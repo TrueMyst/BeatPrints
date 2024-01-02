@@ -1,7 +1,7 @@
 <h3 align="center">
 	<img src="https://i.imgur.com/IR6xU7d.png" width="150"/>
 	<br><br>
-	BeatPrints, a tool that generates eye-catching pinterest-style music posters in python ☕
+	BeatPrints, a tool that generates eye-catching pinterest-style music posters ☕
 </h3>
 
 <p align="center">
@@ -53,7 +53,6 @@ $ python3 main.py
 
 For now BeatPrints offers these such features:
 
-- Color Accent: Choose your preferred color scheme.
 - Custom Image Banner: Add a personalized touch with your own image.
 - Song Selection: Highlight your favorite track.
 - Lyrics Selection: Feature lyrics that resonate with you
