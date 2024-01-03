@@ -40,10 +40,13 @@ with Image.open(cur / "assets/spotify_code.png") as spotify_code:
 with Image.open(cur / "assets/banner_v1.png") as poster:
     poster.paste(banner, (30, 30))
     poster.paste(spotify_code, (20, 807), spotify_code)
-    font = pathlib.Path.resolve( cur / "../fonts/Oswald/")
-    font_regular = font / "Oswald-Regular.ttf"
-    font_bold = font / "Oswald-Bold.ttf"
-    font_light = font / "Oswald-Light.ttf"
+    
+    font_family = "Oswald"
+
+    font_dir = pathlib.Path.resolve( cur / f"../fonts/{font_family}/")
+    font_regular = font_dir / f"{font_family}-Regular.ttf"
+    font_bold = font_dir / f"{font_family}-Bold.ttf"
+    font_light = font_dir / f"{font_family}-Light.ttf"
     
     draw = ImageDraw.Draw(poster)
     draw_palette(draw, path, want_accent)
