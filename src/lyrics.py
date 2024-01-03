@@ -20,7 +20,11 @@ def search_track(query: str, artist: str):
         "apikey": MUSIXMATCH_APIKEY,
     }
     data = requests.get(endpoint, params=params)
-    tracks = data.json()["message"]["body"]["track_list"]
+
+    body = data.json()["message"]["body"]
+    if len(body) == 0:
+        raise Exception("Internal Musixmatch api error occured (empty body)")
+    tracks = body["track_list"]
 
     print("Checking lyrics from the database...\n")
 

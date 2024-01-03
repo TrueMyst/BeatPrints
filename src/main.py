@@ -12,7 +12,7 @@ want_accent = utils.confirm_input(
     "[🤌] Would you like to add a stylish color accent at the bottom of your poster?"
 )
 search = spotify.search_track(
-    input("[🍀] you know what you've to do: "), want_custom_image
+    input("[🍀] Enter song to search: "), want_custom_image
 )
 
 path = search["path"]
