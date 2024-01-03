@@ -1,9 +1,12 @@
 import lyrics
 import spotify
 import utils
+import pathlib
 
 from image import *
 from PIL import Image, ImageDraw
+
+cur = pathlib.Path(__file__).parent.resolve()
 
 want_custom_image = utils.confirm_input(
     "[🌃] Do you want to include a custom image as the cover of the posters?"
@@ -15,7 +18,7 @@ search = spotify.search_track(
     input("[🍀] Enter song to search: "), want_custom_image
 )
 
-path = search["path"]
+path =  cur  / search["path"]
 id = search["track_id"]
 name = search["name"].upper()
 year = search["year"].split("-")[0]
@@ -31,32 +34,36 @@ gen_code = spotify.get_code(id)
 with Image.open(path) as banner:
     banner = banner.resize((510, 510))
 
-with Image.open("./assets/spotify_code.png") as spotify_code:
+with Image.open(cur / "assets/spotify_code.png") as spotify_code:
     spotify_code = spotify_code.resize((150, 38)).convert("RGBA")
 
-with Image.open("./assets/banner_v1.png") as poster:
+with Image.open(cur / "assets/banner_v1.png") as poster:
     poster.paste(banner, (30, 30))
     poster.paste(spotify_code, (20, 807), spotify_code)
-
+    font = pathlib.Path.resolve( cur / "../fonts/Oswald/")
+    font_regular = font / "Oswald-Regular.ttf"
+    font_bold = font / "Oswald-Bold.ttf"
+    font_light = font / "Oswald-Light.ttf"
+    
     draw = ImageDraw.Draw(poster)
     draw_palette(draw, path, want_accent)
 
     write_title(
-        draw, (30, 602, 437, 637), name, year, "../fonts/Oswald/Oswald-Bold.ttf", 40
+        draw, (30, 602, 437, 637), name, year, str(font_bold), 40
     )
 
-    write_text(draw, (30, 649), artist, "../fonts/Oswald/Oswald-Regular.ttf", 30)
-    write_text(draw, (496, 616), duration, "../fonts/Oswald/Oswald-Regular.ttf", 20)
+    write_text(draw, (30, 649), artist, str(font_regular), 30)
+    write_text(draw, (496, 616), duration, str(font_regular), 20)
 
     write_multiline_text(
-        draw, (30, 685), lyrics, "../fonts/Oswald/Oswald-Light.ttf", 21
+        draw, (30, 685), lyrics, str(font_light), 21
     )
 
     write_text(
         draw,
         (545, 810),
         label[0],
-        "../fonts/Oswald/Oswald-Regular.ttf",
+        str(font_regular),
         13,
         anchor="rt",
     )
@@ -64,7 +71,7 @@ with Image.open("./assets/banner_v1.png") as poster:
         draw,
         (545, 825),
         label[1],
-        "../fonts/Oswald/Oswald-Regular.ttf",
+        str(font_regular),
         13,
         anchor="rt",
     )
@@ -72,4 +79,6 @@ with Image.open("./assets/banner_v1.png") as poster:
     utils.create_folder()
     filename = f"{utils.create_filename(name, artist)}_{utils.special_code()}"
 
-    poster.save(f"../images/{filename}.png")
+    out = cur / f"../images/{filename}.png"
+    poster.save(out)
+    print(f"Image save to {out}")

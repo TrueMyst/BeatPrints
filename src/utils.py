@@ -1,6 +1,7 @@
 import re
 import os
 import datetime
+import pathlib
 
 from rich import print
 from lingua import Language, LanguageDetectorBuilder
@@ -11,8 +12,9 @@ def special_code():
 
 
 def create_folder():
-    if not os.path.exists("../images/"):
-        os.makedirs("../images/")
+    cur = pathlib.Path(__file__).parent.resolve()
+    if not os.path.exists(cur / "../images/"):
+        os.makedirs(cur / "../images/")
         print(
             "[📦] Created a folder called [bold underline turquoise4]../images[/bold underline turquoise4] outside of this directory for output."
         )

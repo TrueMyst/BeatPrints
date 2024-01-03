@@ -1,6 +1,6 @@
 from color import palette
 from PIL import Image, ImageDraw, ImageFont
-
+import pathlib
 
 def draw_palette(draw: ImageDraw.ImageDraw, path: str, accent: bool):
     for i in range(6):
@@ -26,8 +26,8 @@ def replace_pixels(path):
                 pixels[x, y] = (
                     transparent if pixels[x, y] != white else (50, 47, 48, 255)
                 )
-
-        img.save("./assets/spotify_code.png")
+        cur = pathlib.Path(__file__).parent.resolve()
+        img.save(cur / "assets/spotify_code.png")
 
 
 def write_text(draw: ImageDraw.ImageDraw, cords, text, font, size, anchor="lt"):
