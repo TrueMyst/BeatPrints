@@ -1,6 +1,7 @@
 import os
 import requests
 import datetime
+import pathlib
 
 from rich import print
 from urllib import parse
@@ -11,6 +12,8 @@ load_dotenv()
 
 CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+
+cur = pathlib.Path(__file__).parent.resolve()
 
 
 def get_token():
@@ -76,7 +79,7 @@ def search_track(track_name: str, image: bool = False):
     }
 
     if not image:
-        with open("./assets/spotify_banner.jpg", "wb") as banner:
+        with open(cur / "assets/spotify_banner.jpg", "wb") as banner:
             banner.write(requests.get(track_info["image"]).content)
             track_info["path"] = "./assets/spotify_banner.jpg"
     else:
@@ -112,9 +115,9 @@ def get_code(id: str):
     )
     data = requests.get(main)
 
-    with open("./assets/spotify_code.png", "wb") as image:
+    with open(cur / "assets/spotify_code.png", "wb") as image:
         image.write(data.content)
 
-    replace_pixels("./assets/spotify_code.png")
+    replace_pixels(cur / "assets/spotify_code.png")
 
     return "\n[🍉] Yay! Retrieved the spotify code properly!\n"
