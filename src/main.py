@@ -84,4 +84,4 @@ with Image.open(cur / "assets/banner_v1.png") as poster:
 
     out = cur / f"../images/{filename}.png"
     poster.save(out)
-    print(f"Image save to {out}")
+    print(f"[☕] Image saved to {out}")

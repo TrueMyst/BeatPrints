@@ -4,7 +4,6 @@ import datetime
 import pathlib
 
 from rich import print
-from urllib import parse
 from dotenv import load_dotenv
 from image import replace_pixels
 
@@ -39,7 +38,7 @@ def search_track(track_name: str, image: bool = False):
     endpoint = "https://api.spotify.com/v1"
     header = authorization_header(get_token())
 
-    query_params = {"q": parse.quote_plus(track_name), "type": "track", "limit": 12}
+    query_params = {"q": track_name, "type": "track", "limit": 7}
     track_data = requests.get(
         f"{endpoint}/search", params=query_params, headers=header
     ).json()
