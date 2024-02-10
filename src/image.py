@@ -8,7 +8,7 @@ def draw_palette(draw: ImageDraw.ImageDraw, path: str, accent: bool):
         draw.rectangle(((30 + start, 560), (30 + end, 580)), fill=palette(path)[i])
 
     if accent == True:
-        draw.rectangle(((0, 860), (570, 870)), fill=sorted(palette(path))[-2])
+        draw.rectangle(((0, 860), (570, 870)), fill=palette(path)[-1])
 
 
 def replace_pixels(path):
