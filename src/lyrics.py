@@ -52,16 +52,27 @@ def search_track(query: str, artist: str):
     }
     response = requests.get(data["track_share_url"], headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
-    cols = soup.findAll(class_="lyrics__content__ok", string=True)
+    
+    start_div = soup.find_all('h2', string=lambda text: f"Lyrics of" in text if text else False)
+    parent_start_div = start_div[0].parent
 
-    lyrics = (
-        "\n".join(x.text for x in cols)
-        if cols
-        else "Oops, seems like the lyrics aren't posted yet."
-    )
+    # get all the child divs of parent_start_div that contain text and add them to a list
+    # remove the last 4 elements, which are not lyrics and are filler website content
+    lyrics = [div.text for div in parent_start_div.find_all('div', string=True)][:-4]
 
-    return lyrics
+    # some lyrics are repeated consecutively, so we need to remove the consecutive duplicates, without completely removing other repeated lines
+    # also remove the elements with the only words being "verse", "chorus", "outro", "intro", "bridge"
+    for lyric in range(len(lyrics)):
+        try:
+            if lyrics[lyric].lower() in ["verse", "chorus", "outro", "intro", "bridge", "hook"]:
+                lyrics.pop(lyric)
+            if lyrics[lyric] == lyrics[lyric+1]:
+                lyrics.pop(lyric)
+        except IndexError:
+            pass
 
+    full_lyrics = "\n".join(lyrics)
+    return full_lyrics
 
 def select_lines(lyrics: str, selection: str):
     lines = lyrics.strip().split("\n")
