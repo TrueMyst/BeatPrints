@@ -1,80 +1,24 @@
 import os
-import requests
+import sys
 
 from rich import print
-from bs4 import BeautifulSoup
+from pymusix import PyMusix
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
-MUSIXMATCH_APIKEY = os.getenv("MUSIXMATCH_API")
+CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+USER_TOKEN = os.getenv("MUSIXMATCH_USERTOKEN")
 
+song = PyMusix()
+song.set_secrets(CLIENT_ID, CLIENT_SECRET, USER_TOKEN)
 
-def search_track(query: str, artist: str):
-    endpoint = f"http://api.musixmatch.com/ws/1.1/track.search?"
-    params = {
-        "q_track": query,
-        "q_artist": artist,
-        "page_size": 10,
-        "apikey": MUSIXMATCH_APIKEY,
-    }
-    data = requests.get(endpoint, params=params)
-
-    body = data.json()["message"]["body"]
-    if len(body) == 0:
-        raise Exception("Internal Musixmatch api error occured (empty body)")
-    tracks = body["track_list"]
-
-    print("Checking lyrics from the database...\n")
-
-    for i, track in enumerate(tracks):
-        track_name = track["track"]["track_name"]
-        track_artist = track["track"]["artist_name"]
-
-        print(
-            f"[bold underline white]{i+1}[/bold underline white]. [bold turquoise4]{track_name}[/bold turquoise4] by [bold steel_blue]{track_artist}[/bold steel_blue]"
-        )
-
-    choice = int(input("\n[✨] Just to be sure which lyrics do you want?: "))
-    track = data.json()["message"]["body"]["track_list"][choice - 1]
-
-    base_url, _ = track["track"]["track_share_url"].split("?")
-
-    data = {
-        "track_name": track["track"]["track_name"],
-        "track_artist": track["track"]["artist_name"],
-        "track_share_url": base_url,
-    }
-
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"
-    }
-    response = requests.get(data["track_share_url"], headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
-    
-    start_div = soup.find_all('h2', string=lambda text: f"Lyrics of" in text if text else False)
-    parent_start_div = start_div[0].parent
-
-    # get all the child divs of parent_start_div that contain text and add them to a list
-    # remove the last 4 elements, which are not lyrics and are filler website content
-    lyrics = [div.text for div in parent_start_div.find_all('div', string=True)][:-4]
-
-    # some lyrics are repeated consecutively, so we need to remove the consecutive duplicates, without completely removing other repeated lines
-    # also remove the elements with the only words being "verse", "chorus", "outro", "intro", "bridge"
-    for lyric in range(len(lyrics)):
-        try:
-            if lyrics[lyric].lower() in ["verse", "chorus", "outro", "intro", "bridge", "hook"]:
-                lyrics.pop(lyric)
-            if lyrics[lyric] == lyrics[lyric+1]:
-                lyrics.pop(lyric)
-        except IndexError:
-            pass
-
-    full_lyrics = "\n".join(lyrics)
-    return full_lyrics
 
 def select_lines(lyrics: str, selection: str):
+    """
+    Let's you select the lines of the lyrics using range eg. 2-5, 7-10.
+    """
     lines = lyrics.strip().split("\n")
     line_count = len(lines)
 
@@ -98,24 +42,33 @@ def select_lines(lyrics: str, selection: str):
 
 
 def get_extract(name: str, artist: str):
-    lyrics = search_track(name, artist)
+    """
+    Returns the extracted portion of the lyrics.
+    """
+    song.search_track(name, artist)
+    lyrics = song.lyrics
 
-    for line_num, line in enumerate(lyrics.split("\n")):
-        print(f"[bold magenta]{line_num + 1:2}[/bold magenta] {line}")
+    try:
+        print("\n[💫] Retrieved lyrics sucessfully\n")
 
-    while True:
-        lines = input(
-            "\n[🍀] Select any 4 of favorite lines from here (e.g., 2-5, 7-10): "
-        )
+        for line_num, line in enumerate(lyrics.split("\n")):
+            print(f"[bold magenta]{line_num + 1:2}[/bold magenta] {line}")
 
-        result = select_lines(lyrics, lines)
-        result = "\n".join(line for line in result.split("\n") if line.strip())
+        while True:
+            lines = input(
+                "\n[🎺] You may ignore the spaces between the lines of the song.\n[🍀] Select any 4 of favorite lines from here (e.g., 2-5, 7-10): "
+            )
 
-        if not result.startswith("Invalid"):
-            selected_lines = result.split("\n")
-            if 2 <= len(selected_lines) <= 4:
-                return result
-            else:
-                print("Please select exactly 4 lines.")
-        else:
-            print(result)
+            result = select_lines(lyrics, lines)
+            result = "\n".join(line for line in result.split("\n") if line.strip())
+
+            if not result.startswith("Invalid"):
+                selected_lines = result.split("\n")
+                if 2 <= len(selected_lines) <= 4:
+                    return result
+                else:
+                    print("Please select exactly 4 lines.")
+
+    except Exception:
+        print("\n[😓] Unfortunately no lyrics were found from MusixMatch.")
+        sys.exit()

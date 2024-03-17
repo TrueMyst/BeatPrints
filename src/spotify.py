@@ -1,11 +1,11 @@
 import os
+import image
 import requests
 import datetime
 import pathlib
 
 from rich import print
 from dotenv import load_dotenv
-from image import replace_pixels
 
 load_dotenv()
 
@@ -34,7 +34,10 @@ def authorization_header(token: str):
     return {"Authorization": "Bearer {0}".format(token)}
 
 
-def search_track(track_name: str, image: bool = False):
+def search_track(track_name: str, want_image: bool = False):
+    """
+    Searches track through Spotify's API.
+    """
     endpoint = "https://api.spotify.com/v1"
     header = authorization_header(get_token())
 
@@ -77,18 +80,23 @@ def search_track(track_name: str, image: bool = False):
         "track_id": selected_track["id"],
     }
 
-    if not image:
+    if not want_image:
         with open(cur / "assets/spotify_banner.jpg", "wb") as banner:
             banner.write(requests.get(track_info["image"]).content)
             track_info["path"] = "./assets/spotify_banner.jpg"
     else:
-        image_path = input("[🤭] Write the path to your custom image: ")
-        track_info["path"] = image_path
+        path = input("[🤭] Write the path to your custom image: ")
+        image.crop_to_square(path, cur / "./assets/custom_image.jpg")
+
+        track_info["path"] = cur / "./assets/custom_image.jpg"
 
     return track_info
 
 
 def label(album_id: str):
+    """
+    Retrivies the name of the album and the release date.
+    """
     endpoint = "https://api.spotify.com/v1"
     header = authorization_header(get_token())
 
@@ -109,14 +117,17 @@ def label(album_id: str):
 
 
 def get_code(id: str):
+    """
+    Downloads the spotify scan code for a particular song.
+    """
     main = (
         f"https://scannables.scdn.co/uri/plain/png/101010/white/256/spotify:track:{id}"
     )
     data = requests.get(main)
 
-    with open(cur / "assets/spotify_code.png", "wb") as image:
-        image.write(data.content)
+    with open(cur / "assets/spotify_code.png", "wb") as img:
+        img.write(data.content)
 
-    replace_pixels(cur / "assets/spotify_code.png")
+    image.remove_white_pixel(cur / "assets/spotify_code.png")
 
     return "\n[🍉] Yay! Retrieved the spotify code properly!\n"
