@@ -1,5 +1,7 @@
 """
-Module:
+Module: image.py
+
+Dependicies:
     1. PIL: Image Processing
     2. color: Extract color palette
 """
