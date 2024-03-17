@@ -1,5 +1,7 @@
 """
-Modules:
+Module: color.py
+
+Dependicies:
     PIL: Open and resize image
     colorthief: extract color palette from image
 """
