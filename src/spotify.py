@@ -1,21 +1,42 @@
-import os
-import image
-import requests
+"""
+This module provides functionalities related to interacting with the Spotify API.
+
+Imports:
+    - datetime: Module for manipulating dates and times.
+    - pathlib: Module for working with filesystem paths.
+    - os: Module for interacting with the operating system.
+    - requests: Module for making HTTP requests.
+    - print: For enhanced output formatting.
+    - load_dotenv: For loading environment variables from a .env file.
+    - image: Module for image manipulation.
+"""
+
 import datetime
 import pathlib
+import os
+import requests
 
 from rich import print
 from dotenv import load_dotenv
+import image
 
 load_dotenv()
 
+# Retrieving Spotify API credentials from environment variables
 CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
-cur = pathlib.Path(__file__).parent.resolve()
+# Getting the current directory
+current_dictionary = pathlib.Path(__file__).parent.resolve()
 
 
 def get_token():
+    """
+    Retrieves the access token for Spotify's API.
+
+    Returns:
+        str: The access token.
+    """
     endpoint = "https://accounts.spotify.com/api/token"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     payload = {
@@ -24,6 +45,7 @@ def get_token():
         "client_secret": CLIENT_SECRET,
     }
 
+    # Requesting token from Spotify API
     data = requests.post(endpoint, headers=headers, params=payload)
     token = data.json()["access_token"]
 
@@ -31,12 +53,28 @@ def get_token():
 
 
 def authorization_header(token: str):
-    return {"Authorization": "Bearer {0}".format(token)}
+    """
+    Constructs the authorization header required for API requests.
+
+    Args:
+        token (str): The access token.
+
+    Returns:
+        dict: Authorization header.
+    """
+    return {"Authorization": f"Bearer {token}"}
 
 
 def search_track(track_name: str, want_image: bool = False):
     """
-    Searches track through Spotify's API.
+    Searches for a track through Spotify's API and provides track information.
+
+    Args:
+        track_name (str): The name of the track to search.
+        want_image (bool, optional): Flag to include track image or not. Defaults to False.
+
+    Returns:
+        dict: Information about the selected track.
     """
     endpoint = "https://api.spotify.com/v1"
     header = authorization_header(get_token())
@@ -46,6 +84,7 @@ def search_track(track_name: str, want_image: bool = False):
         f"{endpoint}/search", params=query_params, headers=header
     ).json()
 
+    # Displaying search results to the user
     for i, item in enumerate(
         track_data.get("tracks", {}).get("items", [])[:7], start=1
     ):
@@ -54,9 +93,13 @@ def search_track(track_name: str, want_image: bool = False):
         t_album = item["album"]["name"]
 
         print(
-            f"[bold underline white]{i}[/bold underline white]. [bold turquoise4]{t_name}[/bold turquoise4] by [bold steel_blue]{t_artist}[/bold steel_blue] from [bold magenta]{t_album}[/bold magenta]"
+            f"[bold underline white]{i}[/bold underline white]. "
+            f"[bold turquoise4]{t_name}[/bold turquoise4] by "
+            f"[bold steel_blue]{t_artist}[/bold steel_blue] from "
+            f"[bold magenta]{t_album}[/bold magenta]"
         )
 
+    # Asking user to select a track
     while True:
         try:
             choice = int(input("\n[✨] Select one of them to show information: "))
@@ -70,6 +113,7 @@ def search_track(track_name: str, want_image: bool = False):
     selected_track = track_data["tracks"]["items"][choice - 1]
     album_id = selected_track["album"]["id"]
 
+    # Extracting track information
     track_info = {
         "image": selected_track["album"]["images"][0]["url"],
         "name": selected_track["name"],
@@ -80,28 +124,35 @@ def search_track(track_name: str, want_image: bool = False):
         "track_id": selected_track["id"],
     }
 
+    # Optionally allowing the user to provide a custom image
     if not want_image:
-        with open(cur / "assets/spotify_banner.jpg", "wb") as banner:
+        with open(current_dictionary / "assets/spotify_banner.jpg", "wb") as banner:
             banner.write(requests.get(track_info["image"]).content)
             track_info["path"] = "./assets/spotify_banner.jpg"
     else:
         path = input("[🤭] Write the path to your custom image: ")
-        image.crop_to_square(path, cur / "./assets/custom_image.jpg")
+        image.crop_to_square(path, current_dictionary / "./assets/custom_image.jpg")
 
-        track_info["path"] = cur / "./assets/custom_image.jpg"
+        track_info["path"] = current_dictionary / "./assets/custom_image.jpg"
 
     return track_info
 
 
 def label(album_id: str):
     """
-    Retrivies the name of the album and the release date.
+    Retrieves the name of the album and the release date from Spotify's API.
+
+    Args:
+        album_id (str): The ID of the album.
+
+    Returns:
+        list: A list containing the release date and album label.
     """
     endpoint = "https://api.spotify.com/v1"
     header = authorization_header(get_token())
 
     album_info = requests.get(f"{endpoint}/albums/{album_id}", headers=header).json()
-    label = album_info["label"]
+    album_label = album_info["label"]
 
     release_date_str = album_info.get("release_date", "")
     release_precision = album_info.get("release_date_precision", "")
@@ -110,24 +161,32 @@ def label(album_id: str):
         release_precision, ""
     )
 
+    # Formatting the release date
     release_date = datetime.datetime.strptime(release_date_str, format_str).strftime(
         "%B %d, %Y"
     )
-    return [release_date, label]
+    return [release_date, album_label]
 
 
-def get_code(id: str):
+def get_code(identification: str):
     """
-    Downloads the spotify scan code for a particular song.
+    Downloads the Spotify scan code for a particular song.
+
+    Args:
+        identification (str): The ID of the track.
+
+    Returns:
+        str: Message indicating success.
     """
     main = (
-        f"https://scannables.scdn.co/uri/plain/png/101010/white/256/spotify:track:{id}"
+        f"https://scannables.scdn.co/uri/plain/png/101010/white/256/spotify:track:{identification}"
     )
     data = requests.get(main)
 
-    with open(cur / "assets/spotify_code.png", "wb") as img:
+    with open(current_dictionary / "assets/spotify_code.png", "wb") as img:
         img.write(data.content)
 
-    image.remove_white_pixel(cur / "assets/spotify_code.png")
+    # Removing white pixels from the downloaded image
+    image.remove_white_pixel(current_dictionary / "assets/spotify_code.png")
 
-    return "\n[🍉] Yay! Retrieved the spotify code properly!\n"
+    return "\n[🍉] Yay! Retrieved the Spotify code properly!\n"

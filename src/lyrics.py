@@ -1,3 +1,26 @@
+"""
+Module: lyrics.py
+
+This module provides functions for retrieving and processing song lyrics using the PyMusix library.
+
+Dependencies:
+    - os: Operating system interfaces (used for environment variables).
+    - sys: System-specific parameters and functions (used for exiting the program).
+    - rich: Rich text formatting for console output.
+    - pymusix: Python wrapper for the MusixMatch API.
+    - dotenv: Loads environment variables from a .env file.
+
+Functions:
+    - select_lines(lyrics, selection): Select specific lines from the lyrics based on the range.
+    - get_extract(name, artist): Search for a song and retrieve a portion of its lyrics.
+
+Usage:
+    To use this module, ensure that you have the necessary environment variables set up:
+    - SPOTIFY_CLIENT_ID: Spotify client ID for accessing the MusixMatch API.
+    - SPOTIFY_CLIENT_SECRET: Spotify client secret for accessing the MusixMatch API.
+    - MUSIXMATCH_USERTOKEN: User token for accessing the MusixMatch API.
+"""
+
 import os
 import sys
 
@@ -5,20 +28,51 @@ from rich import print
 from pymusix import PyMusix
 from dotenv import load_dotenv
 
-load_dotenv()
+try:
+    # Load environment variables from .env file
+    load_dotenv()
 
-CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
-USER_TOKEN = os.getenv("MUSIXMATCH_USERTOKEN")
+    # Retrieve Spotify and MusixMatch API credentials from environment variables
+    CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+    CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+    USER_TOKEN = os.getenv("MUSIXMATCH_USERTOKEN")
 
-song = PyMusix()
-song.set_secrets(CLIENT_ID, CLIENT_SECRET, USER_TOKEN)
+    # Initialize PyMusix object with API credentials
+    song = PyMusix()
+    song.set_secrets(CLIENT_ID, CLIENT_SECRET, USER_TOKEN)
 
+except FileNotFoundError:
+    print("Error: .env file not found.")
+    sys.exit(1)
 
-def select_lines(lyrics: str, selection: str):
+except KeyError as e:
+    print(f"Error: Environment variable {e} not found.")
+    sys.exit(1)
+
+except ValueError:
+    print("Error: Invalid selection range.")
+    sys.exit(1)
+
+except IndexError:
+    print("Error: Selection range out of bounds.")
+    sys.exit(1)
+
+def select_lines(
+        lyrics: str,
+        selection: str
+        ):
+
     """
-    Let's you select the lines of the lyrics using range eg. 2-5, 7-10.
+    Selects specific lines from the lyrics based on the provided range.
+
+    Args:
+        lyrics (str): The full lyrics of the song.
+        selection (str): The range of lines to select (e.g., "2-5, 7-10").
+
+    Returns:
+        str: The selected lines of lyrics.
     """
+
     lines = lyrics.strip().split("\n")
     line_count = len(lines)
 
@@ -41,24 +95,43 @@ def select_lines(lyrics: str, selection: str):
         )
 
 
-def get_extract(name: str, artist: str):
+def get_extract(
+        name: str,
+        artist: str
+        ):
+
     """
-    Returns the extracted portion of the lyrics.
+    Searches for a song and retrieves a portion of its lyrics.
+
+    Args:
+        name (str): The name of the song.
+        artist (str): The name of the artist.
+
+    Returns:
+        str: The extracted portion of the lyrics.
     """
+
+    # Search and retrive song lyrics
     song.search_track(name, artist)
     lyrics = song.lyrics
 
     try:
         print("\n[💫] Retrieved lyrics sucessfully\n")
 
+        # Print the lyrics for user selection
         for line_num, line in enumerate(lyrics.split("\n")):
             print(f"[bold magenta]{line_num + 1:2}[/bold magenta] {line}")
 
+        # Prompt the user to select favorite line
         while True:
+
             lines = input(
-                "\n[🎺] You may ignore the spaces between the lines of the song.\n[🍀] Select any 4 of favorite lines from here (e.g., 2-5, 7-10): "
+                "\n[🎺] You may ignore the spaces between the lines of the song.\n"
+                "[🍀] Select any 4 of favorite lines from here "
+                "(e.g., 2-5, 7-10): "
             )
 
+            # Validate and return the selected lines
             result = select_lines(lyrics, lines)
             result = "\n".join(line for line in result.split("\n") if line.strip())
 
@@ -70,5 +143,6 @@ def get_extract(name: str, artist: str):
                     print("Please select exactly 4 lines.")
 
     except Exception:
-        print("\n[😓] Unfortunately no lyrics were found from MusixMatch.")
+        # Handle specific error related to PyMusix
+        print("\n[😓] Unfortunately, no lyrics were found from MusixMatch.")
         sys.exit()
