@@ -30,7 +30,7 @@ git clone https://github.com/TrueMyst/BeatPrints.git
 
 To run this project, set up the required environment variables in the [`.env`](https://github.com/TrueMyst/BeatPrints/tree/main/src/EXAMPLE.env) file located in the [`./src`](https://github.com/TrueMyst/BeatPrints/tree/main/src) directory. These variables include:
 
-- **`MUSIXMATCH_API`** from [MusixMatch for Developers](https://developer.musixmatch.com/)
+- **`MUSIXMATCH_USERTOKEN`** from [this guide](https://gist.github.com/TrueMyst/0461aea999e347182486934fd83a4cf9)
 - **`SPOTIFY_CLIENT_ID`** and **`SPOTIFY_CLIENT_SECRET`** from [Spotify for Developers](https://developer.spotify.com/dashboard/)
 
 ### `1.3` Dependencies
