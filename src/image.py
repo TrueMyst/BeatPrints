@@ -5,6 +5,7 @@ Dependicies:
     1. PIL: Image Processing
     2. color: Extract color palette
 """
+
 import pathlib
 from PIL import Image
 from PIL import ImageDraw
@@ -14,15 +15,11 @@ import color
 # Get the current dictionary path
 path_to_current_dictionary = pathlib.Path(__file__).parent.resolve()
 
-def draw_palette(
-        draw: ImageDraw.ImageDraw,
-        image_path: str,
-        accent: bool
-        ):
 
+def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
     """
     Draws the color palette on the image.
-    
+
     Args:
         draw (ImageDraw.ImageDraw): An ImageDraw object to draw on the image.
         image_path (str): The path of the image file.
@@ -35,23 +32,17 @@ def draw_palette(
     # Draw rectangles for each color in the palette
     for i in range(6):
         start, end = 85 * i, 85 * (i + 1)
-        draw.rectangle(
-            ((30 + start, 560), (30 + end, 580)), fill=color_palette[i]
-        )
+        draw.rectangle(((30 + start, 560), (30 + end, 580)), fill=color_palette[i])
 
     # Optionally draw a rectangle to highlight the accent color
     if accent:
         draw.rectangle(((0, 860), (570, 870)), fill=color_palette[-1])
 
 
-def crop_to_square(
-        image_path: str,
-        save_path: str
-        ):
-
+def crop_to_square(image_path: str, save_path: str):
     """
     Crops the image to a square aspect ratio and saves it.
-    
+
     Args:
         image_path (str): The path of the original image file.
         save_path (str): The path where the cropped image will be saved.
@@ -75,13 +66,10 @@ def crop_to_square(
     cropped_image.save(save_path)
 
 
-def remove_white_pixel(
-        image_path: str
-        ):
-
+def remove_white_pixel(image_path: str):
     """
     Removes white pixels from the image background and makes them transparent.
-    
+
     Args:
         image_path (str): The path of the image file.
     """
@@ -117,11 +105,10 @@ def write_text(
     font: str,
     size: int,
     anchor="lt",
-    ):
-
+):
     """
     Draws single-line text on the image.
-    
+
     Args:
         draw (ImageDraw.ImageDraw): An ImageDraw object to draw on the image.
         cords (tuple): Coordinates (x, y) where the text will be drawn.
@@ -141,16 +128,11 @@ def write_text(
 
 
 def write_multiline_text(
-    draw: ImageDraw.ImageDraw,
-    cords: tuple,
-    text: str,
-    font: str,
-    size: int
-    ):
-
+    draw: ImageDraw.ImageDraw, cords: tuple, text: str, font: str, size: int
+):
     """
     Draws multi-line text on the image.
-    
+
     Args:
         draw (ImageDraw.ImageDraw): An ImageDraw object to draw on the image.
         cords (tuple): Coordinates (x, y) where the text will be drawn.
@@ -163,9 +145,8 @@ def write_multiline_text(
     font = ImageFont.truetype(font, size)
 
     # Draw the multi-line text
-    draw.multiline_text(
-        xy=(cords[0], cords[1]), text=text, fill=(50, 47, 48), font=font, spacing=0
-    )
+    draw.multiline_text(xy=cords, text=text, fill=(50, 47, 48), font=font, spacing=0)
+
 
 def write_title(
     draw: ImageDraw.ImageDraw,
@@ -175,10 +156,9 @@ def write_title(
     font: str,
     initial_size: int,
 ):
-
     """
     Draws a title consisting of a song name and year on the image.
-    
+
     Args:
         draw (ImageDraw.ImageDraw): An ImageDraw object to draw on the image.
         textbox (tuple): Coordinates (x1, y1, x2, y2) defining the bounding box for the title.
@@ -210,8 +190,6 @@ def write_title(
         (textbox[0], textbox[1]), name, font=title_font, anchor="lt"
     )
     year_getbox = year_font.getbbox(year)
-
-    #Calculate adjustments for positioning
 
     # This is the height that is used to adjust the song name
     extra_height = textbox[3] - name_textbox[3]

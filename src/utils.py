@@ -46,7 +46,6 @@ def create_folder():
         )
 
 
-
 def create_filename(song, artist):
     """
     Creates a safe filename based on the song and artist names.

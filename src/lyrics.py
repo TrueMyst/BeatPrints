@@ -57,11 +57,8 @@ except IndexError:
     print("Error: Selection range out of bounds.")
     sys.exit(1)
 
-def select_lines(
-        lyrics: str,
-        selection: str
-        ):
 
+def select_lines(lyrics: str, selection: str):
     """
     Selects specific lines from the lyrics based on the provided range.
 
@@ -95,11 +92,7 @@ def select_lines(
         )
 
 
-def get_extract(
-        name: str,
-        artist: str
-        ):
-
+def get_extract(name: str, artist: str):
     """
     Searches for a song and retrieves a portion of its lyrics.
 

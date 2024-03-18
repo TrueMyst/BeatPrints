@@ -168,7 +168,7 @@ def label(album_id: str):
     return [release_date, album_label]
 
 
-def get_code(identification: str):
+def get_code(id: str):
     """
     Downloads the Spotify scan code for a particular song.
 
@@ -179,7 +179,7 @@ def get_code(identification: str):
         str: Message indicating success.
     """
     main = (
-        f"https://scannables.scdn.co/uri/plain/png/101010/white/256/spotify:track:{identification}"
+        f"https://scannables.scdn.co/uri/plain/png/101010/white/256/spotify:track:{id}"
     )
     data = requests.get(main)
 

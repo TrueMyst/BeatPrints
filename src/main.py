@@ -44,7 +44,7 @@ search = spotify.search_track(input("[🍀] Enter song to search: "), WANT_CUSTO
 
 # Get the path of the image
 path = current_dictionary / search["path"]
-identification = search["track_id"]
+id = search["track_id"]
 name = search["name"].upper()
 year = search["year"].split("-")[0]
 artist = search["artist"]
@@ -52,11 +52,11 @@ duration = search["duration"]
 label = spotify.label(search["album_id"])
 
 # Get the lyrics of the song
-LYRICS = lyrics.get_extract(search["name"], search["artist"])
 color = (50, 47, 48)
+music_lyrics = lyrics.get_extract(search["name"], search["artist"])
 
 # Generate the Spotify code for the song
-GEN_CODE = spotify.get_code(id)
+spotify.get_code(id)
 
 # Open the banner image
 with Image.open(path) as banner:
@@ -78,10 +78,11 @@ with Image.open(current_dictionary / "assets/banner_v1.png") as poster:
     # Set font family and paths
     FONT_FAMILY = "Oswald"
 
-    font_dir = pathlib.Path.resolve(current_dictionary / f"../fonts/{FONT_FAMILY}/")
-    font_regular = font_dir / f"{FONT_FAMILY}-Regular.ttf"
-    font_bold = font_dir / f"{FONT_FAMILY}-Bold.ttf"
-    font_light = font_dir / f"{FONT_FAMILY}-Light.ttf"
+    # font_dir = pathlib.Path.resolve(current_dictionary / f"../fonts/{FONT_FAMILY}/")
+
+    font_regular = f"../fonts/Oswald/{FONT_FAMILY}-Regular.ttf"
+    font_bold = f"../fonts/Oswald/{FONT_FAMILY}-Bold.ttf"
+    font_light = f"../fonts/Oswald/{FONT_FAMILY}-Light.ttf"
 
     # Create ImageDraw object for drawing on the poster
     draw = ImageDraw.Draw(poster)
@@ -90,14 +91,14 @@ with Image.open(current_dictionary / "assets/banner_v1.png") as poster:
     image.draw_palette(draw, path, WANT_ACCENT)
 
     # Write the title (song name and year) on the poster
-    image.write_title(draw, (30, 602, 400, 637), name, year, str(font_bold), 40)
+    image.write_title(draw, (30, 602, 400, 637), name, year, font_bold, 40)
 
     # Write the artist name and duration on the poster
-    image.write_text(draw, (30, 649), artist, str(font_regular), 30)
-    image.write_text(draw, (496, 617), duration, str(font_regular), 20)
+    image.write_text(draw, (30, 649), artist, font_regular, 30)
+    image.write_text(draw, (496, 617), duration, font_regular, 20)
 
     # Write the lyrics on the poster
-    image.write_multiline_text(draw, (30, 685), lyrics, str(font_light), 21)
+    image.write_multiline_text(draw, (30, 685), music_lyrics, font_light, 21)
 
     # Write the label information on the poster
     image.write_text(
