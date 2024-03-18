@@ -72,6 +72,7 @@ Contributions to BeatPrints are welcome. Feel free to submit your suggestions vi
 I stumbled upon incredible music posters on Pinterest and was amazed by their uniqueness. Not finding a platform to create similarly diverse and appealing designs, I set out to develop a program that simplifies the process with just a few clicks and inputs. Surprisingly, the result exceeded my expectations, resulting in BeatPrints!
 
 - Thanks to [Spotify Poster Generator](https://github.com/AnveshakR/poster-generator/) by [@AnveshakR](https://github.com/AnveshakR) for a good amount of ideas!
+- A big shoutout to [@Magniquick](https://github.com/Magniquick) & [Krishna Gunjan](https://github.com/Krishna-Gunjan) for their big contribution! 
 
 ## 📋 About License
 
