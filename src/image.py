@@ -7,10 +7,17 @@ Dependicies:
 """
 
 import pathlib
+from pathlib import Path
+
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
+
 import color
+from fontTools.ttLib import TTFont
+from typing import Dict
+
+from fontfallback import writing
 
 # Get the current dictionary path
 path_to_current_dictionary = pathlib.Path(__file__).parent.resolve()
@@ -39,7 +46,7 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
         draw.rectangle(((0, 860), (570, 870)), fill=color_palette[-1])
 
 
-def crop_to_square(image_path: str, save_path: str):
+def crop_to_square(image_path: Path, save_path: Path):
     """
     Crops the image to a square aspect ratio and saves it.
 
@@ -66,7 +73,7 @@ def crop_to_square(image_path: str, save_path: str):
     cropped_image.save(save_path)
 
 
-def remove_white_pixel(image_path: str):
+def remove_white_pixel(image_path: Path):
     """
     Removes white pixels from the image background and makes them transparent.
 
@@ -98,66 +105,16 @@ def remove_white_pixel(image_path: str):
         img.save(path_to_current_dictionary / "assets/spotify_code.png")
 
 
-def write_text(
+def heading(
     draw: ImageDraw.ImageDraw,
-    cords: tuple,
+    xy: tuple,
+    width_limit: int,
     text: str,
-    font: str,
-    size: int,
-    anchor="lt",
+    color: tuple,
+    fonts: Dict[str, TTFont],
 ):
     """
-    Draws single-line text on the image.
-
-    Args:
-        draw (ImageDraw.ImageDraw): An ImageDraw object to draw on the image.
-        cords (tuple): Coordinates (x, y) where the text will be drawn.
-        text (str): The text to be drawn.
-        font (str): The path to the font file.
-        size (int): The font size.
-        anchor (str, optional): The anchor point for text alignment. Defaults to "lt" (left-top).
-    """
-
-    # Load the font
-    font = ImageFont.truetype(font, size)
-
-    # Draw the text
-    draw.text(
-        xy=(cords[0], cords[1]), text=text, fill=(50, 47, 48), font=font, anchor=anchor
-    )
-
-
-def write_multiline_text(
-    draw: ImageDraw.ImageDraw, cords: tuple, text: str, font: str, size: int
-):
-    """
-    Draws multi-line text on the image.
-
-    Args:
-        draw (ImageDraw.ImageDraw): An ImageDraw object to draw on the image.
-        cords (tuple): Coordinates (x, y) where the text will be drawn.
-        text (str): The text to be drawn.
-        font (str): The path to the font file.
-        size (int): The font size.
-    """
-
-    # Load the font
-    font = ImageFont.truetype(font, size)
-
-    # Draw the multi-line text
-    draw.multiline_text(xy=cords, text=text, fill=(50, 47, 48), font=font, spacing=0)
-
-
-def write_title(
-    draw: ImageDraw.ImageDraw,
-    textbox: tuple,
-    name: str,
-    year: str,
-    font: str,
-    initial_size: int,
-):
-    """
-    Draws a title consisting of a song name and year on the image.
+    A custom made function that draws a title consisting of a song name and year on the image.
 
     Args:
         draw (ImageDraw.ImageDraw): An ImageDraw object to draw on the image.
@@ -168,39 +125,38 @@ def write_title(
         initial_size (int): The initial font size.
     """
 
-    size = initial_size
-    length = textbox[2] - textbox[0]
+    font_size = 35
+    total_length_of_heading = 0
+    chunked = writing.merge_chunks(text, fonts)
 
-    # Adjust font size to fit the title within the textbox width
     while True:
-        title_font = ImageFont.truetype(font, size)
-        _, _, text_width, _ = draw.textbbox(
-            (textbox[0], textbox[1]), name, font=title_font
-        )
+        for word, path in chunked:
+            font = ImageFont.truetype(path, font_size)
+            total_length_of_heading += font.getlength(word)
 
-        if text_width <= length or size <= 1:
+        if total_length_of_heading > width_limit:
+            font_size -= 1
+            total_length_of_heading = 0
+
+        elif total_length_of_heading <= width_limit:
             break
-        size -= 1
 
-    # Load font for year
-    year_font = ImageFont.truetype(font, 20)
-
-    # Get bounding box for name and year
-    name_textbox = draw.textbbox(
-        (textbox[0], textbox[1]), name, font=title_font, anchor="lt"
-    )
-    year_getbox = year_font.getbbox(year)
-
-    # This is the height that is used to adjust the song name
-    extra_height = textbox[3] - name_textbox[3]
-
-    # The space between the name and the year (currently 7)
-    year_x = name_textbox[2] + 7
-    year_y = textbox[3] - (year_getbox[3] - year_getbox[1])
-
-    name_x = textbox[0]
-    name_y = textbox[1] + extra_height
+    y_offset = 0
 
     # Draw song name and year
-    write_text(draw, (name_x, name_y), name, font, size)
-    write_text(draw, (year_x, year_y), year, font, 20)
+    for words, path in chunked:
+        xy_ = (xy[0] + y_offset, xy[1])
+
+        font = ImageFont.truetype(path, font_size)
+        draw.text(
+            xy=xy_,
+            text=words,
+            fill=color,
+            font=font,
+            anchor="ls",
+            embedded_color=True,
+        )
+
+        draw.text
+        box = font.getbbox(words[0])
+        y_offset += box[2] - box[0]

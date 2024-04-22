@@ -104,23 +104,22 @@ def get_extract(name: str, artist: str):
         str: The extracted portion of the lyrics.
     """
 
-    # Search and retrive song lyrics
-    song.search_track(name, artist)
-    lyrics = song.lyrics
-
+    # Search and retrieve song lyrics
     try:
-        print("\n[💫] Retrieved lyrics sucessfully\n")
+        song.search_track(name, artist)
+        lyrics = str(song.lyrics)
+
+        print("\n[💫] Retrieved lyrics successfully\n")
 
         # Print the lyrics for user selection
         for line_num, line in enumerate(lyrics.split("\n")):
             print(f"[bold magenta]{line_num + 1:2}[/bold magenta] {line}")
 
-        # Prompt the user to select favorite line
+        # Prompt the user to select favorite lines
         while True:
-
             lines = input(
                 "\n[🎺] You may ignore the spaces between the lines of the song.\n"
-                "[🍀] Select any 4 of favorite lines from here "
+                "[🍀] Select any 4 of your favorite lines from here "
                 "(e.g., 2-5, 7-10): "
             )
 
@@ -136,6 +135,13 @@ def get_extract(name: str, artist: str):
                     print("Please select exactly 4 lines.")
 
     except Exception:
-        # Handle specific error related to PyMusix
-        print("\n[😓] Unfortunately, no lyrics were found from MusixMatch.")
-        sys.exit()
+        print("\n[😓] Unfortunately, the lyrics were not found from MusixMatch.")
+        print("[📝] You can paste the lyrics manually below:")
+
+        # Allow user to input lyrics manually
+        manual_lyrics = []
+        for _ in range(4):
+            line = input()
+            manual_lyrics.append(line)
+
+        return "\n".join(manual_lyrics)

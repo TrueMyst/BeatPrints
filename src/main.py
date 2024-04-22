@@ -18,13 +18,16 @@ Usage:
 
 """
 
-import pathlib
 from PIL import Image
 from PIL import ImageDraw
+
 import image
 import lyrics
 import spotify
 import utils
+import pathlib
+
+from fontfallback import writing
 
 # Get the current directory
 current_dictionary = pathlib.Path(__file__).parent.resolve()
@@ -76,13 +79,31 @@ with Image.open(current_dictionary / "assets/banner_v1.png") as poster:
     poster.paste(spotify_code, (20, 807), spotify_code)
 
     # Set font family and paths
-    FONT_FAMILY = "Oswald"
-
     # font_dir = pathlib.Path.resolve(current_dictionary / f"../fonts/{FONT_FAMILY}/")
 
-    font_regular = f"../fonts/Oswald/{FONT_FAMILY}-Regular.ttf"
-    font_bold = f"../fonts/Oswald/{FONT_FAMILY}-Bold.ttf"
-    font_light = f"../fonts/Oswald/{FONT_FAMILY}-Light.ttf"
+    fonts_regular = writing.load_fonts(
+        "../fonts/Oswald/Oswald-Regular.ttf",
+        "../fonts/NotoSansJP/NotoSansJP-Regular.ttf",
+        "../fonts/NotoSansKR/NotoSansKR-Regular.ttf",
+        "../fonts/NotoSansTC/NotoSansTC-Regular.ttf",
+        "../fonts/NotoSansSC/NotoSansSC-Regular.ttf",
+    )
+
+    fonts_bold = writing.load_fonts(
+        "../fonts/Oswald/Oswald-Bold.ttf",
+        "../fonts/NotoSansJP/NotoSansJP-Bold.ttf",
+        "../fonts/NotoSansKR/NotoSansKR-Bold.ttf",
+        "../fonts/NotoSansTC/NotoSansTC-Bold.ttf",
+        "../fonts/NotoSansSC/NotoSansSC-Bold.ttf",
+    )
+
+    fonts_light = writing.load_fonts(
+        "../fonts/Oswald/Oswald-Light.ttf",
+        "../fonts/NotoSansJP/NotoSansJP-Light.ttf",
+        "../fonts/NotoSansKR/NotoSansKR-Light.ttf",
+        "../fonts/NotoSansTC/NotoSansTC-Light.ttf",
+        "../fonts/NotoSansSC/NotoSansSC-Light.ttf",
+    )
 
     # Create ImageDraw object for drawing on the poster
     draw = ImageDraw.Draw(poster)
@@ -91,32 +112,27 @@ with Image.open(current_dictionary / "assets/banner_v1.png") as poster:
     image.draw_palette(draw, path, WANT_ACCENT)
 
     # Write the title (song name and year) on the poster
-    image.write_title(draw, (30, 602, 400, 637), name, year, font_bold, 40)
+    image.heading(draw, (30, 635), 420, name, (50, 47, 48), fonts_bold)
 
-    # Write the artist name and duration on the poster
-    image.write_text(draw, (30, 649), artist, font_regular, 30)
-    image.write_text(draw, (496, 617), duration, font_regular, 20)
-
-    # Write the lyrics on the poster
-    image.write_multiline_text(draw, (30, 685), music_lyrics, font_light, 21)
-
-    # Write the label information on the poster
-    image.write_text(
-        draw,
-        (545, 810),
-        label[0],
-        str(font_regular),
-        13,
-        anchor="rt",
+    # # Write the artist name and duration on the poster
+    writing.draw_text_v2(
+        draw, (30, 670), artist, (50, 47, 48), fonts_regular, 30, anchor="ls"
+    )
+    writing.draw_text_v2(
+        draw, (496, 635), duration, (50, 47, 48), fonts_regular, 20, anchor="ls"
     )
 
-    image.write_text(
-        draw,
-        (545, 825),
-        label[1],
-        str(font_regular),
-        13,
-        anchor="rt",
+    # # Write the lyrics on the poster
+    writing.draw_multiline_text_v2(
+        draw, (30, 685), music_lyrics, (50, 47, 48), fonts_light, 21
+    )
+
+    # # Write the label information on the poster
+    writing.draw_text_v2(
+        draw, (545, 810), label[0], (50, 47, 48), fonts_regular, 13, anchor="rt"
+    )
+    writing.draw_text_v2(
+        draw, (545, 825), label[1], (50, 47, 48), fonts_regular, 13, anchor="rt"
     )
 
     # Create folder to save the poster image
@@ -128,4 +144,5 @@ with Image.open(current_dictionary / "assets/banner_v1.png") as poster:
 
     # Save the poster image
     poster.save(output_path)
+    poster.show()
     print(f"[☕] Image saved to {output_path}")

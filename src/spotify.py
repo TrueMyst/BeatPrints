@@ -11,14 +11,16 @@ Imports:
     - image: Module for image manipulation.
 """
 
-import datetime
-import pathlib
 import os
+import image
+import datetime
 import requests
+
+import pathlib
+from pathlib import Path
 
 from rich import print
 from dotenv import load_dotenv
-import image
 
 load_dotenv()
 
@@ -79,14 +81,14 @@ def search_track(track_name: str, want_image: bool = False):
     endpoint = "https://api.spotify.com/v1"
     header = authorization_header(get_token())
 
-    query_params = {"q": track_name, "type": "track", "limit": 7}
+    query_params = {"q": track_name, "type": "track", "limit": 10}
     track_data = requests.get(
         f"{endpoint}/search", params=query_params, headers=header
     ).json()
 
     # Displaying search results to the user
     for i, item in enumerate(
-        track_data.get("tracks", {}).get("items", [])[:7], start=1
+        track_data.get("tracks", {}).get("items", [])[:10], start=1
     ):
         t_name = item["name"]
         t_artist = item["album"]["artists"][0]["name"]
@@ -131,7 +133,9 @@ def search_track(track_name: str, want_image: bool = False):
             track_info["path"] = "./assets/spotify_banner.jpg"
     else:
         path = input("[🤭] Write the path to your custom image: ")
-        image.crop_to_square(path, current_dictionary / "./assets/custom_image.jpg")
+        image.crop_to_square(
+            Path(path), current_dictionary / "./assets/custom_image.jpg"
+        )
 
         track_info["path"] = current_dictionary / "./assets/custom_image.jpg"
 

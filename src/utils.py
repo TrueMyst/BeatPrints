@@ -14,10 +14,7 @@ import re
 import os
 import datetime
 import pathlib
-
 from rich import print
-from lingua import Language
-from lingua import LanguageDetectorBuilder
 
 
 def special_code():
@@ -87,37 +84,3 @@ def confirm_input(message):
             return False
         else:
             print("\n[🙅] Please enter 'y' for yes or 'n' for no.\n")
-
-
-def decide_font(text: str, weight: int):
-    """
-    Determines the font to use based on the text and font weight.
-
-    Args:
-        text (str): The text to analyze for language detection.
-        weight (int): The weight of the font.
-
-    Returns:
-        str: The path to the selected font file.
-    """
-    path = "../fonts/"
-
-    lang = {
-        "en": "Oswald/Oswald",
-        "ko": "NotoSansKR/NotoSansKR",
-        "ja": "NotoSansJP/NotoSansJP",
-        "zh": "NotoSansTC/NotoSansTC",
-    }
-
-    variant = ["ExtraLight", "Light", "Regular", "Medium", "Semibold", "Bold"]
-
-    # Language detection
-    detector = LanguageDetectorBuilder.from_languages(
-        Language.ENGLISH, Language.KOREAN, Language.JAPANESE, Language.CHINESE
-    ).build()
-    detected = str(detector.detect_language_of(text).iso_code_639_1.name).lower()
-
-    # Construct font path
-    font = f"{path}{lang[detected]}-{variant[weight]}.tff"
-
-    return font
