@@ -183,7 +183,7 @@ def get_code(id: str):
         str: Message indicating success.
     """
     main = (
-        f"https://scannables.scdn.co/uri/plain/png/101010/white/256/spotify:track:{id}"
+        f"https://scannables.scdn.co/uri/plain/png/101010/white/1024/spotify:track:{id}"
     )
     data = requests.get(main)
 

@@ -67,7 +67,7 @@ with Image.open(path) as banner:
 
 # Open the Spotify code image
 with Image.open(current_dictionary / "assets/spotify_code.png") as spotify_code:
-    spotify_code = spotify_code.resize((150, 38)).convert("RGBA")
+    spotify_code = spotify_code.resize((150, 38), Image.BICUBIC).convert("RGBA")
 
 # Open the poster template image
 with Image.open(current_dictionary / "assets/banner_v1.png") as poster:
