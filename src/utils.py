@@ -14,7 +14,10 @@ import re
 import os
 import datetime
 import pathlib
+
 from rich import print
+from typing import Literal
+from fontfallback import writing
 
 
 def special_code():
@@ -37,8 +40,8 @@ def create_folder():
     if not os.path.exists(cur / "../images/"):
         os.makedirs(cur / "../images/")
         print(
-            "[📦] Created a folder called "
-            "[bold underline turquoise4]../images[/bold underline turquoise4] "
+            "📦 • Created a folder called "
+            "[images]"
             "outside of this directory for output."
         )
 
@@ -84,3 +87,30 @@ def confirm_input(message):
             return False
         else:
             print("\n[🙅] Please enter 'y' for yes or 'n' for no.\n")
+
+
+def validate_image_path():
+    while True:
+        image_path = input("[🎷] Awesome, write the path to the image file: ")
+
+        if os.path.exists(image_path):
+            return image_path
+
+        else:
+            print("[❓️] File not found. Please provide a valid file path.")
+
+
+def remove_column(data, column_index):
+    return [row[:column_index] + row[column_index + 1 :] for row in data]
+
+
+def font(weight: Literal["Regular", "Bold", "Light"]):
+    fonts = writing.load_fonts(
+        f"../fonts/Oswald/Oswald-{weight}.ttf",
+        f"../fonts/NotoSansJP/NotoSansJP-{weight}.ttf",
+        f"../fonts/NotoSansKR/NotoSansKR-{weight}.ttf",
+        f"../fonts/NotoSansTC/NotoSansTC-{weight}.ttf",
+        f"../fonts/NotoSansSC/NotoSansSC-{weight}.ttf",
+    )
+
+    return fonts

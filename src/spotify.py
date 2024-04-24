@@ -19,8 +19,8 @@ import requests
 import pathlib
 from pathlib import Path
 
-from rich import print
 from dotenv import load_dotenv
+from typing import List, Tuple
 
 load_dotenv()
 
@@ -32,29 +32,7 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 current_dictionary = pathlib.Path(__file__).parent.resolve()
 
 
-def get_token():
-    """
-    Retrieves the access token for Spotify's API.
-
-    Returns:
-        str: The access token.
-    """
-    endpoint = "https://accounts.spotify.com/api/token"
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    payload = {
-        "grant_type": "client_credentials",
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-    }
-
-    # Requesting token from Spotify API
-    data = requests.post(endpoint, headers=headers, params=payload)
-    token = data.json()["access_token"]
-
-    return token
-
-
-def authorization_header(token: str):
+def authorization_header():
     """
     Constructs the authorization header required for API requests.
 
@@ -64,10 +42,35 @@ def authorization_header(token: str):
     Returns:
         dict: Authorization header.
     """
-    return {"Authorization": f"Bearer {token}"}
+
+    def get_token():
+        """
+        Retrieves the access token for Spotify's API.
+
+        Returns:
+            str: The access token.
+        """
+        endpoint = "https://accounts.spotify.com/api/token"
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        payload = {
+            "grant_type": "client_credentials",
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+        }
+
+        # Requesting token from Spotify API
+        data = requests.post(endpoint, headers=headers, params=payload)
+        token = data.json()["access_token"]
+
+        return token
+
+    return {"Authorization": f"Bearer {get_token()}"}
 
 
-def search_track(track_name: str, want_image: bool = False):
+header = authorization_header()
+
+
+def search_track(track_name: str):
     """
     Searches for a track through Spotify's API and provides track information.
 
@@ -78,8 +81,9 @@ def search_track(track_name: str, want_image: bool = False):
     Returns:
         dict: Information about the selected track.
     """
+    searched_tracks = []
+
     endpoint = "https://api.spotify.com/v1"
-    header = authorization_header(get_token())
 
     query_params = {"q": track_name, "type": "track", "limit": 10}
     track_data = requests.get(
@@ -90,53 +94,44 @@ def search_track(track_name: str, want_image: bool = False):
     for i, item in enumerate(
         track_data.get("tracks", {}).get("items", [])[:10], start=1
     ):
-        t_name = item["name"]
-        t_artist = item["album"]["artists"][0]["name"]
-        t_album = item["album"]["name"]
+        name = item["name"]
+        artist = item["artists"][0]["name"]
+        album = item["album"]["name"]
+        trackid = item["id"]
 
-        print(
-            f"[bold underline white]{i}[/bold underline white]. "
-            f"[bold turquoise4]{t_name}[/bold turquoise4] by "
-            f"[bold steel_blue]{t_artist}[/bold steel_blue] from "
-            f"[bold magenta]{t_album}[/bold magenta]"
-        )
+        searched_tracks.append([i, name, artist, album, trackid])
 
-    # Asking user to select a track
-    while True:
-        try:
-            choice = int(input("\n[✨] Select one of them to show information: "))
-            if 1 <= choice <= 7:
-                break
-            else:
-                print("Please enter a number between 1 and 7.")
-        except ValueError:
-            print("Invalid input. Please enter a number.")
+    return searched_tracks
 
-    selected_track = track_data["tracks"]["items"][choice - 1]
-    album_id = selected_track["album"]["id"]
+
+def get_trackinfo(track: List[Tuple[int, str, str, str, str]], custom_image=None):
+
+    endpoint = "https://api.spotify.com/v1"
+
+    data = requests.get(f"{endpoint}/tracks/{track[4]}", headers=header).json()
 
     # Extracting track information
     track_info = {
-        "image": selected_track["album"]["images"][0]["url"],
-        "name": selected_track["name"],
-        "year": selected_track["album"]["release_date"],
-        "artist": selected_track["album"]["artists"][0]["name"],
-        "duration": f"{(selected_track['duration_ms'] // 60000):02d}:{(selected_track['duration_ms'] // 1000 % 60):02d}",
-        "album_id": album_id,
-        "track_id": selected_track["id"],
+        "album_id": data["album"]["id"],
+        "name": data["name"],
+        "artist": data["artists"][0]["name"],
+        "year": data["album"]["release_date"],
+        "duration": f"{(data['duration_ms'] // 60000):02d}:{(data['duration_ms'] // 1000 % 60):02d}",
+        "image": data["album"]["images"][0]["url"],
+        "track_id": data["id"],
     }
 
     # Optionally allowing the user to provide a custom image
-    if not want_image:
-        with open(current_dictionary / "assets/spotify_banner.jpg", "wb") as banner:
-            banner.write(requests.get(track_info["image"]).content)
-            track_info["path"] = "./assets/spotify_banner.jpg"
-    else:
-        path = input("[🤭] Write the path to your custom image: ")
-        image.crop_to_square(
-            Path(path), current_dictionary / "./assets/custom_image.jpg"
-        )
+    if custom_image == None:
 
+        with open(current_dictionary / "assets/spotify_banner.jpg", "wb") as cover:
+            cover.write(requests.get(track_info["image"]).content)
+            track_info["path"] = "./assets/spotify_banner.jpg"
+
+    elif custom_image != None:
+        image.crop_to_square(
+            Path(custom_image), current_dictionary / "./assets/custom_image.jpg"
+        )
         track_info["path"] = current_dictionary / "./assets/custom_image.jpg"
 
     return track_info
@@ -153,7 +148,6 @@ def label(album_id: str):
         list: A list containing the release date and album label.
     """
     endpoint = "https://api.spotify.com/v1"
-    header = authorization_header(get_token())
 
     album_info = requests.get(f"{endpoint}/albums/{album_id}", headers=header).json()
     album_label = album_info["label"]

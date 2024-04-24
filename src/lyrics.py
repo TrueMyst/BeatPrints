@@ -49,14 +49,6 @@ except KeyError as e:
     print(f"Error: Environment variable {e} not found.")
     sys.exit(1)
 
-except ValueError:
-    print("Error: Invalid selection range.")
-    sys.exit(1)
-
-except IndexError:
-    print("Error: Selection range out of bounds.")
-    sys.exit(1)
-
 
 def select_lines(lyrics: str, selection: str):
     """
@@ -118,8 +110,8 @@ def get_extract(name: str, artist: str):
         # Prompt the user to select favorite lines
         while True:
             lines = input(
-                "\n[🎺] You may ignore the spaces between the lines of the song.\n"
-                "[🍀] Select any 4 of your favorite lines from here "
+                "\n🎺 • You may ignore the spaces between the lines of the song.\n"
+                "🍀 • Select any 4 of your favorite lines from here "
                 "(e.g., 2-5, 7-10): "
             )
 
@@ -135,8 +127,8 @@ def get_extract(name: str, artist: str):
                     print("Please select exactly 4 lines.")
 
     except Exception:
-        print("\n[😓] Unfortunately, the lyrics were not found from MusixMatch.")
-        print("[📝] You can paste the lyrics manually below:")
+        print("\n😓 • Unfortunately, the lyrics were not found from MusixMatch.")
+        print("📝 • You can paste the lyrics manually below:")
 
         # Allow user to input lyrics manually
         manual_lyrics = []

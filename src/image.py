@@ -35,8 +35,8 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
 
     # Get the color palette from the image
     color_palette = color.get_color_palette(image_path)
-
     # Draw rectangles for each color in the palette
+
     for i in range(6):
         start, end = 85 * i, 85 * (i + 1)
         draw.rectangle(((30 + start, 560), (30 + end, 580)), fill=color_palette[i])
