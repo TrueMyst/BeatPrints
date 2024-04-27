@@ -6,21 +6,34 @@ Dependicies:
     2. color: Extract color palette
 """
 
-import pathlib
-from pathlib import Path
-
+import requests
 from PIL import Image
 from PIL import ImageDraw
-from PIL import ImageFont
+from colorthief import ColorThief
 
-import color
-from fontTools.ttLib import TTFont
-from typing import Dict
 
-from fontfallback import writing
+def get_color_palette(path: str):
+    """
+    Function to resize image and get color palette.
 
-# Get the current dictionary path
-path_to_current_dictionary = pathlib.Path(__file__).parent.resolve()
+    Args:
+        path (str): The path of the image file.
+
+    Returns:
+        list: A list containing the color palette extracted from the image.
+    """
+
+    # Resizes the banner to 1x1 pixel and gets the color
+    dominant_color = Image.open(path).resize((1, 1), Image.NEAREST).getpixel((0, 0))
+
+    color_thief = ColorThief(path)
+    color_palette = color_thief.get_palette(color_count=6)
+
+    # Appends the dominant color to the palette
+    color_palette.append(dominant_color)
+
+    # Returns the color palette
+    return color_palette
 
 
 def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
@@ -34,7 +47,7 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
     """
 
     # Get the color palette from the image
-    color_palette = color.get_color_palette(image_path)
+    color_palette = get_color_palette(image_path)
     # Draw rectangles for each color in the palette
 
     for i in range(6):
@@ -46,7 +59,7 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
         draw.rectangle(((0, 860), (570, 870)), fill=color_palette[-1])
 
 
-def crop_to_square(image_path: Path, save_path: Path):
+def crop_to_square(image_path: str, save_path: str):
     """
     Crops the image to a square aspect ratio and saves it.
 
@@ -73,7 +86,7 @@ def crop_to_square(image_path: Path, save_path: Path):
     cropped_image.save(save_path)
 
 
-def remove_white_pixel(image_path: Path):
+def remove_white_pixel(image_path: str):
     """
     Removes white pixels from the image background and makes them transparent.
 
@@ -102,61 +115,26 @@ def remove_white_pixel(image_path: Path):
                 )
 
         # Save the modified image
-        img.save(path_to_current_dictionary / "assets/spotify_code.png")
+        img.save("./assets/spotify_code.png")
 
 
-def heading(
-    draw: ImageDraw.ImageDraw,
-    xy: tuple,
-    width_limit: int,
-    text: str,
-    color: tuple,
-    fonts: Dict[str, TTFont],
-):
+def scannable(id: str):
     """
-    A custom made function that draws a title consisting of a song name and year on the image.
+    Downloads the Spotify scan code for a particular song.
 
     Args:
-        draw (ImageDraw.ImageDraw): An ImageDraw object to draw on the image.
-        textbox (tuple): Coordinates (x1, y1, x2, y2) defining the bounding box for the title.
-        name (str): The song name.
-        year (str): The release year of the song.
-        font (str): The path to the font file.
-        initial_size (int): The initial font size.
+        identification (str): The ID of the track.
+
+    Returns:
+        str: Message indicating success.
     """
+    main = (
+        f"https://scannables.scdn.co/uri/plain/png/101010/white/1024/spotify:track:{id}"
+    )
+    data = requests.get(main)
 
-    font_size = 35
-    total_length_of_heading = 0
-    chunked = writing.merge_chunks(text, fonts)
+    with open("./assets/spotify_code.png", "wb") as img:
+        img.write(data.content)
 
-    while True:
-        for word, path in chunked:
-            font = ImageFont.truetype(path, font_size)
-            total_length_of_heading += font.getlength(word)
-
-        if total_length_of_heading > width_limit:
-            font_size -= 1
-            total_length_of_heading = 0
-
-        elif total_length_of_heading <= width_limit:
-            break
-
-    y_offset = 0
-
-    # Draw song name and year
-    for words, path in chunked:
-        xy_ = (xy[0] + y_offset, xy[1])
-
-        font = ImageFont.truetype(path, font_size)
-        draw.text(
-            xy=xy_,
-            text=words,
-            fill=color,
-            font=font,
-            anchor="ls",
-            embedded_color=True,
-        )
-
-        draw.text
-        box = font.getbbox(words[0])
-        y_offset += box[2] - box[0]
+    # Removing white pixels from the downloaded image
+    remove_white_pixel("./assets/spotify_code.png")

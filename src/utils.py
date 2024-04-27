@@ -15,9 +15,9 @@ import os
 import datetime
 import pathlib
 
+import writing
 from rich import print
 from typing import Literal
-from fontfallback import writing
 
 
 def special_code():
@@ -114,3 +114,37 @@ def font(weight: Literal["Regular", "Bold", "Light"]):
     )
 
     return fonts
+
+
+def select_lines(lyrics: str, selection: str):
+    """
+    Selects specific lines from the lyrics based on the provided range.
+
+    Args:
+        lyrics (str): The full lyrics of the song.
+        selection (str): The range of lines to select (e.g., "2-5, 7-10").
+
+    Returns:
+        str: The selected lines of lyrics.
+    """
+
+    lines = lyrics.strip().split("\n")
+    line_count = len(lines)
+
+    try:
+        selected = [int(num) for num in selection.split("-")]
+        if (
+            len(selected) != 2
+            or selected[0] >= selected[1]
+            or selected[0] <= 0
+            or selected[1] > line_count
+        ):
+            return "Invalid selection. Please provide a valid range within the line numbers."
+
+        selected_lines = lines[selected[0] - 1 : selected[1]]
+        return "\n".join(selected_lines)
+
+    except ValueError:
+        return (
+            "Invalid input. Please provide a valid range using the format 'line x-y'."
+        )

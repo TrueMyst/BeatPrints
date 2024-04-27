@@ -18,130 +18,61 @@ Usage:
 
 """
 
-import image
-import lyrics
-import spotify
-import utils
-import pathlib
+import os
+import dotenv
 import tabulate
 
-from PIL import Image
-from PIL import ImageDraw
+from rich import print
+from lyrics import Lyrics
+from poster import Poster
+from spotify import Spotify
 
-from utils import font
-from fontfallback import writing
+from utils import select_lines, remove_column, confirm_input, validate_image_path
 
+dotenv.load_dotenv()
 
-# Get the current directory
-current_dictionary = pathlib.Path(__file__).parent.resolve()
+# Retrieving Spotify API & MXM API credentials from environment variables
+MXM_TOKEN = os.getenv("MXM_USERTOKEN")
+LF_TOKEN = os.getenv("LF_USERTOKEN")
+CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
-# Ask user if they want to include a custom image
-WANT_CUSTOM_IMAGE = utils.confirm_input(
-    "🌃 • Do you want to include a custom image as the cover of the poster?"
-)
+# Intialize classes
+ly = Lyrics(MXM_TOKEN, LF_TOKEN)
+sp = Spotify(CLIENT_ID, CLIENT_SECRET)
+ps = Poster(save_path="../images/")
 
-# Get custom image if user wants
-CUSTOM_IMAGE = utils.validate_image_path() if WANT_CUSTOM_IMAGE else None
+# Get input for Image and Accent
+IMAGE = validate_image_path() if confirm_input(
+    "🌃 • Do you want to include a custom image as the cover of the poster?") else None
 
-# Ask user if they want to add a stylish color accent
-WANT_ACCENT = utils.confirm_input(
-    "🤌 • Would you like to add a stylish color accent at the bottom of your poster?"
-)
+ACCENT = confirm_input(
+    "🤌 • Would you like to add a stylish color accent at the bottom of your poster?")
 
-# Search for song on Spotify and Print them out
-search_list = spotify.search_track(input("🍀 • Enter song to search: "))
-heading_list = ["*", "Name", "Artist", "Album"]
-format = "rounded_outline"
+# Search for Tracks
+track_search = input("🎺 • Search for your favourite song: ")
 
-modified_search_list = utils.remove_column(search_list, 4)
-print(tabulate.tabulate(modified_search_list, heading_list, format))
+# Pretty print lists
+tracks = sp.search_track(track_search)
+header = ["*", "Name", "Artist", "Album"]
 
-while True:
-    try:
-        choice = int(
-            input("📋️ • Choose any song based on their index number (1 - 10): ")
-        )
-        if 1 <= choice <= 10:
-            break
-        else:
-            print("🤨 • Your choice must be between 1 and 10.")
-    except ValueError:
-        print("🤨 • Invalid choice, try to enter a valid integer.")
+table = remove_column(tracks, 4)
+print(tabulate.tabulate(table, header, "rounded_outline"))
 
-track = spotify.get_trackinfo(search_list[choice - 1], CUSTOM_IMAGE)
+# Get choices
+choice = int(input("📋️ • Select your song right here: "))
+track_selected = tracks[choice - 1]
 
-# Get the necessary details of the song
-color = (50, 47, 48)
-path = current_dictionary / track["path"]
-id = track["track_id"]
-name = track["name"].upper()
-year = track["year"].split("-")[0]
-artist = track["artist"]
-duration = track["duration"]
-label = spotify.label(track["album_id"])
-lyrics = lyrics.get_extract(track["name"], track["artist"])
+# Get trackinfo and lyrics
+track_info = sp.trackinfo(track_selected)
+lyrics = ly.get_lyrics(track_selected[1], track_selected[2])
 
-# Generate the Spotify code for the song
-spotify.get_code(id)
+for line_num, line in enumerate(str(lyrics).split("\n")):
+    print(f"[bold magenta]{line_num + 1:2}[/bold magenta] {line}")
 
+# Select lyrics
+selected = input("🍀. Select any 4 lines (eg. 7-10): ")
+lyrics = select_lines(str(lyrics), selected)
 
-# Open the poster template image
-with Image.open(current_dictionary / "assets/banner_v1.png") as poster:
-
-    # Open the banner image
-    with Image.open(path) as banner:
-        banner = banner.resize((510, 510))
-
-    # Open the Spotify code image
-    with Image.open(current_dictionary / "assets/spotify_code.png") as spotify_code:
-        spotify_code = spotify_code.resize((150, 38), Image.BICUBIC).convert("RGBA")
-
-    # Paste the banner image onto the poster
-    poster.paste(banner, (30, 30))
-
-    # Paste the Spotify code onto the poster
-    poster.paste(spotify_code, (20, 807), spotify_code)
-
-    # Set font family and paths
-
-    draw = ImageDraw.Draw(poster)
-
-    # Draw the color palette on the poster
-    image.draw_palette(draw, path, WANT_ACCENT)
-
-    # Write the title (song name and year) on the poster
-    image.heading(draw, (30, 635), 420, name, (50, 47, 48), font("Bold"))
-
-    # Write the artist name and duration on the poster
-    writing.draw_text_v2(
-        draw, (30, 675), artist, (50, 47, 48), font("Regular"), 30, anchor="ls"
-    )
-    writing.draw_text_v2(
-        draw, (496, 635), duration, (50, 47, 48), font("Regular"), 20, anchor="ls"
-    )
-
-    # Write the lyrics on the poster
-    writing.draw_multiline_text_v2(
-        draw, (30, 685), lyrics, (50, 47, 48), font("Light"), 21
-    )
-
-    # Write the label information on the poster
-    writing.draw_text_v2(
-        draw, (545, 810), label[0], (50, 47, 48), font("Regular"), 13, anchor="rt"
-    )
-    writing.draw_text_v2(
-        draw, (545, 825), label[1], (50, 47, 48), font("Regular"), 13, anchor="rt"
-    )
-
-    # Create folder to save the poster image
-    utils.create_folder()
-
-    # Generate a unique filename for the poster image
-    filename = f"{utils.create_filename(name, artist)}_{utils.special_code()}.png"
-    save_path = current_dictionary / f"../images/{filename}"
-
-    # Save the poster image
-    poster.save(save_path)
-    poster.show()
-
-    print(f"☕ • Image saved in the image folder of this repository")
+# Generate Poster
+ps.generate(track_info, lyrics, ACCENT, IMAGE)

@@ -117,3 +117,60 @@ def draw_multiline_text_v2(
             direction=direction,
         )
         spacing += size + 5
+
+
+def heading(
+    draw: ImageDraw.ImageDraw,
+    xy: tuple,
+    width_limit: int,
+    text: str,
+    color: tuple,
+    fonts: Dict[str, TTFont],
+):
+    """
+    A custom made function that draws a title consisting of a song name and year on the image.
+
+    Args:
+        draw (ImageDraw.ImageDraw): An ImageDraw object to draw on the image.
+        textbox (tuple): Cordinates defining the bounding box for the title.
+        name (str): The song name.
+        year (str): The release year of the song.
+        font (str): The path to the font file.
+        initial_size (int): The initial font size.
+    """
+
+    font_size = 35
+    total_length_of_heading = 0
+    chunked = merge_chunks(text, fonts)
+
+    while True:
+        for word, path in chunked:
+            font = ImageFont.truetype(path, font_size)
+            total_length_of_heading += font.getlength(word)
+
+        if total_length_of_heading > width_limit:
+            font_size -= 1
+            total_length_of_heading = 0
+
+        elif total_length_of_heading <= width_limit:
+            break
+
+    y_offset = 0
+
+    # Draw song name and year
+    for words, path in chunked:
+        xy_ = (xy[0] + y_offset, xy[1])
+
+        font = ImageFont.truetype(path, font_size)
+        draw.text(
+            xy=xy_,
+            text=words,
+            fill=color,
+            font=font,
+            anchor="ls",
+            embedded_color=True,
+        )
+
+        draw.text
+        box = font.getbbox(words[0])
+        y_offset += box[2] - box[0]
