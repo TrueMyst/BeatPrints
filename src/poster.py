@@ -22,8 +22,8 @@ class Poster:
             draw = ImageDraw.Draw(poster)
             COLOR = (50, 47, 48)
 
-            id = track_info["track_id"]
             cover_path = track_info["cover"]
+            id = track_info["track_id"]
             name = track_info["name"].upper()
             artist = track_info["artist"]
             duration = track_info["duration"]
@@ -32,7 +32,6 @@ class Poster:
             if custom_image != None:
                 image.crop_to_square(
                     str(custom_image), "./assets/custom_image.jpg")
-
                 cover_path = "./assets/custom_image.jpg"
 
             # Open the cover image

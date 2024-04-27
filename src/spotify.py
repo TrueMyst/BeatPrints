@@ -108,7 +108,10 @@ class Spotify:
             "image": t_data["album"]["images"][0]["url"],
             "label": f"{release_date}\n{album_label}",
             "track_id": t_data["id"],
-            "cover": "./assets/spotify_banner.jpg"
         }
+
+        with open("assets/spotify_banner.jpg", "wb") as cover:
+            cover.write(requests.get(info["image"]).content)
+            info["cover"] = "./assets/spotify_banner.jpg"
 
         return info

@@ -12,7 +12,7 @@ from PIL import ImageDraw
 from colorthief import ColorThief
 
 
-def get_color_palette(path: str):
+def color_palette(path: str):
     """
     Function to resize image and get color palette.
 
@@ -24,7 +24,8 @@ def get_color_palette(path: str):
     """
 
     # Resizes the banner to 1x1 pixel and gets the color
-    dominant_color = Image.open(path).resize((1, 1), Image.NEAREST).getpixel((0, 0))
+    dominant_color = Image.open(path).resize(
+        (1, 1), Image.NEAREST).getpixel((0, 0))
 
     color_thief = ColorThief(path)
     color_palette = color_thief.get_palette(color_count=6)
@@ -47,16 +48,17 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
     """
 
     # Get the color palette from the image
-    color_palette = get_color_palette(image_path)
+    palette = color_palette(image_path)
     # Draw rectangles for each color in the palette
 
     for i in range(6):
         start, end = 85 * i, 85 * (i + 1)
-        draw.rectangle(((30 + start, 560), (30 + end, 580)), fill=color_palette[i])
+        draw.rectangle(((30 + start, 560), (30 + end, 580)),
+                       fill=palette[i])
 
     # Optionally draw a rectangle to highlight the accent color
     if accent:
-        draw.rectangle(((0, 860), (570, 870)), fill=color_palette[-1])
+        draw.rectangle(((0, 860), (570, 870)), fill=palette[-1])
 
 
 def crop_to_square(image_path: str, save_path: str):
