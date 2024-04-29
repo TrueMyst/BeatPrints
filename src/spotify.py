@@ -3,12 +3,8 @@ This module provides functionalities related to interacting with the Spotify API
 
 Imports:
     - datetime: Module for manipulating dates and times.
-    - pathlib: Module for working with filesystem paths.
-    - os: Module for interacting with the operating system.
     - requests: Module for making HTTP requests.
-    - print: For enhanced output formatting.
-    - load_dotenv: For loading environment variables from a .env file.
-    - image: Module for image manipulation.
+    - typing: Module for type hints.
 """
 
 import datetime
@@ -18,7 +14,7 @@ from typing import List, Tuple
 
 class Spotify:
     """
-    Uses Spotify's API to search and retrieve about a track.
+    Uses Spotify's API to search and retrieve information about a track.
     """
 
     def __init__(self, CLIENT_ID, CLIENT_SECRET):
@@ -45,7 +41,7 @@ class Spotify:
 
         self.__AUTH_HEADER = {"Authorization": f"Bearer {token}"}
 
-    def search_track(self, track_name: str, limit: int = 5):
+    def search_track(self, track_name: str, limit: int = 5) -> List[Tuple[int, str, str, str, str]]:
         """
         Searches for a track through Spotify's API and provides track information.
 
@@ -54,7 +50,7 @@ class Spotify:
             limit (bool, optional): Set the limit for the number songs to be shown.
 
         Returns:
-            dict: Information about the selected track.
+            List[Tuple[int, str, str, str, str]]: Information about the selected tracks.
         """
         tracks = []
 
@@ -72,11 +68,20 @@ class Spotify:
             album = item["album"]["name"]
             trackid = item["id"]
 
-            tracks.append([i, name, artist, album, trackid])
+            tracks.append((i, name, artist, album, trackid))
 
         return tracks
 
-    def trackinfo(self, track: List[Tuple[int, str, str, str, str]]):
+    def trackinfo(self, track: Tuple[int, str, str, str, str]) -> dict:
+        """
+        Retrieves detailed information about a track.
+
+        Args:
+            track (Tuple[int, str, str, str, str]): Information about the track.
+
+        Returns:
+            dict: Detailed information about the track.
+        """
         t_data = requests.get(
             f"{self.__BASE_URL}/tracks/{track[4]}", headers=self.__AUTH_HEADER
         ).json()

@@ -27,8 +27,7 @@ class Lyrics:
             mxm_response.json()
             .get("message", {})
             .get("body", {})
-            .get("macro_calls", {})
-        )
+            .get("macro_calls", {}))
 
         lf_params = {
             "reqtype": "default",
@@ -51,28 +50,28 @@ class Lyrics:
 
         lf_data = lf_response.json().get("tracks", [])
 
-        if mxm_data:
-            mxm_lyrics = (
-                mxm_data.get("track.lyrics.get", {})
-                .get("message", {})
-                .get("body", {})
-                .get("lyrics", {})
-            )
+        try:
+            if mxm_data:
+                mxm_lyrics = (
+                    mxm_data.get("track.lyrics.get", {})
+                    .get("message", {})
+                    .get("body", {})
+                    .get("lyrics", {})
+                )
 
-            lyrics = mxm_lyrics.get("lyrics_body", "")
+                lyrics = mxm_lyrics.get("lyrics_body", "")
 
-            return lyrics
+                return lyrics
 
-        elif lf_data:
-            lf_track = lf_data[0].get("slug")
-            lf_track_url = f"https://lyrics.lyricfind.com/_next/data/K8lnjb_309zmz7XOhQHFu/en-US/lyrics/{lf_track}.json?songSlug={lf_track}"
-            lf_response = requests.get(lf_track_url, headers=lf_headers)
-            lf_json = lf_response.json().get("pageProps", {}).get("songData", {})
+            elif lf_data:
+                lf_track = lf_data[0].get("slug")
+                lf_track_url = f"https://lyrics.lyricfind.com/_next/data/K8lnjb_309zmz7XOhQHFu/en-US/lyrics/{lf_track}.json?songSlug={lf_track}"
+                lf_response = requests.get(lf_track_url, headers=lf_headers)
+                lf_json = lf_response.json().get("pageProps", {}).get("songData", {})
 
-            lyrics = lf_json.get("track", {}).get("lyrics", "")
+                lyrics = lf_json.get("track", {}).get("lyrics", "")
 
-            return lyrics
+                return lyrics
 
-        else:
-            print("Lyrics are not found")
-            return "Lyrics not found."
+        except Exception:
+            raise Exception

@@ -1,9 +1,10 @@
 """
 Module: image.py
 
-Dependicies:
+Dependencies:
     1. PIL: Image Processing
-    2. color: Extract color palette
+    2. colorthief: Extract color palette
+    3. requests: HTTP requests
 """
 
 import requests
@@ -12,7 +13,7 @@ from PIL import ImageDraw
 from colorthief import ColorThief
 
 
-def color_palette(path: str):
+def color_palette(path: str) -> list:
     """
     Function to resize image and get color palette.
 
@@ -23,7 +24,7 @@ def color_palette(path: str):
         list: A list containing the color palette extracted from the image.
     """
 
-    # Resizes the banner to 1x1 pixel and gets the color
+    # Resizes the image to 1x1 pixel and gets the color
     dominant_color = Image.open(path).resize(
         (1, 1), Image.NEAREST).getpixel((0, 0))
 
@@ -49,8 +50,8 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
 
     # Get the color palette from the image
     palette = color_palette(image_path)
-    # Draw rectangles for each color in the palette
 
+    # Draw rectangles for each color in the palette
     for i in range(6):
         start, end = 85 * i, 85 * (i + 1)
         draw.rectangle(((30 + start, 560), (30 + end, 580)),
@@ -125,7 +126,7 @@ def scannable(id: str):
     Downloads the Spotify scan code for a particular song.
 
     Args:
-        identification (str): The ID of the track.
+        id (str): The ID of the track.
 
     Returns:
         str: Message indicating success.

@@ -1,3 +1,14 @@
+"""
+This module provides functionalities for generating posters with track information and lyrics.
+
+Imports:
+    - os: Module for interacting with the operating system.
+    - image: Module for image manipulation.
+    - utils: Module containing utility functions.
+    - writing: Module containing functions related to writing text on images.
+    - PIL: Module for image processing.
+"""
+
 import os
 import image
 import utils
@@ -10,6 +21,13 @@ from utils import font
 
 
 class Poster:
+    """
+    This class represents a poster generator for track information and lyrics.
+
+    Attributes:
+        save_path (str): The path where the generated posters will be saved.
+    """
+
     def __init__(
         self,
         save_path=os.getcwd(),
@@ -17,6 +35,15 @@ class Poster:
         self.save_path = save_path
 
     def generate(self, track_info: dict, lyrics: str, accent=False, custom_image=None):
+        """
+        Generates a poster with track information and lyrics.
+
+        Args:
+            track_info (dict): Information about the track.
+            lyrics (str): The lyrics of the track.
+            accent (bool, optional): Flag indicating whether to highlight accent color in the palette.
+            custom_image (str, optional): Path to a custom image to use as the cover. Defaults to None.
+        """
         # Open the poster template image
         with Image.open("./assets/banner_v1.png") as poster:
             draw = ImageDraw.Draw(poster)
@@ -29,7 +56,7 @@ class Poster:
             duration = track_info["duration"]
             label = track_info["label"]
 
-            if custom_image != None:
+            if custom_image is not None:
                 image.crop_to_square(
                     str(custom_image), "./assets/custom_image.jpg")
                 cover_path = "./assets/custom_image.jpg"

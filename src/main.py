@@ -27,7 +27,7 @@ from lyrics import Lyrics
 from poster import Poster
 from spotify import Spotify
 
-from utils import select_lines, remove_column, confirm_input, validate_image_path
+import utils
 
 dotenv.load_dotenv()
 
@@ -43,10 +43,10 @@ sp = Spotify(CLIENT_ID, CLIENT_SECRET)
 ps = Poster(save_path="../images/")
 
 # Get input for Image and Accent
-IMAGE = validate_image_path() if confirm_input(
+IMAGE = utils.validate_image_path() if utils.confirm_input(
     "🌃 • Do you want to include a custom image as the cover of the poster?") else None
 
-ACCENT = confirm_input(
+ACCENT = utils.confirm_input(
     "🤌 • Would you like to add a stylish color accent at the bottom of your poster?")
 
 # Search for Tracks
@@ -56,7 +56,7 @@ track_search = input("🎺 • Search for your favourite song: ")
 tracks = sp.search_track(track_search)
 header = ["*", "Name", "Artist", "Album"]
 
-table = remove_column(tracks, 4)
+table = utils.remove_column(tracks, 4)
 print(tabulate.tabulate(table, header, "rounded_outline"))
 
 # Get choices
@@ -67,12 +67,8 @@ track_selected = tracks[choice - 1]
 track_info = sp.trackinfo(track_selected)
 lyrics = ly.get_lyrics(track_selected[1], track_selected[2])
 
-for line_num, line in enumerate(str(lyrics).split("\n")):
-    print(f"[bold magenta]{line_num + 1:2}[/bold magenta] {line}")
-
-# Select lyrics
-selected = input("🍀. Select any 4 lines (eg. 7-10): ")
-lyrics = select_lines(str(lyrics), selected)
+# Extract the lyrics based on the selection
+extracted = utils.get_extract(str(lyrics))
 
 # Generate Poster
-ps.generate(track_info, lyrics, ACCENT, IMAGE)
+ps.generate(track_info, extracted, ACCENT, IMAGE)
