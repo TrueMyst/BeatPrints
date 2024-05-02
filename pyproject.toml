@@ -1,0 +1,31 @@
+[project]
+name ="BeatPrints"
+version = "0.0.1"
+authors = [
+    { name="TrueMyst", email="urEmailHere" }
+]
+description = "A tool that generates eye-catching pinterest-style music posters in python"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "beautifulsoup4",
+    "colorthief",
+    "lingua-language-detector",
+    "Pillow",
+    "python-dotenv",
+    "Requests",
+    "rich",
+    "pymusix"
+]
+[project.urls]
+Homepage = "https://github.com/TrueMyst/BeatPrints"
+Issues = "https://github.com/TrueMyst/BeatPrints/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
