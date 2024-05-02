@@ -101,7 +101,7 @@ def validate_image_path():
 
 
 def remove_column(data, column_index):
-    return [row[:column_index] + row[column_index + 1 :] for row in data]
+    return [row[:column_index] + row[column_index + 1:] for row in data]
 
 
 def font(weight: Literal["Regular", "Bold", "Light"]):
@@ -141,7 +141,7 @@ def select_lines(lyrics: str, selection: str):
         ):
             return "Invalid selection. Please provide a valid range within the line numbers."
 
-        selected_lines = lines[selected[0] - 1 : selected[1]]
+        selected_lines = lines[selected[0] - 1: selected[1]]
         return "\n".join(selected_lines)
 
     except ValueError:

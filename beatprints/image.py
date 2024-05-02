@@ -45,6 +45,8 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
         draw (ImageDraw.ImageDraw): An ImageDraw object to draw on the image.
         image_path (str): The path of the image file.
         accent (bool): Flag indicating whether to highlight the accent color.
+
+    Returns: None
     """
 
     # Get the color palette from the image
@@ -68,6 +70,8 @@ def crop_to_square(image_path: str, save_path: str):
     Args:
         image_path (str): The path of the original image file.
         save_path (str): The path where the cropped image will be saved.
+
+    Returns: None
     """
 
     # Open the image
@@ -94,6 +98,8 @@ def remove_white_pixel(image_path: str):
 
     Args:
         image_path (str): The path of the image file.
+
+    Returns: None
     """
 
     # Open the image as img
@@ -127,8 +133,7 @@ def scannable(id: str):
     Args:
         identification (str): The ID of the track.
 
-    Returns:
-        str: Message indicating success.
+    Returns: None
     """
     main = (
         f"https://scannables.scdn.co/uri/plain/png/101010/white/1024/spotify:track:{id}"
