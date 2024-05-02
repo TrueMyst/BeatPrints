@@ -76,7 +76,7 @@ I stumbled upon incredible music posters on Pinterest and was amazed by their un
 
 ## 📋 About License
 
-**BeatPrints** is released under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License license**, which grants the following permissions:
+**BeatPrints** is released under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**, which grants the following permissions:
 
 - **Use:** Copy, share, and adapt the material.
 - **Attribution:** Provide appropriate credit to the owner and a link to the license.
