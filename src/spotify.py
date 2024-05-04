@@ -41,7 +41,9 @@ class Spotify:
 
         self.__AUTH_HEADER = {"Authorization": f"Bearer {token}"}
 
-    def search_track(self, track_name: str, limit: int = 5) -> List[Tuple[int, str, str, str, str]]:
+    def search_track(self,
+                     track_name: str,
+                     limit: int = 5) -> List[Tuple[int, str, str, str, str]]:
         """
         Searches for a track through Spotify's API and provides track information.
 
@@ -55,14 +57,14 @@ class Spotify:
         tracks = []
 
         query_params = {"q": track_name, "type": "track", "limit": limit}
-        track_data = requests.get(
-            f"{self.__BASE_URL}/search", params=query_params, headers=self.__AUTH_HEADER
-        ).json()
+        track_data = requests.get(f"{self.__BASE_URL}/search",
+                                  params=query_params,
+                                  headers=self.__AUTH_HEADER).json()
 
         # Displaying search results to the user
-        for i, item in enumerate(
-            track_data.get("tracks", {}).get("items", [])[:10], start=1
-        ):
+        for i, item in enumerate(track_data.get("tracks", {}).get("items",
+                                                                  [])[:10],
+                                 start=1):
             name = item["name"]
             artist = item["artists"][0]["name"]
             album = item["album"]["name"]
@@ -82,9 +84,8 @@ class Spotify:
         Returns:
             dict: Detailed information about the track.
         """
-        t_data = requests.get(
-            f"{self.__BASE_URL}/tracks/{track[4]}", headers=self.__AUTH_HEADER
-        ).json()
+        t_data = requests.get(f"{self.__BASE_URL}/tracks/{track[4]}",
+                              headers=self.__AUTH_HEADER).json()
 
         a_data = requests.get(
             f"{self.__BASE_URL}/albums/{t_data['album']['id']}",
@@ -96,12 +97,13 @@ class Spotify:
         # Formatting the release date
         date = t_data["album"]["release_date"]
         precision = t_data["album"]["release_date_precision"]
-        date_format = {"day": "%Y-%m-%d", "month": "%Y-%m", "year": "%Y"}.get(
-            precision, ""
-        )
-        release_date = datetime.datetime.strptime(date, date_format).strftime(
-            "%B %d, %Y"
-        )
+        date_format = {
+            "day": "%Y-%m-%d",
+            "month": "%Y-%m",
+            "year": "%Y"
+        }.get(precision, "")
+        release_date = datetime.datetime.strptime(
+            date, date_format).strftime("%B %d, %Y")
 
         # Extracting track information
         info = {
@@ -109,7 +111,8 @@ class Spotify:
             "name": t_data["name"],
             "artist": t_data["artists"][0]["name"],
             "year": t_data["album"]["release_date"],
-            "duration": f"{(t_data['duration_ms'] // 60000):02d}:{(t_data['duration_ms'] // 1000 % 60):02d}",
+            "duration":
+            f"{(t_data['duration_ms'] // 60000):02d}:{(t_data['duration_ms'] // 1000 % 60):02d}",
             "image": t_data["album"]["images"][0]["url"],
             "label": f"{release_date}\n{album_label}",
             "track_id": t_data["id"],

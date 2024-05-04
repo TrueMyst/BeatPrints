@@ -6,7 +6,13 @@ from typing import Optional, Dict, Literal, Tuple, List
 
 def load_fonts(*font_paths: str) -> Dict[str, TTFont]:
     """
-    Loads font files specified by paths into memory and returns a dictionary of font objects.
+    Loads font files into memory and returns a dictionary of font objects.
+
+    Args:
+        *font_paths (str): Paths to the font files.
+
+    Returns:
+        Dict[str, TTFont]: Dictionary mapping font names to TTFont objects.
     """
     fonts = {}
     for path in font_paths:
@@ -15,25 +21,41 @@ def load_fonts(*font_paths: str) -> Dict[str, TTFont]:
     return fonts
 
 
-def has_glyph(font: TTFont, glyph: str) -> bool:
+def check_glyph(font: TTFont, glyph: str) -> bool:
     """
-    Checks if the given font contains a glyph for the specified character.
+    Check if a glyph exists in a font.
+
+    Args:
+        font_file (str): Path to the font file.
+        char (str): Character to check.
+
+    Returns:
+        bool: True if the glyph exists, False otherwise.
     """
-    for table in font["cmap"].tables:
-        if table.cmap.get(ord(glyph)):
-            return True
-    return False
+    try:
+        cmap = font.getBestCmap()
+        return ord(glyph) in cmap
+
+    except Exception:
+        return False
 
 
 def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
     """
-    Merges consecutive characters with the same font into clusters, optimizing font lookup.
+    Merge consecutive characters with the same font into clusters for optimized font lookup.
+
+    Args:
+        text (str): The input text to be processed.
+        fonts (Dict[str, TTFont]): A dictionary mapping font names to TTFont objects.
+
+    Returns:
+        List[List[str]]: A list of clusters where each cluster contains consecutive characters with the same font.
     """
     chunks = []
 
     for char in text:
         for font_path, font in fonts.items():
-            if has_glyph(font, char):
+            if check_glyph(font, char):
                 chunks.append([char, font_path])
                 break
 
@@ -60,18 +82,29 @@ def draw_text_v2(
     direction: Literal["rtl", "ltr", "ttb"] = "ltr",
 ) -> None:
     """
-    Draws text on an image at given coordinates, using specified size, color, and fonts.
+    Draws text on an image.
+
+    Args:
+        draw (ImageDraw.ImageDraw): The ImageDraw object.
+        xy (Tuple[int, int]): The xy coordinates for the text.
+        text (str): The text to be drawn.
+        color (Tuple[int, int, int]): The RGB color of the text.
+        fonts (Dict[str, TTFont]): A dictionary of font names to TTFont objects.
+        size (int): The font size.
+        anchor (Optional[str], optional): The anchor point for positioning the text. Defaults to None.
+        align (Literal["left", "center", "right"], optional): The alignment of the text. Defaults to "left".
+        direction (Literal["rtl", "ltr", "ttb"], optional): The direction of the text. Defaults to "ltr".
     """
 
     y_offset = 0
     sentence = merge_chunks(text, fonts)
 
     for words in sentence:
-        xy_ = (xy[0] + y_offset, xy[1])
+        cords = (xy[0] + y_offset, xy[1])
 
         font = ImageFont.truetype(words[1], size)
         draw.text(
-            xy=xy_,
+            xy=cords,
             text=words[0],
             fill=color,
             font=font,

@@ -1,8 +1,8 @@
-beautifulsoup4==4.12.2
 colorthief==0.2.1
-lingua-language-detector==2.0.2
-Pillow==10.1.0
-python-dotenv==1.0.0
+fonttools==4.51.0
+Pillow==10.3.0
+python-dotenv==1.0.1
 Requests==2.31.0
-rich==13.7.0
-pymusix==1.0.0
+rich==13.7.1
+tabulate==0.9.0
+lrclibapi==0.3.1

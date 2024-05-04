@@ -29,12 +29,16 @@ class Poster:
     """
 
     def __init__(
-        self,
-        save_path=os.getcwd(),
+            self,
+            save_path=os.getcwd(),
     ):
         self.save_path = save_path
 
-    def generate(self, track_info: dict, lyrics: str, accent=False, custom_image=None):
+    def generate(self,
+                 track_info: dict,
+                 lyrics: str,
+                 accent=False,
+                 custom_image=None):
         """
         Generates a poster with track information and lyrics.
 
@@ -57,8 +61,8 @@ class Poster:
             label = track_info["label"]
 
             if custom_image is not None:
-                image.crop_to_square(
-                    str(custom_image), "./assets/custom_image.jpg")
+                image.crop_to_square(str(custom_image),
+                                     "./assets/custom_image.jpg")
                 cover_path = "./assets/custom_image.jpg"
 
             # Open the cover image
@@ -69,9 +73,8 @@ class Poster:
             image.scannable(id)
 
             with Image.open("./assets/spotify_code.png") as spotify_code:
-                spotify_code = spotify_code.resize((150, 38), Image.BICUBIC).convert(
-                    "RGBA"
-                )
+                spotify_code = spotify_code.resize(
+                    (150, 38), Image.Resampling.BICUBIC).convert("RGBA")
 
             # Paste the cover and the scan image onto the poster
             poster.paste(cover, (30, 30))
@@ -104,14 +107,16 @@ class Poster:
             )
 
             # Write the lyrics on the poster
-            writing.draw_multiline_text_v2(
-                draw, (30, 685), lyrics, COLOR, font("Light"), 21
-            )
+            writing.draw_multiline_text_v2(draw, (30, 685), lyrics, COLOR,
+                                           font("Light"), 21)
 
             # Write the label information on the poster
-            writing.draw_multiline_text_v2(
-                draw, (545, 810), label, COLOR, font("Regular"), 13, anchor="rt"
-            )
+            writing.draw_multiline_text_v2(draw, (545, 810),
+                                           label,
+                                           COLOR,
+                                           font("Regular"),
+                                           13,
+                                           anchor="rt")
 
             # Create folder to save the poster image
             utils.create_folder()

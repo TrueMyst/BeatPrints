@@ -1,77 +1,67 @@
-import requests
+import errors
+from lrclib import LrcLibAPI
 
 
 class Lyrics:
-    def __init__(self, MXM_USERTOKEN, LF_USERTOKEN):
-        self.mxm_base_url = (
-            "https://apic-desktop.musixmatch.com/ws/1.1/macro.subtitles.get?"
+
+    def __init__(self):
+        pass
+
+    def get_lyrics(self, name: str, artist: str):
+        """
+        Retrieve lyrics from LRClib.net.
+
+        Args:
+            name (str): Track's name.
+            artist (str): Track's artist.
+
+        Returns:
+            str or None: The lyrics in plain text if found, otherwise None.
+        """
+        api = LrcLibAPI(
+            user_agent=
+            "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"
         )
-        self.lf_base_url = "https://lyrics.lyricfind.com/api/v1/search?"
-        self.mxm_usertoken = MXM_USERTOKEN
-        self.lf_usertoken = LF_USERTOKEN
+        id = api.search_lyrics(track_name=name, artist_name=artist)
 
-    def get_lyrics(self, track_name: str, artist_name: str):
+        if len(id) != 0:
+            lyrics = api.get_lyrics_by_id(id[0].id)
+            return lyrics.plain_lyrics
 
-        mxm_params = {
-            "format": "json",
-            "namespace": "lyrics_synched",
-            "app_id": "web-desktop-app-v1.0",
-            "subtitle_format": "mxm",
-            "q_track": track_name,
-            "q_artist": artist_name,
-            "usertoken": self.mxm_usertoken,
-        }
+        else:
+            return None
 
-        mxm_response = requests.get(self.mxm_base_url, params=mxm_params)
-        mxm_data = (
-            mxm_response.json()
-            .get("message", {})
-            .get("body", {})
-            .get("macro_calls", {}))
+    def select_lines(self, lyrics: str, selection: str) -> str:
+        """
+        Selects specific lines from the lyrics based on the provided range.
 
-        lf_params = {
-            "reqtype": "default",
-            "territory": "BD",
-            "searchtype": "track",
-            "all": f"{artist_name} {track_name} ",
-            "all-tracks": "no",
-            "limit": 1,
-            "output": "json",
-        }
+        Args:
+            lyrics (str): The full lyrics of the song.
+            selection (str): The range of lines to select (e.g., "2-5, 7-10").
 
-        lf_headers = {
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
-            "Authorization": f"Bearer {self.lf_usertoken}",
-        }
+        Returns:
+            str: The selected lines of lyrics.
+        """
 
-        lf_response = requests.get(
-            self.lf_base_url, params=lf_params, headers=lf_headers
-        )
-
-        lf_data = lf_response.json().get("tracks", [])
+        # Remove empty lines from the lyrics
+        lines = [line for line in lyrics.split("\n")]
+        line_count = len(lines)
 
         try:
-            if mxm_data:
-                mxm_lyrics = (
-                    mxm_data.get("track.lyrics.get", {})
-                    .get("message", {})
-                    .get("body", {})
-                    .get("lyrics", {})
-                )
+            selected = [int(num) for num in selection.split("-")]
 
-                lyrics = mxm_lyrics.get("lyrics_body", "")
+            if (len(selected) != 2 or selected[0] >= selected[1]
+                    or selected[0] <= 0 or selected[1] > line_count):
+                raise errors.InvalidSelectionError
 
-                return lyrics
+            portion = lines[selected[0] - 1:selected[1]]
+            selected_lines = [line for line in portion if line != '']
 
-            elif lf_data:
-                lf_track = lf_data[0].get("slug")
-                lf_track_url = f"https://lyrics.lyricfind.com/_next/data/K8lnjb_309zmz7XOhQHFu/en-US/lyrics/{lf_track}.json?songSlug={lf_track}"
-                lf_response = requests.get(lf_track_url, headers=lf_headers)
-                lf_json = lf_response.json().get("pageProps", {}).get("songData", {})
+            if len(selected_lines) > 4:
+                raise errors.LineLimitExceededError
 
-                lyrics = lf_json.get("track", {}).get("lyrics", "")
+            result = "\n".join(selected_lines).strip()
+            return result
 
-                return lyrics
-
-        except Exception:
-            raise Exception
+        except ValueError:
+            raise errors.InvalidInputError

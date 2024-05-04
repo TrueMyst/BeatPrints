@@ -1,7 +1,10 @@
 class InvalidSelectionError(Exception):
     """Exception raised for invalid line selection."""
 
-    def __init__(self, message="❓️ • Invalid selection, please provide a valid range within the line numbers."):
+    def __init__(
+        self,
+        message="❓️ • Invalid selection, please provide a valid range within the line numbers."
+    ):
         self.message = message
         super().__init__(self.message)
 
@@ -17,6 +20,9 @@ class LineLimitExceededError(Exception):
 class InvalidInputError(Exception):
     """Exception raised for invalid input format."""
 
-    def __init__(self, message="❓️ • Invalid input, please provide a valid range using the format 'line x-y'."):
+    def __init__(
+        self,
+        message="❓️ • Invalid input, please provide a valid range using the format 'line x-y'."
+    ):
         self.message = message
         super().__init__(self.message)
