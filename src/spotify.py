@@ -2,9 +2,9 @@
 This module provides functionalities related to interacting with the Spotify API.
 
 Imports:
-    - datetime: Module for manipulating dates and times.
-    - requests: Module for making HTTP requests.
-    - typing: Module for type hints.
+    - datetime: Dates and times.
+    - requests: HTTP requests.
+    - typing: Type hints.
 """
 
 import datetime

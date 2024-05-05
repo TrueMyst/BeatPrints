@@ -1,12 +1,13 @@
 """
-This module provides functionalities for generating posters with track information and lyrics.
+Generates posters with track info and lyrics.
 
 Imports:
-    - os: Module for interacting with the operating system.
-    - image: Module for image manipulation.
-    - utils: Module containing utility functions.
-    - writing: Module containing functions related to writing text on images.
-    - PIL: Module for image processing.
+    - os: OS interaction.
+    - image: Image manipulation.
+    - utils: Utility functions.
+    - writing: Text writing on images.
+    - PIL: Image processing.
+    - dim: Coordinates & Sizes.
 """
 
 import os
@@ -17,6 +18,7 @@ import writing
 from PIL import Image
 from PIL import ImageDraw
 
+import dim
 from utils import font
 
 
@@ -67,55 +69,63 @@ class Poster:
 
             # Open the cover image
             with Image.open(cover_path) as cover:
-                cover = cover.resize((510, 510))
+                cover = cover.resize(dim.S_COVER)
 
             # Generate the Spotify scan code for the track and resize it.
             image.scannable(id)
 
             with Image.open("./assets/spotify_code.png") as spotify_code:
                 spotify_code = spotify_code.resize(
-                    (150, 38), Image.Resampling.BICUBIC).convert("RGBA")
+                    dim.S_SPOTIFY_CODE,
+                    Image.Resampling.BICUBIC).convert("RGBA")
 
             # Paste the cover and the scan image onto the poster
-            poster.paste(cover, (30, 30))
-            poster.paste(spotify_code, (20, 807), spotify_code)
+            poster.paste(cover, dim.C_COVER)
+            poster.paste(spotify_code, dim.C_SPOTIFY_CODE, spotify_code)
 
             # Draw the color palette on the poster
             image.draw_palette(draw, cover_path, accent)
 
             # Write the title (song name and year) on the poster
-            writing.heading(draw, (30, 635), 420, name, COLOR, font("Bold"))
+            writing.heading(draw, dim.C_HEADING, 915, name, COLOR,
+                            font("Bold"), dim.S_HEADING)
 
-            # Write the name of the and duration on the poster
+            # Write the name of the artist and duration on the poster
             writing.draw_text_v2(
                 draw,
-                (30, 675),
+                dim.C_ARTIST,
                 artist,
                 COLOR,
                 font("Regular"),
-                30,
+                dim.S_ARTIST,
                 anchor="ls",
             )
             writing.draw_text_v2(
                 draw,
-                (496, 635),
+                dim.C_DURATION,
                 duration,
                 COLOR,
                 font("Regular"),
-                20,
-                anchor="ls",
+                dim.S_DURATION,
+                anchor="rs",
             )
 
             # Write the lyrics on the poster
-            writing.draw_multiline_text_v2(draw, (30, 685), lyrics, COLOR,
-                                           font("Light"), 21)
+            writing.draw_multiline_text_v2(draw,
+                                           dim.C_LYRICS,
+                                           lyrics,
+                                           COLOR,
+                                           font("Light"),
+                                           dim.S_LYRICS,
+                                           anchor="lt")
 
             # Write the label information on the poster
-            writing.draw_multiline_text_v2(draw, (545, 810),
+            writing.draw_multiline_text_v2(draw,
+                                           dim.C_LABEL,
                                            label,
                                            COLOR,
                                            font("Regular"),
-                                           13,
+                                           dim.S_LABEL,
                                            anchor="rt")
 
             # Create folder to save the poster image

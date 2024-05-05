@@ -1,3 +1,12 @@
+"""
+Contains modules for handling errors and interacting with LRC files.
+
+Imports:
+    - errors: For handling errors.
+    - lrclib: Retrieving lyrics from LRClib.
+
+"""
+
 import errors
 from lrclib import LrcLibAPI
 

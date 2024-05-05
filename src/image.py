@@ -2,15 +2,18 @@
 Module: image.py
 
 Dependencies:
-    1. PIL: Image Processing
-    2. colorthief: Extract color palette
-    3. requests: HTTP requests
+    - PIL: Image Processing
+    - colorthief: Extract color palette
+    - requests: HTTP requests
+    - dim: Cords & Sizes
 """
 
 import requests
 from PIL import Image
 from PIL import ImageDraw
 from colorthief import ColorThief
+
+import dim
 
 
 def color_palette(path: str) -> list:
@@ -53,12 +56,15 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
 
     # Draw rectangles for each color in the palette
     for i in range(6):
-        start, end = 85 * i, 85 * (i + 1)
-        draw.rectangle(((30 + start, 560), (30 + end, 580)), fill=palette[i])
+        x, y = dim.C_PALETTE
+
+        start, end = 170 * i, 170 * (i + 1)
+
+        draw.rectangle(((x + start, y), (x + end, 1160)), fill=palette[i])
 
     # Optionally draw a rectangle to highlight the accent color
     if accent:
-        draw.rectangle(((0, 860), (570, 870)), fill=palette[-1])
+        draw.rectangle(((0, 1730), (1140, 1740)), fill=palette[-1])
 
 
 def crop_to_square(image_path: str, save_path: str):
@@ -127,8 +133,9 @@ def scannable(id: str):
     Args:
         id (str): The ID of the track.
     """
+
     main = (
-        f"https://scannables.scdn.co/uri/plain/png/101010/white/1024/spotify:track:{id}"
+        f"https://scannables.scdn.co/uri/plain/png/101010/white/1280/spotify:track:{id}"
     )
     data = requests.get(main)
 

@@ -1,5 +1,14 @@
-from fontTools.ttLib import TTFont
+"""
+Provides modules for image processing and font tools.
 
+Imports:
+    - PIL: Image processing.
+    - fontTools: Font manipulation tools.
+    - typing: Type hinting support.
+
+"""
+
+from fontTools.ttLib import TTFont
 from PIL import ImageFont, ImageDraw
 from typing import Optional, Dict, Literal, Tuple, List
 
@@ -100,11 +109,11 @@ def draw_text_v2(
     sentence = merge_chunks(text, fonts)
 
     for words in sentence:
-        cords = (xy[0] + y_offset, xy[1])
+        xy_ = (xy[0] + y_offset, xy[1])
 
         font = ImageFont.truetype(words[1], size)
         draw.text(
-            xy=cords,
+            xy=xy_,
             text=words[0],
             fill=color,
             font=font,
@@ -133,14 +142,16 @@ def draw_multiline_text_v2(
     """
     Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines.
     """
-    spacing = xy[1]
+
+    x, y = xy
+    spacing = 0
     lines = text.split("\n")
 
-    for line in lines:
-        mod_cord = (xy[0], spacing)
+    for ln, line in enumerate(lines):
+        xy_ = (x, y + spacing)
         draw_text_v2(
             draw,
-            xy=mod_cord,
+            xy=xy_,
             text=line,
             color=color,
             fonts=fonts,
@@ -149,7 +160,7 @@ def draw_multiline_text_v2(
             align=align,
             direction=direction,
         )
-        spacing += size + 5
+        spacing += size + ln + 1 * 5
 
 
 def heading(
@@ -159,6 +170,7 @@ def heading(
     text: str,
     color: tuple,
     fonts: Dict[str, TTFont],
+    size: int,
 ):
     """
     A custom made function that draws a title consisting of a song name and year on the image.
@@ -172,17 +184,17 @@ def heading(
         initial_size (int): The initial font size.
     """
 
-    font_size = 35
+    # font_size = 45
     total_length_of_heading = 0
     chunked = merge_chunks(text, fonts)
 
     while True:
         for word, path in chunked:
-            font = ImageFont.truetype(path, font_size)
+            font = ImageFont.truetype(path, size)
             total_length_of_heading += font.getlength(word)
 
         if total_length_of_heading > width_limit:
-            font_size -= 1
+            size -= 1
             total_length_of_heading = 0
 
         elif total_length_of_heading <= width_limit:
@@ -194,7 +206,7 @@ def heading(
     for words, path in chunked:
         xy_ = (xy[0] + y_offset, xy[1])
 
-        font = ImageFont.truetype(path, font_size)
+        font = ImageFont.truetype(path, size)
         draw.text(
             xy=xy_,
             text=words,

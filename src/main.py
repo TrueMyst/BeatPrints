@@ -1,22 +1,20 @@
 """
-Module: main.py
-
-This module serves as the main entry point for the BeatPrints application. 
-It orchestrates the process of generating posters for songs, 
-including fetching song information, processing images, and generating posters.
+Serves as the main entry point for the BeatPrints application. 
+Orchestrates the process of generating posters for songs, including 
+fetching song information, processing images, and generating posters.
 
 Dependencies:
-    - pathlib: For working with filesystem paths.
-    - PIL: Python Imaging Library for image processing tasks.
-    - image: Custom module for image processing functions.
-    - lyrics: Custom module for retrieving and processing song lyrics.
-    - spotify: Custom module for interacting with the Spotify API.
-    - utils: Custom module containing utility functions.
-    - rich: Pretty-print texts.
+    - PIL: Image processing.
+    - pathlib: Filesystem paths.
+    - tabulate: Printing tables.
+    - image: Image processing functions.
+    - lyrics: Retrieving and processing song lyrics.
+    - spotify: Interacting with Spotify API.
+    - utils: Utility functions.
+    - rich: Pretty-printing texts.
 
 Usage:
     Run this module to generate posters for songs based on user input.
-
 """
 
 import os

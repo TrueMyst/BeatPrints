@@ -18,7 +18,6 @@ import os
 import datetime
 import pathlib
 
-import utils
 import writing
 
 from rich import print
@@ -162,7 +161,7 @@ def get_extract(lyrics: Union[str, None]):
         manual_lyrics = []
 
         for _ in range(4):
-            line = input(f"[bold magenta]{_}[/bold magenta] ")
+            line = input()
             manual_lyrics.append(line)
 
         return "\n".join(manual_lyrics)
