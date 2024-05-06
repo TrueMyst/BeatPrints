@@ -1,6 +1,8 @@
 include README.md
 include LICENSE
 include requirements.txt
+include beatprints/assets/*.png
+include beatprints/assets/templates/*.png
 include fonts/NotoSansJP/*.ttf
 include fonts/NotoSansKr/*.ttf
 include fonts/NotoSansSc/*.ttf
