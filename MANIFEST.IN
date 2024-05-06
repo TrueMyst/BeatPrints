@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include requirements.txt
+include fonts/NotoSansJP/*.ttf
+include fonts/NotoSansKr/*.ttf
+include fonts/NotoSansSc/*.ttf
+include fonts/NotoSansTC/*.ttf
+include fonts/Oswald/*.ttf
+include examples/*.png
