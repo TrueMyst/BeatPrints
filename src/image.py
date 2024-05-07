@@ -8,12 +8,12 @@ Dependencies:
     - dim: Cords & Sizes
 """
 
+import dim
 import requests
+
 from PIL import Image
 from PIL import ImageDraw
 from colorthief import ColorThief
-
-import dim
 
 
 def color_palette(path: str) -> list:
@@ -64,7 +64,7 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
 
     # Optionally draw a rectangle to highlight the accent color
     if accent:
-        draw.rectangle(((0, 1730), (1140, 1740)), fill=palette[-1])
+        draw.rectangle(dim.C_ACCENT, fill=palette[-1])
 
 
 def crop_to_square(image_path: str, save_path: str):

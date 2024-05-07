@@ -20,13 +20,12 @@ Usage:
 import os
 import dotenv
 import tabulate
+import utils
 
 from rich import print
 from lyrics import Lyrics
 from poster import Poster
 from spotify import Spotify
-
-import utils
 
 dotenv.load_dotenv()
 

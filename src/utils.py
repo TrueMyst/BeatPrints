@@ -17,12 +17,10 @@ import re
 import os
 import datetime
 import pathlib
-
 import writing
 
 from rich import print
 from typing import Literal, Union
-
 from lyrics import Lyrics
 
 

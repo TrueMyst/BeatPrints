@@ -136,6 +136,7 @@ def draw_multiline_text_v2(
     fonts: Dict[str, TTFont],
     size: int,
     anchor: Optional[str] = None,
+    spacing=0,
     align: Literal["left", "center", "right"] = "left",
     direction: Literal["rtl", "ltr", "ttb"] = "ltr",
 ) -> None:
@@ -144,11 +145,13 @@ def draw_multiline_text_v2(
     """
 
     x, y = xy
-    spacing = 0
+    y_offset = 0
     lines = text.split("\n")
 
-    for ln, line in enumerate(lines):
-        xy_ = (x, y + spacing)
+    scale = int(round((size * 6) / 42, 1))
+
+    for line in lines:
+        xy_ = (x, y + y_offset)
         draw_text_v2(
             draw,
             xy=xy_,
@@ -160,7 +163,7 @@ def draw_multiline_text_v2(
             align=align,
             direction=direction,
         )
-        spacing += size + ln + 1 * 5
+        y_offset += size + scale + spacing
 
 
 def heading(
