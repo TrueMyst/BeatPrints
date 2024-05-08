@@ -118,8 +118,8 @@ class Spotify:
             "track_id": t_data["id"],
         }
 
-        with open("assets/spotify_banner.jpg", "wb") as cover:
+        with open("assets/spotify/spotify_banner.jpg", "wb") as cover:
             cover.write(requests.get(info["image"]).content)
-            info["cover"] = "./assets/spotify_banner.jpg"
+            info["cover"] = "./assets/spotify/spotify_banner.jpg"
 
         return info

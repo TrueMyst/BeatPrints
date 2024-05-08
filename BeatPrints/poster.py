@@ -64,8 +64,8 @@ class Poster:
 
             if custom_image is not None:
                 image.crop_to_square(str(custom_image),
-                                     "./assets/custom_image.jpg")
-                cover_path = "./assets/custom_image.jpg"
+                                     "./assets/spotify/custom_image.jpg")
+                cover_path = "./assets/spotify/custom_image.jpg"
 
             # Open the cover image
             with Image.open(cover_path) as cover:
@@ -74,7 +74,8 @@ class Poster:
             # Generate the Spotify scan code for the track and resize it.
             image.scannable(id)
 
-            with Image.open("./assets/spotify_code.png") as spotify_code:
+            with Image.open(
+                    "./assets/spotify/spotify_code.png") as spotify_code:
                 spotify_code = spotify_code.resize(
                     dim.S_SPOTIFY_CODE,
                     Image.Resampling.BICUBIC).convert("RGBA")

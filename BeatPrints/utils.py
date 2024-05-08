@@ -41,8 +41,8 @@ def create_folder():
     Prints a message indicating the creation of the folder.
     """
     cur = pathlib.Path(__file__).parent.resolve()
-    if not os.path.exists(cur / "../images/"):
-        os.makedirs(cur / "../images/")
+    if not os.path.exists(cur / ".assets/images/"):
+        os.makedirs(cur / ".assets/images/")
         print("📦 • Created a folder called "
               "[images]"
               "outside of this directory for output.")
@@ -105,11 +105,11 @@ def remove_column(data: list, column_index: int) -> list:
 
 def font(weight: Literal["Regular", "Bold", "Light"]) -> dict:
     fonts = writing.load_fonts(
-        f"../fonts/Oswald/Oswald-{weight}.ttf",
-        f"../fonts/NotoSansJP/NotoSansJP-{weight}.ttf",
-        f"../fonts/NotoSansKR/NotoSansKR-{weight}.ttf",
-        f"../fonts/NotoSansTC/NotoSansTC-{weight}.ttf",
-        f"../fonts/NotoSansSC/NotoSansSC-{weight}.ttf",
+        f"./assets/fonts/Oswald/Oswald-{weight}.ttf",
+        f"./assets/fonts/NotoSansJP/NotoSansJP-{weight}.ttf",
+        f"./assets/fonts/NotoSansKR/NotoSansKR-{weight}.ttf",
+        f"./assets/fonts/NotoSansTC/NotoSansTC-{weight}.ttf",
+        f"./assets/fonts/NotoSansSC/NotoSansSC-{weight}.ttf",
     )
 
     return fonts

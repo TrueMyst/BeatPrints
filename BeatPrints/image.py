@@ -123,7 +123,7 @@ def remove_white_pixel(image_path: str):
                                                       y] != white else brown)
 
         # Save the modified image
-        img.save("./assets/spotify_code.png")
+        img.save("./assets/spotify/spotify_code.png")
 
 
 def scannable(id: str):
@@ -139,8 +139,8 @@ def scannable(id: str):
     )
     data = requests.get(main)
 
-    with open("./assets/spotify_code.png", "wb") as img:
+    with open("./assets/spotify/spotify_code.png", "wb") as img:
         img.write(data.content)
 
     # Removing white pixels from the downloaded image
-    remove_white_pixel("./assets/spotify_code.png")
+    remove_white_pixel("./assets/spotify/spotify_code.png")
