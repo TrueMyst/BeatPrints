@@ -3,6 +3,7 @@ This file has all the co-ordinates that'll be needed to place the texts/images
 """
 # S = Size
 # C = Cords
+# CL = Color
 
 S_COVER = (1020, 1020)
 S_SPOTIFY_CODE = (330, 85)
@@ -20,5 +21,8 @@ C_LABEL = (1080, 1615)
 
 C_DURATION = (1080, 1275)
 C_PALETTE = (60, 1120)
-C_ACCENT = (0, 1710, 1140, 1740)
+C_ACCENT = (0, 1720, 1140, 1740)
 C_SPOTIFY_CODE = (45, 1610)
+
+CL_DARK_MODE = (168, 153, 132)
+CL_LIGHT_MODE = (50, 47, 48)

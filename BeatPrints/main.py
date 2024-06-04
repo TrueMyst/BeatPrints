@@ -38,10 +38,12 @@ ly = Lyrics()
 sp = Spotify(CLIENT_ID, CLIENT_SECRET)
 ps = Poster(save_path="../images/")
 
-# Get input for Image and Accent
+# Get input for Image, Dark Mode and Accent
 IMAGE = utils.validate_image_path() if utils.c_input(
     "🌃 • Do you want to include a custom image as the cover of the poster?"
 ) else None
+
+DARK_MODE = utils.c_input("🌙 • Do you want the dark mode edition?")
 
 ACCENT = utils.c_input(
     "🤌 • Would you like to add a stylish color accent at the bottom of your poster?"
@@ -69,4 +71,4 @@ lyrics = ly.get_lyrics(track_selected[1].split(' - ')[0], track_selected[2])
 extracted = utils.get_extract(lyrics)
 
 # Generate Poster
-ps.generate(track_info, extracted, ACCENT, IMAGE)
+ps.generate(track_info, extracted, ACCENT, IMAGE, DARK_MODE)

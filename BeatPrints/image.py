@@ -94,53 +94,36 @@ def crop_to_square(image_path: str, save_path: str):
     cropped_image.save(save_path)
 
 
-def remove_white_pixel(image_path: str):
+def scannable(id: str, dark_mode=False):
     """
-    Removes white pixels from the image background and makes them transparent.
+    Downloads the Spotify scan code for a particular song and removes white pixels from it.
 
     Args:
-        image_path (str): The path of the image file.
+        id (str): The ID of the track.
+        dark_mode (bool): Whether to use dark mode colors. Default is False.
     """
+    # Define colors
+    transparent = (0, 0, 0, 0)
+    white = (255, 255, 255, 255)
+    color = dim.CL_DARK_MODE if dark_mode else dim.CL_LIGHT_MODE
 
-    # Open the image as img
-    with Image.open(image_path) as img:
+    # Download the Spotify scan code image
+    main = f"https://scannables.scdn.co/uri/plain/png/101010/white/1280/spotify:track:{id}"
+    data = requests.get(main)
 
+    with open("./assets/spotify/spotify_code.png", "wb") as img_file:
+        img_file.write(data.content)
+
+    with Image.open("./assets/spotify/spotify_code.png") as img:
         # Convert the image into RGBA mode
         img = img.convert("RGBA")
         pixels = img.load()
-
-        # Define colors
-        transparent = (0, 0, 0, 0)
-        brown = (50, 47, 48, 255)
-        white = (255, 255, 255, 255)
-
         width, height = img.size
 
         # Iterate through pixels and make white pixels transparent
         for x in range(width):
             for y in range(height):
-                pixels[x, y] = (transparent if pixels[x,
-                                                      y] != white else brown)
+                pixels[x, y] = transparent if pixels[x, y] != white else color
 
         # Save the modified image
         img.save("./assets/spotify/spotify_code.png")
-
-
-def scannable(id: str):
-    """
-    Downloads the Spotify scan code for a particular song.
-
-    Args:
-        id (str): The ID of the track.
-    """
-
-    main = (
-        f"https://scannables.scdn.co/uri/plain/png/101010/white/1280/spotify:track:{id}"
-    )
-    data = requests.get(main)
-
-    with open("./assets/spotify/spotify_code.png", "wb") as img:
-        img.write(data.content)
-
-    # Removing white pixels from the downloaded image
-    remove_white_pixel("./assets/spotify/spotify_code.png")

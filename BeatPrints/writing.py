@@ -171,7 +171,7 @@ def heading(
     xy: tuple,
     width_limit: int,
     text: str,
-    color: tuple,
+    color: Tuple[int, int, int],
     fonts: Dict[str, TTFont],
     size: int,
 ):

@@ -40,7 +40,8 @@ class Poster:
                  track_info: dict,
                  lyrics: str,
                  accent=False,
-                 custom_image=None):
+                 custom_image=None,
+                 dark_mode=False):
         """
         Generates a poster with track information and lyrics.
 
@@ -50,10 +51,15 @@ class Poster:
             accent (bool, optional): Flag indicating whether to highlight accent color in the palette.
             custom_image (str, optional): Path to a custom image to use as the cover. Defaults to None.
         """
+
+        banner_path = "./assets/banner_dark.png" if dark_mode else "./assets/banner_light.png"
+        color = dim.CL_DARK_MODE if dark_mode else dim.CL_LIGHT_MODE
+
         # Open the poster template image
-        with Image.open("./assets/banner_v1.png") as poster:
+        with Image.open(banner_path) as poster:
+            poster = poster.convert("RGB")
+
             draw = ImageDraw.Draw(poster)
-            COLOR = (50, 47, 48)
 
             cover_path = track_info["cover"]
             id = track_info["track_id"]
@@ -72,7 +78,7 @@ class Poster:
                 cover = cover.resize(dim.S_COVER)
 
             # Generate the Spotify scan code for the track and resize it.
-            image.scannable(id)
+            image.scannable(id, dark_mode)
 
             with Image.open(
                     "./assets/spotify/spotify_code.png") as spotify_code:
@@ -88,7 +94,7 @@ class Poster:
             image.draw_palette(draw, cover_path, accent)
 
             # Write the title (song name and year) on the poster
-            writing.heading(draw, dim.C_HEADING, 915, name, COLOR,
+            writing.heading(draw, dim.C_HEADING, 915, name, color,
                             font("Bold"), dim.S_HEADING)
 
             # Write the name of the artist and duration on the poster
@@ -96,7 +102,7 @@ class Poster:
                 draw,
                 dim.C_ARTIST,
                 artist,
-                COLOR,
+                color,
                 font("Regular"),
                 dim.S_ARTIST,
                 anchor="ls",
@@ -105,7 +111,7 @@ class Poster:
                 draw,
                 dim.C_DURATION,
                 duration,
-                COLOR,
+                color,
                 font("Regular"),
                 dim.S_DURATION,
                 anchor="rs",
@@ -115,7 +121,7 @@ class Poster:
             writing.draw_multiline_text_v2(draw,
                                            dim.C_LYRICS,
                                            lyrics,
-                                           COLOR,
+                                           color,
                                            font("Light"),
                                            dim.S_LYRICS,
                                            anchor="lt")
@@ -124,7 +130,7 @@ class Poster:
             writing.draw_multiline_text_v2(draw,
                                            dim.C_LABEL,
                                            label,
-                                           COLOR,
+                                           color,
                                            font("Regular"),
                                            dim.S_LABEL,
                                            anchor="rt")
