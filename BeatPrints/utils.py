@@ -7,9 +7,10 @@ Imports:
     - datetime: Module for working with dates and times.
     - pathlib: Module for working with filesystem paths.
     - rich: Function from the rich library for enhanced output formatting.
+    - typing: Module for type hints.
+
     - utils: Module containing utility functions.
     - writing: Module containing functions related to writing.
-    - typing: Module for type hints.
     - errors: Module containing custom error classes.
 """
 
@@ -34,17 +35,16 @@ def special_code() -> int:
     return ((int(datetime.datetime.now().timestamp()) % 10000) + 10000) % 10000
 
 
-def create_folder():
+def create_folder(folder_name: str):
     """
     Creates a folder named 'images' if it doesn't exist.
 
     Prints a message indicating the creation of the folder.
     """
     cur = pathlib.Path(__file__).parent.resolve()
-    if not os.path.exists(cur / ".assets/images/"):
-        os.makedirs(cur / ".assets/images/")
-        print("📦 • Created a folder called "
-              "[images]"
+    if not os.path.exists(cur / "../beatprints_posters/"):
+        os.makedirs(cur / "../beatprints_posters/")
+        print("📦 • Created a folder called [images]"
               "outside of this directory for output.")
 
 

@@ -1,17 +1,21 @@
 """
-Serves as the main entry point for the BeatPrints application. 
-Orchestrates the process of generating posters for songs, including 
-fetching song information, processing images, and generating posters.
+Module: main.py
 
-Dependencies:
-    - PIL: Image processing.
-    - pathlib: Filesystem paths.
+Serves as the main entry point for the BeatPrints application. 
+
+Combines the process of generating posters for songs, including 
+fetching song information, processing images, and more.
+
+Imports:
+    - os: OS Interactions.
+    - dotenv: Loading environmental variables.
+    - rich: Pretty-printing texts.
     - tabulate: Printing tables.
-    - image: Image processing functions.
+
     - lyrics: Retrieving and processing song lyrics.
     - spotify: Interacting with Spotify API.
+    - poster: To Generate Musics Posters
     - utils: Utility functions.
-    - rich: Pretty-printing texts.
 
 Usage:
     Run this module to generate posters for songs based on user input.
@@ -36,7 +40,7 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 # Intialize classes
 ly = Lyrics()
 sp = Spotify(CLIENT_ID, CLIENT_SECRET)
-ps = Poster(save_path="../images/")
+ps = Poster(save_path="../../")
 
 # Get input for Image, Dark Mode and Accent
 IMAGE = utils.validate_image_path() if utils.c_input(

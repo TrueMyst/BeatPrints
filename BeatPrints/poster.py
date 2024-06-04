@@ -1,13 +1,16 @@
 """
+Module: poster.py
+
 Generates posters with track info and lyrics.
 
 Imports:
     - os: OS interaction.
+    - PIL: Image processing.
+
+    - dim: Coordinates & Sizes.
     - image: Image manipulation.
     - utils: Utility functions.
     - writing: Text writing on images.
-    - PIL: Image processing.
-    - dim: Coordinates & Sizes.
 """
 
 import os
@@ -69,8 +72,8 @@ class Poster:
             label = track_info["label"]
 
             if custom_image is not None:
-                image.crop_to_square(str(custom_image),
-                                     "./assets/spotify/custom_image.jpg")
+                image.square_crop(str(custom_image),
+                                  "./assets/spotify/custom_image.jpg")
                 cover_path = "./assets/spotify/custom_image.jpg"
 
             # Open the cover image
@@ -135,15 +138,25 @@ class Poster:
                                            dim.S_LABEL,
                                            anchor="rt")
 
-            # Create folder to save the poster image
-            utils.create_folder()
-
             # Generate a unique filename for the poster image
             filename = (
                 f"{utils.create_filename(name, artist)}_{utils.special_code()}.png"
             )
-            # Save the poster image
-            poster.save(f"{self.save_path}/{filename}")
-            poster.show()
 
-            print(f"☕ • Image saved in the image folder of this repository")
+            if self.save_path != None:
+                fn = f"../posters/"
+
+                # Save the poster image in local repository
+                os.makedirs(fn)
+                poster.save(f"{fn}{filename}")
+
+                print(f"✨ Saved image at {fn}")
+
+            else:
+                fn = f"{self.save_path}/posters/"
+
+                # Save the poster image in a custom directory
+                os.makedirs(fn)
+                poster.save(f"{fn}{filename}")
+
+                print(f"✨ Saved image at {fn}")

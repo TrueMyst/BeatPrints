@@ -1,5 +1,8 @@
 """
-This file has all the co-ordinates that'll be needed to place the texts/images
+Module: dim.py
+
+This file has all the co-ordinates that'll be
+needed to place the texts/images on the poster
 """
 # S = Size
 # C = Cords

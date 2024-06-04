@@ -1,5 +1,7 @@
 """
-This module provides functionalities related to interacting with the Spotify API.
+Module: spotify.py
+
+Provides functionalities related to interacting with the Spotify API.
 
 Imports:
     - datetime: Dates and times.

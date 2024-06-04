@@ -1,4 +1,6 @@
 """
+Module: writing.py
+
 Provides modules for image processing and font tools.
 
 Imports:

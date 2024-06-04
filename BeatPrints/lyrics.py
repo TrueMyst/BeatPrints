@@ -1,5 +1,7 @@
 """
-Contains modules for handling errors and interacting with LRC files.
+Module: lyrics.py
+
+Retrieve lyrics through LRC API
 
 Imports:
     - errors: For handling errors.
@@ -12,6 +14,9 @@ from lrclib import LrcLibAPI
 
 
 class Lyrics:
+    """
+    This class helps to retrieve lyrics with the help of LRC API.
+    """
 
     def __init__(self):
         pass
@@ -27,12 +32,14 @@ class Lyrics:
         Returns:
             str or None: The lyrics in plain text if found, otherwise None.
         """
-        api = LrcLibAPI(
-            user_agent=
-            "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"
-        )
+
+        user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"
+
+        # Preparing the API
+        api = LrcLibAPI(user_agent=user_agent)
         id = api.search_lyrics(track_name=name, artist_name=artist)
 
+        # Check if lyrics are available
         if len(id) != 0:
             lyrics = api.get_lyrics_by_id(id[0].id)
             return lyrics.plain_lyrics
@@ -59,16 +66,19 @@ class Lyrics:
         try:
             selected = [int(num) for num in selection.split("-")]
 
+            # Conditions to check whether the range is valid or not
             if (len(selected) != 2 or selected[0] >= selected[1]
                     or selected[0] <= 0 or selected[1] > line_count):
                 raise errors.InvalidSelectionError
 
+            # Selects the part of the lyrics
             portion = lines[selected[0] - 1:selected[1]]
             selected_lines = [line for line in portion if line != '']
 
             if len(selected_lines) > 4:
                 raise errors.LineLimitExceededError
 
+            # Returns the result
             result = "\n".join(selected_lines).strip()
             return result
 
