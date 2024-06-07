@@ -17,6 +17,7 @@ import os
 import image
 import utils
 import writing
+import pathlib
 
 from PIL import Image
 from PIL import ImageDraw
@@ -34,8 +35,8 @@ class Poster:
     """
 
     def __init__(
-            self,
-            save_path=os.getcwd(),
+        self,
+        save_path=None,
     ):
         self.save_path = save_path
 
@@ -55,7 +56,7 @@ class Poster:
             custom_image (str, optional): Path to a custom image to use as the cover. Defaults to None.
         """
 
-        banner_path = "./assets/banner_dark.png" if dark_mode else "./assets/banner_light.png"
+        banner_path = "./assets/templates/banner_dark.png" if dark_mode else "./assets/templates/banner_light.png"
         color = dim.CL_DARK_MODE if dark_mode else dim.CL_LIGHT_MODE
 
         # Open the poster template image
@@ -71,6 +72,7 @@ class Poster:
             duration = track_info["duration"]
             label = track_info["label"]
 
+            # If the user wants a custom image...
             if custom_image is not None:
                 image.square_crop(str(custom_image),
                                   "./assets/spotify/custom_image.jpg")
@@ -143,20 +145,18 @@ class Poster:
                 f"{utils.create_filename(name, artist)}_{utils.special_code()}.png"
             )
 
-            if self.save_path != None:
-                fn = f"../posters/"
-
-                # Save the poster image in local repository
-                os.makedirs(fn)
-                poster.save(f"{fn}{filename}")
-
-                print(f"✨ Saved image at {fn}")
+            # [ note ] This "save-feature" will be reimplemented later on
+            if self.save_path is None:
+                path = os.path.realpath("../")
+                poster_dir = os.path.join(path, "posters")
 
             else:
-                fn = f"{self.save_path}/posters/"
+                path = os.path.realpath(self.save_path)
+                poster_dir = os.path.join(path, "posters")
 
-                # Save the poster image in a custom directory
-                os.makedirs(fn)
-                poster.save(f"{fn}{filename}")
+            if not os.path.exists(poster_dir):
+                os.makedirs(poster_dir)
 
-                print(f"✨ Saved image at {fn}")
+            # Save the poster image in the local repository
+            poster.save(os.path.join(poster_dir, filename))
+            print(f"✨ Saved image at {poster_dir}/")

@@ -40,7 +40,7 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 # Intialize classes
 ly = Lyrics()
 sp = Spotify(CLIENT_ID, CLIENT_SECRET)
-ps = Poster(save_path="../../")
+ps = Poster()
 
 # Get input for Image, Dark Mode and Accent
 IMAGE = utils.validate_image_path() if utils.c_input(
