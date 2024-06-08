@@ -63,7 +63,7 @@ def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
         List[List[str]]: A list of clusters where each cluster contains consecutive characters with the same font.
     """
     chunks = []
-    universal_chars = ''' ,!@#$%^&*(){}[]+_=-""'''''
+    universal_chars = ''' ,!@#$%^&*(){}[]+_=-""''?'''
     last_font = next(iter(fonts))
 
     for char in text:
@@ -90,6 +90,7 @@ def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
             cluster[-1][0] += char
         else:
             cluster.append([char, font_path])
+    print(cluster)
     return cluster
 
 
