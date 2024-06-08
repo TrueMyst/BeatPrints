@@ -110,8 +110,8 @@ def font(weight: Literal["Regular", "Bold", "Light"]) -> dict:
         f"./assets/fonts/NotoSansKR/NotoSansKR-{weight}.ttf",
         f"./assets/fonts/NotoSansTC/NotoSansTC-{weight}.ttf",
         f"./assets/fonts/NotoSansSC/NotoSansSC-{weight}.ttf",
+        f"./assets/fonts/NotoSans/NotoSans-{weight}.ttf"
     )
-
     return fonts
 
 

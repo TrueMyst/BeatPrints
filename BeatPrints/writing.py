@@ -63,12 +63,25 @@ def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
         List[List[str]]: A list of clusters where each cluster contains consecutive characters with the same font.
     """
     chunks = []
+    universal_chars = ''' ,!@#$%^&*(){}[]+_=-""''?'''
+    last_font = next(iter(fonts))
 
     for char in text:
+        char_found = False
+        if char in universal_chars:  # Should be rendered by same font
+            chunks.append([char, last_font])
+            continue
+        
         for font_path, font in fonts.items():
             if check_glyph(font, char):
+                last_font = font_path
+                char_found = True
                 chunks.append([char, font_path])
                 break
+
+        if not char_found:
+            # If not found, don't skip it
+            chunks.append([char, font_path])
 
     cluster = chunks[:1]
 
@@ -77,7 +90,7 @@ def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
             cluster[-1][0] += char
         else:
             cluster.append([char, font_path])
-
+    print(cluster)
     return cluster
 
 
@@ -91,6 +104,7 @@ def draw_text_v2(
     anchor: Optional[str] = None,
     align: Literal["left", "center", "right"] = "left",
     direction: Literal["rtl", "ltr", "ttb"] = "ltr",
+    line_height: int = 20,
 ) -> None:
     """
     Draws text on an image.
@@ -105,15 +119,18 @@ def draw_text_v2(
         anchor (Optional[str], optional): The anchor point for positioning the text. Defaults to None.
         align (Literal["left", "center", "right"], optional): The alignment of the text. Defaults to "left".
         direction (Literal["rtl", "ltr", "ttb"], optional): The direction of the text. Defaults to "ltr".
+        line_height (int): Spacing between new lines. 
     """
 
-    y_offset = 0
+    x_offset = 0
     sentence = merge_chunks(text, fonts)
 
     for words in sentence:
-        xy_ = (xy[0] + y_offset, xy[1])
 
         font = ImageFont.truetype(words[1], size)
+        box = font.getbbox(words[0])
+        xy_ = (xy[0] + x_offset - box[0], xy[1] - box[1] + line_height)
+
         draw.text(
             xy=xy_,
             text=words[0],
@@ -124,10 +141,7 @@ def draw_text_v2(
             direction=direction,
             embedded_color=True,
         )
-
-        draw.text
-        box = font.getbbox(words[0])
-        y_offset += box[2] - box[0]
+        x_offset += box[2] - box[0]
 
 
 def draw_multiline_text_v2(
@@ -141,6 +155,7 @@ def draw_multiline_text_v2(
     spacing=0,
     align: Literal["left", "center", "right"] = "left",
     direction: Literal["rtl", "ltr", "ttb"] = "ltr",
+    line_height: int = 20,
 ) -> None:
     """
     Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines.
@@ -164,6 +179,7 @@ def draw_multiline_text_v2(
             anchor=anchor,
             align=align,
             direction=direction,
+            line_height=line_height,
         )
         y_offset += size + scale + spacing
 
