@@ -104,6 +104,7 @@ def draw_text_v2(
     anchor: Optional[str] = None,
     align: Literal["left", "center", "right"] = "left",
     direction: Literal["rtl", "ltr", "ttb"] = "ltr",
+    line_height: int = 20,
 ) -> None:
     """
     Draws text on an image.
@@ -118,6 +119,7 @@ def draw_text_v2(
         anchor (Optional[str], optional): The anchor point for positioning the text. Defaults to None.
         align (Literal["left", "center", "right"], optional): The alignment of the text. Defaults to "left".
         direction (Literal["rtl", "ltr", "ttb"], optional): The direction of the text. Defaults to "ltr".
+        line_height (int): Spacing between new lines. 
     """
 
     x_offset = 0
@@ -127,7 +129,7 @@ def draw_text_v2(
 
         font = ImageFont.truetype(words[1], size)
         box = font.getbbox(words[0])
-        xy_ = (xy[0] + x_offset - box[0], xy[1] - box[1])
+        xy_ = (xy[0] + x_offset - box[0], xy[1] - box[1] + line_height)
 
         draw.text(
             xy=xy_,
@@ -153,6 +155,7 @@ def draw_multiline_text_v2(
     spacing=0,
     align: Literal["left", "center", "right"] = "left",
     direction: Literal["rtl", "ltr", "ttb"] = "ltr",
+    line_height: int = 20,
 ) -> None:
     """
     Draws multiple lines of text on an image, handling newline characters and adjusting spacing between lines.
@@ -176,6 +179,7 @@ def draw_multiline_text_v2(
             anchor=anchor,
             align=align,
             direction=direction,
+            line_height=line_height,
         )
         y_offset += size + scale + spacing
 
