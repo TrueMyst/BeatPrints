@@ -71,7 +71,7 @@ def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
         if char in universal_chars:  # Should be rendered by same font
             chunks.append([char, last_font])
             continue
-        
+
         for font_path, font in fonts.items():
             if check_glyph(font, char):
                 last_font = font_path
@@ -90,7 +90,6 @@ def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
             cluster[-1][0] += char
         else:
             cluster.append([char, font_path])
-    print(cluster)
     return cluster
 
 
@@ -129,7 +128,7 @@ def draw_text_v2(
 
         font = ImageFont.truetype(words[1], size)
         box = font.getbbox(words[0])
-        xy_ = (xy[0] + x_offset - box[0], xy[1] - box[1] + line_height)
+        xy_ = (xy[0] + x_offset, xy[1])
 
         draw.text(
             xy=xy_,

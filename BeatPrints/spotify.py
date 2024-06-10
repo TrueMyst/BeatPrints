@@ -9,6 +9,7 @@ Imports:
     - typing: Type hints.
 """
 
+import os
 import datetime
 import requests
 from typing import List, Tuple
@@ -119,6 +120,9 @@ class Spotify:
             "label": f"{release_date}\n{album_label}",
             "track_id": t_data["id"],
         }
+
+        if not os.path.exists("./assets/spotify/"):
+            os.makedirs("./assets/spotify/")
 
         with open("assets/spotify/spotify_banner.jpg", "wb") as cover:
             cover.write(requests.get(info["image"]).content)
