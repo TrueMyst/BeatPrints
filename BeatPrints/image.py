@@ -2,12 +2,14 @@
 Module: image.py
 
 Imports:
+    - os: OS interaction.
     - dim: Cords & Sizes
     - requests: HTTP requests
     - PIL: Image Processing
     - colorthief: Extract color palette
 """
 
+import os
 import dim
 import requests
 
@@ -120,10 +122,15 @@ def scannable(id: str, dark_mode=False):
     main = f"https://scannables.scdn.co/uri/plain/png/101010/white/1280/spotify:track:{id}"
     data = requests.get(main)
 
-    with open("./assets/spotify/spotify_code.png", "wb") as file:
+    # Spotify code's path
+    assets_path = os.path.realpath("assets")
+    spotify_code_path = os.path.join(assets_path, "spotify",
+                                     "spotify_code.png")
+
+    with open(spotify_code_path, "wb") as file:
         file.write(data.content)
 
-    with Image.open("./assets/spotify/spotify_code.png") as scan_code:
+    with Image.open(spotify_code_path) as scan_code:
         # Convert the image into RGBA mode
         scan_code = scan_code.convert("RGBA")
 
@@ -136,4 +143,4 @@ def scannable(id: str, dark_mode=False):
                 pixels[x, y] = transparent if pixels[x, y] != white else color
 
         # Save the modified image
-        scan_code.save("./assets/spotify/spotify_code.png")
+        scan_code.save(spotify_code_path)

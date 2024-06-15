@@ -35,19 +35,6 @@ def special_code() -> int:
     return ((int(datetime.datetime.now().timestamp()) % 10000) + 10000) % 10000
 
 
-def create_folder(folder_name: str):
-    """
-    Creates a folder named 'images' if it doesn't exist.
-
-    Prints a message indicating the creation of the folder.
-    """
-    cur = pathlib.Path(__file__).parent.resolve()
-    if not os.path.exists(cur / "../beatprints_posters/"):
-        os.makedirs(cur / "../beatprints_posters/")
-        print("📦 • Created a folder called [images]"
-              "outside of this directory for output.")
-
-
 def create_filename(song: str, artist: str) -> str:
     """
     Creates a safe filename based on the song and artist names.
@@ -104,14 +91,14 @@ def remove_column(data: list, column_index: int) -> list:
 
 
 def font(weight: Literal["Regular", "Bold", "Light"]) -> dict:
+    fonts_path = os.path.realpath("assets/fonts")
     fonts = writing.load_fonts(
-        f"./assets/fonts/Oswald/Oswald-{weight}.ttf",
-        f"./assets/fonts/NotoSansJP/NotoSansJP-{weight}.ttf",
-        f"./assets/fonts/NotoSansKR/NotoSansKR-{weight}.ttf",
-        f"./assets/fonts/NotoSansTC/NotoSansTC-{weight}.ttf",
-        f"./assets/fonts/NotoSansSC/NotoSansSC-{weight}.ttf",
-        f"./assets/fonts/NotoSans/NotoSans-{weight}.ttf"
-    )
+        os.path.join(fonts_path, "Oswald", f"Oswald-{weight}.ttf"),
+        os.path.join(fonts_path, "NotoSansJP", f"NotoSansJP-{weight}.ttf"),
+        os.path.join(fonts_path, "NotoSansKR", f"NotoSansKR-{weight}.ttf"),
+        os.path.join(fonts_path, "NotoSansTC", f"NotoSansTC-{weight}.ttf"),
+        os.path.join(fonts_path, "NotoSansSC", f"NotoSansSC-{weight}.ttf"),
+        os.path.join(fonts_path, "NotoSans", f"NotoSans-{weight}.ttf"))
     return fonts
 
 

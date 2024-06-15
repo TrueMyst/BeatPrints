@@ -121,11 +121,17 @@ class Spotify:
             "track_id": t_data["id"],
         }
 
-        if not os.path.exists("./assets/spotify/"):
-            os.makedirs("./assets/spotify/")
+        # Path for the spotify's folder
+        assets_path = os.path.realpath("assets")
+        spotify_path = os.path.join(assets_path, "spotify")
 
-        with open("assets/spotify/spotify_banner.jpg", "wb") as cover:
+        if not os.path.exists(spotify_path):
+            os.makedirs(spotify_path)
+
+        spotify_banner = os.path.join(spotify_path, "spotify_banner.jpg")
+        with open(spotify_banner, "wb") as cover:
+
             cover.write(requests.get(info["image"]).content)
-            info["cover"] = "./assets/spotify/spotify_banner.jpg"
+            info["cover"] = spotify_banner
 
         return info

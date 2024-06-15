@@ -56,7 +56,12 @@ class Poster:
             custom_image (str, optional): Path to a custom image to use as the cover. Defaults to None.
         """
 
-        banner_path = "./assets/templates/banner_dark.png" if dark_mode else "./assets/templates/banner_light.png"
+        assets_path = os.path.realpath("assets")
+
+        # Checking which banner will be used
+        banner = "banner_dark.png" if dark_mode else "banner_light.png"
+        banner_path = os.path.join(assets_path, "templates", banner)
+
         color = dim.CL_DARK_MODE if dark_mode else dim.CL_LIGHT_MODE
 
         # Open the poster template image
@@ -74,9 +79,9 @@ class Poster:
 
             # If the user wants a custom image...
             if custom_image is not None:
-                image.square_crop(str(custom_image),
-                                  "./assets/spotify/custom_image.jpg")
-                cover_path = "./assets/spotify/custom_image.jpg"
+                cover_path = os.path.join(assets_path, "spotify",
+                                          "custom_image.jpg")
+                image.square_crop(str(custom_image), saved_path)
 
             # Open the cover image
             with Image.open(cover_path) as cover:
@@ -84,9 +89,10 @@ class Poster:
 
             # Generate the Spotify scan code for the track and resize it.
             image.scannable(id, dark_mode)
+            spotify_code_path = os.path.join(assets_path, "spotify",
+                                             "spotify_code.png")
 
-            with Image.open(
-                    "./assets/spotify/spotify_code.png") as spotify_code:
+            with Image.open(spotify_code_path) as spotify_code:
                 spotify_code = spotify_code.resize(
                     dim.S_SPOTIFY_CODE,
                     Image.Resampling.BICUBIC).convert("RGBA")
@@ -147,7 +153,7 @@ class Poster:
 
             # [ note ] This "save-feature" will be reimplemented later on
             if self.save_path is None:
-                path = os.path.realpath("../")
+                path = os.path.dirname(os.path.realpath("."))
                 poster_dir = os.path.join(path, "posters")
 
             else:
