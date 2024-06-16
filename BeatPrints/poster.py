@@ -81,7 +81,7 @@ class Poster:
             if custom_image is not None:
                 cover_path = os.path.join(assets_path, "spotify",
                                           "custom_image.jpg")
-                image.square_crop(str(custom_image), saved_path)
+                image.square_crop(str(custom_image), cover_path)
 
             # Open the cover image
             with Image.open(cover_path) as cover:
