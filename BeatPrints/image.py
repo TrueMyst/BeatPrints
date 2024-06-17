@@ -6,7 +6,7 @@ Imports:
     - dim: Cords & Sizes
     - requests: HTTP requests
     - PIL: Image Processing
-    - colorthief: Extract color palette
+    - haishoku: Extract color palette
 """
 
 import os
@@ -15,7 +15,7 @@ import requests
 
 from PIL import Image
 from PIL import ImageDraw
-from colorthief import ColorThief
+from haishoku.haishoku import Haishoku
 
 
 def color_palette(path: str) -> list:
@@ -29,15 +29,11 @@ def color_palette(path: str) -> list:
         list: A list containing the colors extracted from the image.
     """
 
-    # Resizes the image to 1x1 pixel to get the dominant color of the image.
-    dominant_color = Image.open(path).resize(
-        (1, 1), Image.Resampling.BICUBIC).getpixel((0, 0))
+    image = Haishoku.getPalette(path)
+    palette = [color for _, color in image]
+    dominant = Haishoku.getDominant(path)
 
-    ct = ColorThief(path)
-    palette = ct.get_palette(color_count=6)
-
-    # Append the dominant color to the palette
-    palette.append(dominant_color)
+    palette.append(dominant)
 
     # Returns the color palette
     return palette

@@ -47,17 +47,23 @@ IMAGE = utils.validate_image_path() if utils.c_input(
     "🌃 • Do you want to include a custom image as the cover of the poster?"
 ) else None
 
-DARK_MODE = utils.c_input("🌙 • Do you want the dark mode edition?")
+DARK_MODE = utils.c_input("🌙 • Do you want your poster to have a dark mode?")
 
 ACCENT = utils.c_input(
-    "🤌 • Would you like to add a stylish color accent at the bottom of your poster?"
-)
+    "🤌 • Add a stylish color accent at the bottom of your poster?")
 
-# Search for Tracks
-track_search = input("🎺 • Search for your favourite song: ")
+while True:
+    # Search for Tracks
+    track_search = input("\n🎺 • Search for your favourite song: ")
 
-# Pretty print lists
-tracks = sp.search_track(track_search)
+    # Pretty print lists
+    tracks = sp.search_track(track_search)
+
+    if tracks:
+        break
+    else:
+        print("╰─ 😔 • Couldn't find the song, try again")
+
 header = ["*", "Name", "Artist", "Album"]
 
 table = utils.remove_column(tracks, 4)
@@ -72,6 +78,10 @@ track_info = sp.trackinfo(track_selected)
 
 # Extract the lyrics based on the selection
 lyrics = ly.get_lyrics(track_selected[1].split(' - ')[0], track_selected[2])
+
+lyrics_info = f"\n✨ LYRICS: {track_info["name"]} by {track_info["artist"]}"
+print(f"{lyrics_info}\n" + "─" * len(lyrics_info))
+
 extracted = utils.get_extract(lyrics)
 
 # Generate Poster

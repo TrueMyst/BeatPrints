@@ -65,17 +65,19 @@ class Spotify:
                                   headers=self.__AUTH_HEADER).json()
 
         # Displaying search results to the user
-        for i, item in enumerate(track_data.get("tracks", {}).get("items",
-                                                                  [])[:10],
-                                 start=1):
-            name = item["name"]
-            artist = item["artists"][0]["name"]
-            album = item["album"]["name"]
-            trackid = item["id"]
+        if len(track_data) != 0:
+            for i, item in enumerate(track_data.get("tracks",
+                                                    {}).get("items", [])[:10],
+                                     start=1):
+                name = item["name"]
+                artist = item["artists"][0]["name"]
+                album = item["album"]["name"]
+                trackid = item["id"]
+                tracks.append((i, name, artist, album, trackid))
 
-            tracks.append((i, name, artist, album, trackid))
-
-        return tracks
+            return tracks
+        else:
+            return None
 
     def trackinfo(self, track: Tuple[int, str, str, str, str]) -> dict:
         """
