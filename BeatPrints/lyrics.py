@@ -1,12 +1,11 @@
 """
 Module: lyrics.py
 
-Retrieve lyrics through LRC API
+Retrieve lyrics from LRClib API.
 
 Imports:
-    - errors: For handling errors.
+    - errors: For errors handling.
     - lrclib: Retrieving lyrics from LRClib.
-
 """
 
 import errors
@@ -15,7 +14,7 @@ from lrclib import LrcLibAPI
 
 class Lyrics:
     """
-    This class helps to retrieve lyrics with the help of LRC API.
+    This class helps to retrieve lyrics through LRClib API.
     """
 
     def __init__(self):
@@ -52,7 +51,7 @@ class Lyrics:
         Selects specific lines from the lyrics based on the provided range.
 
         Args:
-            lyrics (str): The full lyrics of the song.
+            lyrics (str): The entire lyrics of the song.
             selection (str): The range of lines to select (e.g., "2-5, 7-10").
 
         Returns:

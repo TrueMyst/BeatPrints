@@ -1,12 +1,15 @@
 """
 Module: image.py
 
+Provides essential image functions for poster generation.
+
 Imports:
-    - os: OS interaction.
-    - dim: Cords & Sizes
-    - requests: HTTP requests
-    - PIL: Image Processing
-    - haishoku: Extract color palette
+    - os: Provides OS interaction
+    - typing: Type hinting support.
+    - PIL: Image processing Library
+    - requests: Simplifies HTTP requests.
+    - haishoku: Extracts dominant colors from images.
+    - dim: Cords & Sizes for necessary texts.
 """
 
 import os
@@ -15,10 +18,11 @@ import requests
 
 from PIL import Image
 from PIL import ImageDraw
+from typing import Tuple
 from haishoku.haishoku import Haishoku
 
 
-def color_palette(path: str) -> list:
+def color_palette(path) -> list:
     """
     Extract the color palette from an image.
 
@@ -26,22 +30,33 @@ def color_palette(path: str) -> list:
         path (str): The path of the image file.
 
     Returns:
-        list: A list containing the colors extracted from the image.
+        palette (list): A list containing the colors extracted from the image.
     """
 
+    # Get the palette
     image = Haishoku.getPalette(path)
-    palette = [color for _, color in image]
-    dominant = Haishoku.getDominant(path)
 
+    # Only retrieves the color
+    palette = [color for _, color in image]
+
+    # Gets the dominant color
+    dominant = Haishoku.getDominant(path)
     palette.append(dominant)
 
-    # Returns the color palette
-    return palette
+    # Gets rid of duplicate colors
+    np = []
+    [np.append(x) for x in palette if x not in np]
+
+    def luminance(color: Tuple[int, int, int]) -> float:
+        r, g, b = color
+        return 0.299 * r + 0.587 * g + 0.114 * b
+
+    return sorted(np, key=luminance, reverse=False)
 
 
 def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
     """
-    Uses Pillow to draw the color palette on a image.
+    Uses Pillow to draw the color palette on the image.
 
     Args:
         draw (ImageDraw.ImageDraw): An ImageDraw object to draw.
@@ -58,7 +73,7 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
         # Position of the color palette
         x, y = dim.C_PALETTE
 
-        # Starting Position of the colors.
+        # Starting Position of each colors.
         start, end = 170 * i, 170 * (i + 1)
 
         # Draw the palette co-ordinate wise.
@@ -71,17 +86,17 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool):
 
 def square_crop(image_path: str, save_path: str):
     """
-    Crops the image to a square aspect ratio and saves it.
+    Crops the image to a 1:1 ratio and saves it.
 
     Args:
-        image_path (str): The path of the original image file.
-        save_path (str): The path where the cropped image will be saved.
+        image_path (str): The path to the original image file.
+        save_path (str): The path where the cropped image file will be saved.
     """
 
     # Open the image
     image = Image.open(image_path)
 
-    # Crop the image to a square aspect ratio
+    # It's the chop :3 function
     def chop(image):
         width, height = image.size
         min_dimension = min(width, height)
@@ -100,11 +115,11 @@ def square_crop(image_path: str, save_path: str):
 
 def scannable(id: str, dark_mode=False):
     """
-    Downloads the Spotify scan code for a particular song and removes white pixels from it.
+    Generates a spotify scannable code based on tracks.
 
     Args:
         id (str): The ID of the track.
-        dark_mode (bool): Whether to use dark mode colors. Default is False.
+        dark_mode (bool): Flag indicating whether to use dark mode. Defaults to False.
     """
 
     # Define colors
@@ -115,8 +130,8 @@ def scannable(id: str, dark_mode=False):
     color = dim.CL_DARK_MODE if dark_mode else dim.CL_LIGHT_MODE
 
     # Download the Spotify scan code image
-    main = f"https://scannables.scdn.co/uri/plain/png/101010/white/1280/spotify:track:{id}"
-    data = requests.get(main)
+    scan = f"https://scannables.scdn.co/uri/plain/png/101010/white/1280/spotify:track:{id}"
+    data = requests.get(scan)
 
     # Spotify code's path
     assets_path = os.path.realpath("assets")
@@ -127,16 +142,19 @@ def scannable(id: str, dark_mode=False):
         file.write(data.content)
 
     with Image.open(spotify_code_path) as scan_code:
+
         # Convert the image into RGBA mode
         scan_code = scan_code.convert("RGBA")
-
         pixels = scan_code.load()
+
         width, height = scan_code.size
 
         # Iterate through pixels and make white pixels transparent
         for x in range(width):
             for y in range(height):
-                pixels[x, y] = transparent if pixels[x, y] != white else color
+                if pixels is not None:
+                    pixels[x, y] = transparent if pixels[x,
+                                                         y] != white else color
 
         # Save the modified image
         scan_code.save(spotify_code_path)

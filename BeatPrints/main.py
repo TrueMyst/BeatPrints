@@ -7,11 +7,10 @@ Combines the process of generating posters for songs, including
 fetching song information, processing images, and more.
 
 Imports:
-    - os: OS Interactions.
+    - os: Provides OS interaction
+    - rich: Renders rich text in the terminal.
     - dotenv: Loading environmental variables.
-    - rich: Pretty-printing texts.
     - tabulate: Printing tables.
-
     - lyrics: Retrieving and processing song lyrics.
     - spotify: Interacting with Spotify API.
     - poster: To Generate Musics Posters
@@ -39,8 +38,8 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 # Intialize classes
 ly = Lyrics()
-sp = Spotify(CLIENT_ID, CLIENT_SECRET)
 ps = Poster()
+sp = Spotify(CLIENT_ID, CLIENT_SECRET)
 
 # Get input for Image, Dark Mode and Accent
 IMAGE = utils.validate_image_path() if utils.c_input(
@@ -74,7 +73,7 @@ choice = int(input("📋️ • Select your song right here: "))
 track_selected = tracks[choice - 1]
 
 # Get trackinfo and lyrics
-track_info = sp.trackinfo(track_selected)
+track_info = sp.trackinfo(track_selected[4])
 
 # Extract the lyrics based on the selection
 lyrics = ly.get_lyrics(track_selected[1].split(' - ')[0], track_selected[2])

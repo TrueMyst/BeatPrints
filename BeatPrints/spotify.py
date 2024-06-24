@@ -4,15 +4,17 @@ Module: spotify.py
 Provides functionalities related to interacting with the Spotify API.
 
 Imports:
-    - datetime: Dates and times.
-    - requests: HTTP requests.
-    - typing: Type hints.
+    - os: Provides OS interaction
+    - typing: Type hinting support.
+    - datetime: Work with dates and times.
+    - requests: Simplifies HTTP requests.
 """
 
 import os
 import datetime
 import requests
-from typing import List, Tuple
+
+from typing import Any, List, Tuple, Dict, Union
 
 
 class Spotify:
@@ -30,6 +32,7 @@ class Spotify:
         """
         Constructs the authorization header required for API requests.
         """
+
         endpoint = "https://accounts.spotify.com/api/token"
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         payload = {
@@ -44,96 +47,101 @@ class Spotify:
 
         self.__AUTH_HEADER = {"Authorization": f"Bearer {token}"}
 
-    def search_track(self,
-                     track_name: str,
-                     limit: int = 5) -> List[Tuple[int, str, str, str, str]]:
+    def search_track(
+            self,
+            name: str,
+            limit: int = 6
+    ) -> Union[List[Tuple[int, str, str, str, str]], None]:
         """
-        Searches for a track through Spotify's API and provides track information.
+        Searches for a track through Spotify's API and provides the track information.
 
         Args:
-            track_name (str): The name of the track to search.
-            limit (bool, optional): Set the limit for the number songs to be shown.
+            name (str): The name of the track to search.
+            limit (int, optional): The maximum number of tracks to return. Defaults to 5.
 
         Returns:
-            List[Tuple[int, str, str, str, str]]: Information about the selected tracks.
+            tracks (Union[List[Tuple[int, str, str, str, str]], None]): 
+                A list of tuples containing track information if tracks are found, otherwise None. 
         """
-        tracks = []
 
-        query_params = {"q": track_name, "type": "track", "limit": limit}
+        tracks = []
+        params = {"q": name, "type": "track", "limit": limit}
         track_data = requests.get(f"{self.__BASE_URL}/search",
-                                  params=query_params,
+                                  params=params,
                                   headers=self.__AUTH_HEADER).json()
 
         # Displaying search results to the user
         if len(track_data) != 0:
-            for i, item in enumerate(track_data.get("tracks",
-                                                    {}).get("items", [])[:10],
-                                     start=1):
+            for num, item in enumerate(track_data.get("tracks",
+                                                      {}).get("items",
+                                                              [])[:10],
+                                       start=1):
                 name = item["name"]
                 artist = item["artists"][0]["name"]
                 album = item["album"]["name"]
-                trackid = item["id"]
-                tracks.append((i, name, artist, album, trackid))
+                track_id = item["id"]
+                tracks.append((num, name, artist, album, track_id))
 
             return tracks
         else:
             return None
 
-    def trackinfo(self, track: Tuple[int, str, str, str, str]) -> dict:
+    def trackinfo(self, track_id: str) -> Dict[str, Any]:
         """
         Retrieves detailed information about a track.
 
         Args:
-            track (Tuple[int, str, str, str, str]): Information about the track.
+            track_id (str): Track ID of the song.
 
         Returns:
-            dict: Detailed information about the track.
+            track_info (Dict[str, Any]): Detailed information about the track.
         """
-        t_data = requests.get(f"{self.__BASE_URL}/tracks/{track[4]}",
-                              headers=self.__AUTH_HEADER).json()
+        track_data = requests.get(f"{self.__BASE_URL}/tracks/{track_id}",
+                                  headers=self.__AUTH_HEADER).json()
 
-        a_data = requests.get(
-            f"{self.__BASE_URL}/albums/{t_data['album']['id']}",
+        album_data = requests.get(
+            f"{self.__BASE_URL}/albums/{track_data['album']['id']}",
             headers=self.__AUTH_HEADER,
         ).json()
 
-        album_label = a_data["label"]
+        album_label = album_data["label"]
 
         # Formatting the release date
-        date = t_data["album"]["release_date"]
-        precision = t_data["album"]["release_date_precision"]
+        release_date = track_data["album"]["release_date"]
+        release_date_precision = track_data["album"]["release_date_precision"]
         date_format = {
             "day": "%Y-%m-%d",
             "month": "%Y-%m",
             "year": "%Y"
-        }.get(precision, "")
-        release_date = datetime.datetime.strptime(
-            date, date_format).strftime("%B %d, %Y")
+        }.get(release_date_precision, "")
+        formatted_release_date = datetime.datetime.strptime(
+            release_date, date_format).strftime("%B %d, %Y")
 
         # Extracting track information
-        info = {
-            "album_id": t_data["album"]["id"],
-            "name": t_data["name"],
-            "artist": t_data["artists"][0]["name"],
-            "year": t_data["album"]["release_date"],
+        track_info = {
+            "album_id": track_data["album"]["id"],
+            "name": track_data["name"],
+            "artist": track_data["artists"][0]["name"],
+            "year": track_data["album"]["release_date"],
             "duration":
-            f"{(t_data['duration_ms'] // 60000):02d}:{(t_data['duration_ms'] // 1000 % 60):02d}",
-            "image": t_data["album"]["images"][0]["url"],
-            "label": f"{release_date}\n{album_label}",
-            "track_id": t_data["id"],
+            f"{(track_data['duration_ms'] // 60000):02d}:{(track_data['duration_ms'] // 1000 % 60):02d}",
+            "image": track_data["album"]["images"][0]["url"],
+            "label": f"{formatted_release_date}\n{album_label}",
+            "track_id": track_data["id"],
         }
 
-        # Path for the spotify's folder
+        # Path for the Spotify folder
         assets_path = os.path.realpath("assets")
         spotify_path = os.path.join(assets_path, "spotify")
 
         if not os.path.exists(spotify_path):
             os.makedirs(spotify_path)
 
-        spotify_banner = os.path.join(spotify_path, "spotify_banner.jpg")
-        with open(spotify_banner, "wb") as cover:
+        # Setting spotify banner's path
+        spotify_banner_path = os.path.join(spotify_path, "spotify_banner.jpg")
 
-            cover.write(requests.get(info["image"]).content)
-            info["cover"] = spotify_banner
+        with open(spotify_banner_path, "wb") as cover_file:
+            cover_file.write(requests.get(track_info["image"]).content)
+            track_info["cover"] = spotify_banner_path
 
-        return info
+        return track_info

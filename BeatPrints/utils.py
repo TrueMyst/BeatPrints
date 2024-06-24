@@ -2,27 +2,21 @@
 This module provides a lot of useful functions related to Spotify and Lyrics.
 
 Imports:
-    - re: Module for regular expressions used in string manipulation.
-    - os: Module for interacting with the operating system.
-    - datetime: Module for working with dates and times.
-    - pathlib: Module for working with filesystem paths.
-    - rich: Function from the rich library for enhanced output formatting.
-    - typing: Module for type hints.
-
-    - utils: Module containing utility functions.
-    - writing: Module containing functions related to writing.
-    - errors: Module containing custom error classes.
+    - re: Provides regular expressions.
+    - os: Provides OS interaction.
+    - datetime: Work with dates and times.
+    - typing: Type hinting support.
+    - rich: Renders rich text in the terminal.
+    - lyrics: Retrieve lyrics through LRClib API.
 """
 
 import re
 import os
 import datetime
-import pathlib
-import writing
 
 from rich import print
-from typing import Literal, Union
 from lyrics import Lyrics
+from typing import Union
 
 
 def special_code() -> int:
@@ -32,7 +26,8 @@ def special_code() -> int:
     Returns:
         int: The generated special code.
     """
-    return ((int(datetime.datetime.now().timestamp()) % 10000) + 10000) % 10000
+    return (
+        (int(datetime.datetime.now().timestamp()) % 100000) + 100000) % 100000
 
 
 def create_filename(song: str, artist: str) -> str:
@@ -75,31 +70,34 @@ def c_input(message: str) -> bool:
 
 
 def validate_image_path() -> str:
+    """
+    Prompts the user for an image file path until a valid path is provided.
+
+    Returns:
+        str: Validated image file path.
+    """
     while True:
         image_path = input(
             "╰─ 🎷 • Awesome, write the path to the image file: ")
 
         if os.path.exists(image_path):
             return image_path
-
         else:
             print("╰─ ❓️ • File not found. Please provide a valid file path.")
 
 
 def remove_column(data: list, column_index: int) -> list:
+    """
+    Removes the specified column from a 2D list.
+
+    Args:
+        data (list): 2D list of data.
+        column_index (int): Index of the column to remove.
+
+    Returns:
+        list: 2D list with the specified column removed.
+    """
     return [row[:column_index] + row[column_index + 1:] for row in data]
-
-
-def font(weight: Literal["Regular", "Bold", "Light"]) -> dict:
-    fonts_path = os.path.realpath("assets/fonts")
-    fonts = writing.load_fonts(
-        os.path.join(fonts_path, "Oswald", f"Oswald-{weight}.ttf"),
-        os.path.join(fonts_path, "NotoSansJP", f"NotoSansJP-{weight}.ttf"),
-        os.path.join(fonts_path, "NotoSansKR", f"NotoSansKR-{weight}.ttf"),
-        os.path.join(fonts_path, "NotoSansTC", f"NotoSansTC-{weight}.ttf"),
-        os.path.join(fonts_path, "NotoSansSC", f"NotoSansSC-{weight}.ttf"),
-        os.path.join(fonts_path, "NotoSans", f"NotoSans-{weight}.ttf"))
-    return fonts
 
 
 def get_extract(lyrics: Union[str, None]):
@@ -110,7 +108,7 @@ def get_extract(lyrics: Union[str, None]):
         lyrics (str): The lyrics of the song
 
     Returns:
-        str: The extracted portion of the lyrics.
+        result (str): The extracted portion of the lyrics.
     """
 
     ly = Lyrics()
