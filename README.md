@@ -1,6 +1,6 @@
 
 <h3 align="center">
-	<img src="https://i.ibb.co/hKMGdnM/beatprints-logo-2.png" width="700"/>
+	<img src="https://i.ibb.co/hC4cdJv/beatprints-logo.png" width="250"/>
 	<br><br>
 	An amazing tool that generates eye-catching pinterest-style music posters ☕
 </h3>
@@ -13,7 +13,7 @@
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Static Badge" src="https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-%23c4b9a6?style=for-the-badge&logo=Pinboard&labelColor=%23312123"></a>
   </p>
 
-![examples](https://i.ibb.co/1TWhR3V/font-cover.png)
+![examples](https://i.ibb.co/5Mk0nqb/banner.png)
 
 <p align ="center"><b>BeatPrints</b> is a tool designed to create eye-catching music posters that stand out. It provides a straightforward way to generate custom posters using <b>Spotify</b> and <b>LRClib API.</b> 🍀</p>
 
