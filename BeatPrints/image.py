@@ -134,11 +134,12 @@ def scannable(id: str, dark_mode: bool = False) -> None:
     # Spotify code's path
     spotify_code_path = os.path.join(consts.P_IMAGE, "scannable.png")
 
+    # Save the sacannable code
     with open(spotify_code_path, "wb") as file:
         file.write(data.content)
 
+    # Turn it into a transparent code
     with Image.open(spotify_code_path) as scan_code:
-        # Convert the image into RGBA mode
         scan_code = scan_code.convert("RGBA")
         pixels = scan_code.load()
 

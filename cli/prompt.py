@@ -109,10 +109,12 @@ try:
     lyrics_ = ly.select_lines(lyrics_result, range_)
 except errors.NoLyricsAvailable:
     print("\n😦 • Unfortunately, I couldn't find the lyrics from my sources")
-    print("📝 • But don't worry, you can paste the lyrics manually below:\n")
 
-    lines = [input(f"Line {i + 1}: ") for i in range(4)]
-    lyrics_ = "\n".join(lines)
+    lyrics_ = questionary.text(
+        "🎀 • But don't worry, you can paste your lyrics down below: \n",
+        validate=validate.LineCountValidator,
+        style=exutils.default,
+    ).ask()
 
 # Clear the screen and print the banner again
 exutils.clear()

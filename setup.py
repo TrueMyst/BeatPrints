@@ -5,7 +5,7 @@ here = pathlib.Path(__file__).parent.resolve()
 desc = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
-    name="beatprints",
+    name="Beatprints",
     version="1.0.0",
     description="☕️ BeatPrints, a tool designed to create eye-catching, Pinterest-style music posters using Spotify and LRClib API",
     long_description=desc,
@@ -25,6 +25,6 @@ setup(
         "Topic :: Utilities",
     ],
     python_requires=">=3.8",
-    packages=find_packages(include=["pymusix"]),
-    package_data={"": ["*.ttf", "*.png"]},
+    packages=find_packages(include=["Beatprints"]),
+    package_data={"": ["*.ttf", "*.png", "*.jpg"]},
 )

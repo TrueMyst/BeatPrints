@@ -91,3 +91,17 @@ class SelectionValidator(Validator):
                 message="> Invalid input. Ensure you enter two numbers separated by a hyphen.",
                 cursor_position=len(document.text),  # Move cursor to end
             )
+
+
+class LineCountValidator(Validator):
+
+    def validate(self, document):
+        lyrics = document.text
+
+        splitted = lyrics.split("\n")
+
+        if len(splitted) > 4 or len(splitted) < 4:
+            raise ValidationError(
+                message="> Exactly 4 lines must be given, no more, no less.",
+                cursor_position=len(document.text),  # Move cursor to end
+            )
