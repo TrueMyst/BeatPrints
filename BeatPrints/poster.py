@@ -1,25 +1,24 @@
 """
 Module: poster.py
 
-Generates poster with track info and lyrics.
+Generates poster based on track info and lyrics.
 
 Imports:
-    - os: Provides OS interaction
-    - PIL: Image processing Library
+    - os: Provides OS interaction.
+    - requests: Simplifies HTTP requests.
+    - image: Essential image functions to generate posters.
+    - consts: Coordinates & sizes for necessary texts.
+    - write: Better draw.text().
     - utils: Useful utility functions.
-    - dim: Cords & Sizes for necessary texts.
-    - write: Custom draw.text functions for text handling.
-    - image: Provides essential image functions for poster generation.
+    - typing: Type hinting support.
+    - PIL: Image processing library (Pillow).
 """
 
-import os
-import dim
-import image
-import utils
-import write
+import os, requests
+import image, consts, write, utils
 
-from PIL import Image
-from PIL import ImageDraw
+from typing import Dict, Optional
+from PIL import Image, ImageDraw
 
 
 class Poster:
@@ -27,139 +26,159 @@ class Poster:
     This class represents a poster generator for track information and lyrics.
 
     Attributes:
-        save_path (str): The path where the generated posters will be saved.
+        save (str): The directory where the generated posters will be saved.
     """
 
-    def __init__(
-        self,
-        save_path=None,
-    ):
-        self.save_path = save_path
-
-    def generate(self,
-                 track_info: dict,
-                 lyrics: str,
-                 accent=False,
-                 custom_image=None,
-                 dark_mode=False):
+    def __init__(self, save: Optional[str] = None):
         """
-        Creates a poster with track details and lyrics.
+        Initializes the Poster instance with an optional output directory.
 
         Args:
-            track_info (dict): Track details.
-            lyrics (str): Track lyrics.
-            accent (bool, optional): Adds an accent at the bottom. Defaults to False.
-            custom_image (str, optional): Path to a custom cover image. Defaults to None.
-            dark_mode (bool, optional): Generates a dark-themed poster. Defaults to False.
+            save (str, optional): The directory where the posters will be saved. Defaults to None.
         """
+        self.save = save
 
-        assets_path = os.path.realpath("assets")
+    def generate(
+        self,
+        metadata: Dict[str, str],
+        lyrics: str,
+        accent: bool = False,
+        dark_mode: bool = False,
+        custom_image: Optional[str] = None,
+    ) -> None:
+        """
+        Generates a poster with track information and lyrics.
 
-        # Selecting the color and theme of the banner
-        color, banner = (dim.CL_DARK_MODE,
-                         "banner_dark.png") if dark_mode else (
-                             dim.CL_LIGHT_MODE, "banner_light.png")
+        Args:
+            metadata (Dict[str, str]): Dictionary containing track metadata.
+            lyrics (str): Lyrics of the track.
+            accent (bool, optional): Flag to add an accent to the poster. Defaults to False.
+            dark_mode (bool, optional): Flag to use dark mode theme. Defaults to False.
+            custom_image (str, optional): Path to a custom image for the poster. Defaults to None.
+        """
+        # Determine the color and theme of the banner based on the dark mode flag
+        color, banner_theme = (
+            (consts.CL_DARK_MODE, "banner_dark.png")
+            if dark_mode
+            else (consts.CL_LIGHT_MODE, "banner_light.png")
+        )
 
-        banner_path = os.path.join(assets_path, "templates", banner)
+        # Define the path for the banner template
+        banner_path = os.path.join(consts.P_TEMPLATES, banner_theme)
 
-        # Open the poster template image
+        # Open and prepare the banner template image
         with Image.open(banner_path) as poster:
             poster = poster.convert("RGB")
             draw = ImageDraw.Draw(poster)
 
-            name = track_info["name"].upper()
-            label = track_info["label"]
-            artist = track_info["artist"]
-            duration = track_info["duration"]
-            track_id = track_info["track_id"]
-            cover_path = track_info["cover"]
+            # Extract important metadata
+            track_name = metadata["name"].upper()
+            track_label = metadata["label"]
+            track_artist = metadata["artist"]
+            track_duration = metadata["duration"]
+            track_released = metadata["released"]
+            track_id = metadata["id"]
 
-            # If the user wants a custom image...
-            if custom_image is not None:
-                cover_path = os.path.join(assets_path, "spotify",
-                                          "custom_image.jpg")
-                image.square_crop(str(custom_image), cover_path)
+            # Create a directory for image assets
+            os.makedirs(consts.P_IMAGE, exist_ok=True)
 
-            # Open the cover image
+            # Define the path for the cover image
+            cover_path = os.path.join(consts.P_IMAGE, "cover.jpg")
+
+            # Use custom image if provided, otherwise download the cover image from metadata
+            if custom_image:
+                image.crop(custom_image, cover_path)
+            else:
+                with open(cover_path, "wb") as cover_file:
+                    cover_file.write(requests.get(metadata["image"]).content)
+
+            # Adjust the brightness and contrast of the cover image
+            image.magicify(cover_path)
+
+            # Open and resize the cover image
             with Image.open(cover_path) as cover:
-                cover = cover.resize(dim.S_COVER)
+                cover = cover.resize(consts.S_COVER)
 
-            # Generate the Spotify scan code for the track and resize it.
+            # Generate and resize the Spotify scan code
             image.scannable(track_id, dark_mode)
-            spotify_code_path = os.path.join(assets_path, "spotify",
-                                             "spotify_code.png")
+            scannable_path = os.path.join(consts.P_IMAGE, "scannable.png")
 
-            with Image.open(spotify_code_path) as spotify_code:
-                spotify_code = spotify_code.resize(
-                    dim.S_SPOTIFY_CODE,
-                    Image.Resampling.BICUBIC).convert("RGBA")
+            with Image.open(scannable_path) as scannable:
+                scannable = scannable.resize(
+                    consts.S_SPOTIFY_CODE, Image.Resampling.BICUBIC
+                ).convert("RGBA")
 
-            # Paste the cover and the scan image onto the poster
-            poster.paste(cover, dim.C_COVER)
-            poster.paste(spotify_code, dim.C_SPOTIFY_CODE, spotify_code)
+            # Paste the cover image and Spotify scan code onto the poster
+            poster.paste(cover, consts.C_COVER)
+            poster.paste(scannable, consts.C_SPOTIFY_CODE, scannable)
 
             # Draw the color palette on the poster
             image.draw_palette(draw, cover_path, accent)
 
             # Write the heading on the poster
-            write.heading(draw, dim.C_HEADING, 915, name, color,
-                          write.font("Bold"), dim.S_HEADING)
+            write.heading(
+                draw,
+                consts.C_HEADING,
+                875,
+                track_name,
+                color,
+                write.font("Bold"),
+                consts.S_HEADING,
+            )
 
-            # Write the name of the artist and duration on the poster
+            # Write the artist name and track duration on the poster
             write.text_v2(
                 draw,
-                dim.C_ARTIST,
-                artist,
+                consts.C_ARTIST,
+                track_artist,
                 color,
                 write.font("Regular"),
-                dim.S_ARTIST,
+                consts.S_ARTIST,
                 anchor="ls",
             )
             write.text_v2(
                 draw,
-                dim.C_DURATION,
-                duration,
+                consts.C_DURATION,
+                track_duration,
                 color,
                 write.font("Regular"),
-                dim.S_DURATION,
+                consts.S_DURATION,
                 anchor="rs",
             )
 
             # Write the lyrics on the poster
-            write.multiline_text_v2(draw,
-                                    dim.C_LYRICS,
-                                    lyrics,
-                                    color,
-                                    write.font("Light"),
-                                    dim.S_LYRICS,
-                                    anchor="lt")
-
-            # Write the label information on the poster
-            write.multiline_text_v2(draw,
-                                    dim.C_LABEL,
-                                    label,
-                                    color,
-                                    write.font("Regular"),
-                                    dim.S_LABEL,
-                                    anchor="rt")
-
-            # Generate a unique filename for the poster image
-            filename = (
-                f"{utils.create_filename(name, artist)}_{utils.special_code()}.png"
+            write.multiline_text_v2(
+                draw,
+                consts.C_LYRICS,
+                lyrics,
+                color,
+                write.font("Light"),
+                consts.S_LYRICS,
+                anchor="lt",
             )
 
-            # [ note ] This "save-feature" will be reimplemented later on
-            if self.save_path is None:
-                path = os.path.dirname(os.path.realpath("."))
-                poster_dir = os.path.join(path, "posters")
+            # Write the label information on the poster
+            custom_label = f"{track_released}\n{track_label}"
 
-            else:
-                path = os.path.realpath(self.save_path)
-                poster_dir = os.path.join(path, "posters")
+            write.multiline_text_v2(
+                draw,
+                consts.C_LABEL,
+                custom_label,
+                color,
+                write.font("Regular"),
+                consts.S_LABEL,
+                anchor="rt",
+            )
 
-            if not os.path.exists(poster_dir):
-                os.makedirs(poster_dir)
+            # Generate a unique filename for the poster image
+            filename = utils.create_filename(track_name, track_artist)
 
-            # Save the poster image in the local repository
+            # Determine the directory for saving the poster
+            poster_dir = os.path.join(
+                self.save or os.path.dirname(os.path.realpath(".")), "posters"
+            )
+            os.makedirs(poster_dir, exist_ok=True)
+
+            # Save the poster image to the specified directory
             poster.save(os.path.join(poster_dir, filename))
-            print(f"✨ Saved image at {poster_dir}/")
+            print(f"✨ Saved image at {poster_dir}")

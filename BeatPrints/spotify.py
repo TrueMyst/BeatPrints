@@ -4,17 +4,17 @@ Module: spotify.py
 Provides functionalities related to interacting with the Spotify API.
 
 Imports:
-    - os: Provides OS interaction
     - typing: Type hinting support.
     - datetime: Work with dates and times.
     - requests: Simplifies HTTP requests.
+    - errors: Custom error definitions for Spotify API interactions.
 """
 
-import os
-import datetime
+import errors
 import requests
+import datetime
 
-from typing import Any, List, Tuple, Dict, Union
+from typing import List, Dict
 
 
 class Spotify:
@@ -22,17 +22,23 @@ class Spotify:
     Uses Spotify's API to search and retrieve information about a track.
     """
 
-    def __init__(self, CLIENT_ID, CLIENT_SECRET):
+    def __init__(self, CLIENT_ID: str, CLIENT_SECRET: str) -> None:
+        """
+        Initializes the Spotify client with credentials and obtains an access token.
+
+        Args:
+            CLIENT_ID (str): Spotify API client ID.
+            CLIENT_SECRET (str): Spotify API client secret.
+        """
         self.__CLIENT_ID = CLIENT_ID
         self.__CLIENT_SECRET = CLIENT_SECRET
         self.__BASE_URL = "https://api.spotify.com/v1"
-        self.authorization_header()
+        self.__authorization_header()
 
-    def authorization_header(self):
+    def __authorization_header(self) -> None:
         """
         Constructs the authorization header required for API requests.
         """
-
         endpoint = "https://accounts.spotify.com/api/token"
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         payload = {
@@ -47,101 +53,92 @@ class Spotify:
 
         self.__AUTH_HEADER = {"Authorization": f"Bearer {token}"}
 
-    def search_track(
-            self,
-            name: str,
-            limit: int = 6
-    ) -> Union[List[Tuple[int, str, str, str, str]], None]:
+    def search(self, query: str, limit: int = 6) -> List[Dict[str, str]]:
         """
-        Searches for a track through Spotify's API and provides the track information.
+        Searches Spotify for tracks matching the given query.
 
         Args:
-            name (str): The name of the track to search.
-            limit (int, optional): The maximum number of tracks to return. Defaults to 5.
+            query (str): The search query for the track.
+            limit (int, optional): Maximum number of tracks to retrieve. Defaults to 6.
 
         Returns:
-            tracks (Union[List[Tuple[int, str, str, str, str]], None]): 
-                A list of tuples containing track information if tracks are found, otherwise None. 
+            List[Dict[str, str]]: A list of dictionaries containing track metadata.
+                Each dictionary includes keys 'name', 'artist', 'album', 'released',
+                'duration', 'image', 'label', 'id'.
+
+        Raises:
+            errors.InvalidTrackLimit: If the limit is less than 1.
+            errors.NoMatchingSongFound: If no matching songs are found.
         """
+        if limit < 1:
+            raise errors.InvalidTrackLimit
 
-        tracks = []
-        params = {"q": name, "type": "track", "limit": limit}
-        track_data = requests.get(f"{self.__BASE_URL}/search",
-                                  params=params,
-                                  headers=self.__AUTH_HEADER).json()
-
-        # Displaying search results to the user
-        if len(track_data) != 0:
-            for num, item in enumerate(track_data.get("tracks",
-                                                      {}).get("items",
-                                                              [])[:10],
-                                       start=1):
-                name = item["name"]
-                artist = item["artists"][0]["name"]
-                album = item["album"]["name"]
-                track_id = item["id"]
-                tracks.append((num, name, artist, album, track_id))
-
-            return tracks
-        else:
-            return None
-
-    def trackinfo(self, track_id: str) -> Dict[str, Any]:
-        """
-        Retrieves detailed information about a track.
-
-        Args:
-            track_id (str): Track ID of the song.
-
-        Returns:
-            track_info (Dict[str, Any]): Detailed information about the track.
-        """
-        track_data = requests.get(f"{self.__BASE_URL}/tracks/{track_id}",
-                                  headers=self.__AUTH_HEADER).json()
-
-        album_data = requests.get(
-            f"{self.__BASE_URL}/albums/{track_data['album']['id']}",
-            headers=self.__AUTH_HEADER,
+        track_list = []
+        params = {"q": query, "type": "track", "limit": limit}
+        search_response = requests.get(
+            f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
         ).json()
 
-        album_label = album_data["label"]
+        tracks = search_response["tracks"]["items"]
 
-        # Formatting the release date
-        release_date = track_data["album"]["release_date"]
-        release_date_precision = track_data["album"]["release_date_precision"]
-        date_format = {
-            "day": "%Y-%m-%d",
-            "month": "%Y-%m",
-            "year": "%Y"
-        }.get(release_date_precision, "")
-        formatted_release_date = datetime.datetime.strptime(
-            release_date, date_format).strftime("%B %d, %Y")
+        if len(tracks) != 0:
+            for track_info in tracks:
+                # Retrieve album details
+                album_id = track_info["album"]["id"]
+                album_response = requests.get(
+                    f"{self.__BASE_URL}/albums/{album_id}", headers=self.__AUTH_HEADER
+                ).json()
 
-        # Extracting track information
-        track_info = {
-            "album_id": track_data["album"]["id"],
-            "name": track_data["name"],
-            "artist": track_data["artists"][0]["name"],
-            "year": track_data["album"]["release_date"],
-            "duration":
-            f"{(track_data['duration_ms'] // 60000):02d}:{(track_data['duration_ms'] // 1000 % 60):02d}",
-            "image": track_data["album"]["images"][0]["url"],
-            "label": f"{formatted_release_date}\n{album_label}",
-            "track_id": track_data["id"],
-        }
+                # Format metadata
+                metadata = {
+                    "name": track_info["name"],
+                    "artist": track_info["artists"][0]["name"],
+                    "album": track_info["album"]["name"],
+                    "released": self.format_release_date(
+                        track_info["album"]["release_date"],
+                        track_info["album"]["release_date_precision"],
+                    ),
+                    "duration": self.format_duration(track_info["duration_ms"]),
+                    "image": track_info["album"]["images"][0]["url"],
+                    "label": album_response["label"],
+                    "id": track_info["id"],
+                }
 
-        # Path for the Spotify folder
-        assets_path = os.path.realpath("assets")
-        spotify_path = os.path.join(assets_path, "spotify")
+                track_list.append(metadata)
+        else:
+            raise errors.NoMatchingSongFound
 
-        if not os.path.exists(spotify_path):
-            os.makedirs(spotify_path)
+        return track_list
 
-        # Setting spotify banner's path
-        spotify_banner_path = os.path.join(spotify_path, "spotify_banner.jpg")
+    def format_release_date(self, release_date: str, precision: str) -> str:
+        """
+        Formats the release date of a track.
 
-        with open(spotify_banner_path, "wb") as cover_file:
-            cover_file.write(requests.get(track_info["image"]).content)
-            track_info["cover"] = spotify_banner_path
+        Args:
+            release_date (str): Release date string from Spotify API.
+            precision (str): Precision of the release date
+                ('day', 'month', 'year').
 
-        return track_info
+        Returns:
+            str: Formatted release date.
+        """
+        date_format = {"day": "%Y-%m-%d", "month": "%Y-%m", "year": "%Y"}.get(
+            precision, ""
+        )
+        return datetime.datetime.strptime(release_date, date_format).strftime(
+            "%B %d, %Y"
+        )
+
+    def format_duration(self, duration_ms: int) -> str:
+        """
+        Formats the duration of a track from milliseconds to MM:SS format.
+
+        Args:
+            duration_ms (int): Duration of the track in milliseconds.
+
+        Returns:
+            str: Formatted duration in MM:SS format.
+        """
+        minutes = duration_ms // 60000
+        seconds = (duration_ms // 1000) % 60
+        return f"{minutes:02d}:{seconds:02d}"

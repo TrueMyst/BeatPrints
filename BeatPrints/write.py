@@ -5,14 +5,17 @@ Provides modules for image processing and font tools.
 
 Imports:
     - os: Provides OS interaction
+    - consts: Coordinates & sizes for necessary texts.
     - PIL: Image processing Library
     - fontTools: Font manipulation tools.
     - typing: Type hinting support.
 """
 
 import os
-from fontTools.ttLib import TTFont
+import consts
+
 from PIL import ImageFont, ImageDraw
+from fontTools.ttLib import TTFont
 from typing import Optional, Dict, Literal, Tuple, List
 
 
@@ -43,10 +46,14 @@ def font(weight: Literal["Regular", "Bold", "Light"]) -> Dict[str, TTFont]:
     Returns:
         Dict[str, TTFont]: Dictionary of loaded font objects.
     """
-    fonts_path = os.path.realpath(os.path.join("assets", "fonts"))
+    fonts_path = consts.P_FONTS
     font_families = [
-        "Oswald", "NotoSansJP", "NotoSansKR", "NotoSansTC", "NotoSansSC",
-        "NotoSans"
+        "Oswald",
+        "NotoSansJP",
+        "NotoSansKR",
+        "NotoSansTC",
+        "NotoSansSC",
+        "NotoSans",
     ]
     font_paths = [
         os.path.join(fonts_path, family, f"{family}-{weight}.ttf")
@@ -87,7 +94,7 @@ def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
     """
     chunks = []
     font_path = ""
-    universal_chars = ''' ,!@#$%^&*(){}[]+_=-""''?'''
+    universal_chars = """ ,!@#$%^&*(){}[]+_=-""''?"""
     last_font = next(iter(fonts))
 
     for char in text:
@@ -117,15 +124,17 @@ def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
     return cluster
 
 
-def text_v2(draw: ImageDraw.ImageDraw,
-            xy: Tuple[int, int],
-            text: str,
-            color: Tuple[int, int, int],
-            fonts: Dict[str, TTFont],
-            size: int,
-            anchor: Optional[str] = None,
-            align: Literal["left", "center", "right"] = "left",
-            direction: Literal["rtl", "ltr", "ttb"] = "ltr") -> None:
+def text_v2(
+    draw: ImageDraw.ImageDraw,
+    xy: Tuple[int, int],
+    text: str,
+    fill: Tuple[int, int, int],
+    fonts: Dict[str, TTFont],
+    size: int,
+    anchor: Optional[str] = None,
+    align: Literal["left", "center", "right"] = "left",
+    direction: Literal["rtl", "ltr", "ttb"] = "ltr",
+) -> None:
     """
     Draw text on an image.
 
@@ -148,31 +157,34 @@ def text_v2(draw: ImageDraw.ImageDraw,
 
         font = ImageFont.truetype(words[1], size)
         box = font.getbbox(words[0])
-        xy_ = (xy[0] + x_offset, xy[1])
+        xy = (xy[0] + x_offset, xy[1])
 
         draw.text(
-            xy=xy_,
+            xy=xy,
             text=words[0],
-            fill=color,
+            fill=fill,
             font=font,
             anchor=anchor,
             align=align,
             direction=direction,
             embedded_color=True,
         )
+
         x_offset += box[2] - box[0]
 
 
-def multiline_text_v2(draw: ImageDraw.ImageDraw,
-                      xy: Tuple[int, int],
-                      text: str,
-                      color: Tuple[int, int, int],
-                      fonts: Dict[str, TTFont],
-                      size: int,
-                      anchor: Optional[str] = None,
-                      spacing: int = 0,
-                      align: Literal["left", "center", "right"] = "left",
-                      direction: Literal["rtl", "ltr", "ttb"] = "ltr") -> None:
+def multiline_text_v2(
+    draw: ImageDraw.ImageDraw,
+    xy: Tuple[int, int],
+    text: str,
+    color: Tuple[int, int, int],
+    fonts: Dict[str, TTFont],
+    size: int,
+    anchor: Optional[str] = None,
+    spacing: int = 0,
+    align: Literal["left", "center", "right"] = "left",
+    direction: Literal["rtl", "ltr", "ttb"] = "ltr",
+) -> None:
     """
     Draw multiple lines of text on an image.
 
@@ -196,12 +208,12 @@ def multiline_text_v2(draw: ImageDraw.ImageDraw,
     scale = int(round((size * 6) / 42, 1))
 
     for line in lines:
-        xy_ = (x, y + y_offset)
+        xy = (x, y + y_offset)
         text_v2(
             draw,
-            xy=xy_,
+            xy=xy,
             text=line,
-            color=color,
+            fill=color,
             fonts=fonts,
             size=size,
             anchor=anchor,
@@ -211,9 +223,15 @@ def multiline_text_v2(draw: ImageDraw.ImageDraw,
         y_offset += size + scale + spacing
 
 
-def heading(draw: ImageDraw.ImageDraw, xy: Tuple[int, int], width_limit: int,
-            text: str, color: Tuple[int, int, int], fonts: Dict[str, TTFont],
-            size: int) -> None:
+def heading(
+    draw: ImageDraw.ImageDraw,
+    xy: Tuple[int, int],
+    width_limit: int,
+    text: str,
+    color: Tuple[int, int, int],
+    fonts: Dict[str, TTFont],
+    size: int,
+) -> None:
     """
     Draw a heading on an image within a specified width limit.
 
