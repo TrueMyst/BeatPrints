@@ -18,7 +18,7 @@
     <img alt="Static Badge" src="https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-%23c4b9a6?style=for-the-badge&logo=Pinboard&logoColor=%23b5a790&labelColor=%23312123"></a>
 </p>
 
-![examples](https://i.ibb.co/5Mk0nqb/banner.png)
+![examples](https://i.ibb.co.com/y0jKqHK/banner.png)
 
 ## 📜 Getting Started
 
