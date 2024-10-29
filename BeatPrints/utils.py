@@ -2,12 +2,6 @@
 Module: utils.py
 
 Provides various utility functions for Spotify and Lyrics operations.
-
-Imports:
-    - re: Regular expression operations.
-    - random: Generate random values.
-    - string: String manipulation utilities.
-    - datetime: Date and time handling.
 """
 
 import re

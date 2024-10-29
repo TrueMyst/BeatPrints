@@ -2,9 +2,10 @@ import os
 
 from rich import box
 from rich.table import Table
-from typing import Union, List, Dict
-
 from questionary import Style
+from typing import Union, List
+
+from BeatPrints.spotify import TrackMetadata
 
 default = Style(
     [
@@ -34,7 +35,7 @@ def clear() -> None:
     print(BEATPRINTS_ANSI)
 
 
-def tablize(tracks: List[Dict[str, str]]):
+def tablize(tracks: List[TrackMetadata]):
     table = Table(box=box.ROUNDED)
 
     table.add_column("*", justify="center", style="cyan")
@@ -43,7 +44,7 @@ def tablize(tracks: List[Dict[str, str]]):
     table.add_column("Album", justify="left", style="white")
 
     for pos, track in enumerate(tracks, start=1):
-        name, artist, album = track["name"], track["artist"], track["album"]
+        name, artist, album = track.name, track.artist, track.album
         table.add_row(f"{pos}", name, artist, album)
 
     return table

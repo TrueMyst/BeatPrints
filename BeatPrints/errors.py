@@ -1,3 +1,10 @@
+"""
+Module: errors.py
+
+Custom error handling made for BeatPrints.
+"""
+
+
 class NoMatchingSongFound(Exception):
     """
     Exception raised when no song matching the query is found.
@@ -57,5 +64,15 @@ class InvalidFormatError(Exception):
     """
 
     def __init__(self, message="Use format 'x-y' where x and y are numbers."):
+        self.message = message
+        super().__init__(self.message)
+
+
+class PathNotFoundError(Exception):
+    """
+    Exception raised when the specified path for saving images is not found.
+    """
+
+    def __init__(self, message="The specified path for saving images does not exist."):
         self.message = message
         super().__init__(self.message)

@@ -2,17 +2,18 @@
 Module: lyrics.py
 
 Provide lyrics from LRClib API.
-
-Imports:
-    - re: Regex operations.
-    - errors: For errors handling.
-    - lrclib: Retrieving lyrics from LRClib.
 """
 
 import re
-import errors
-
 from lrclib import LrcLibAPI
+
+from .spotify import TrackMetadata
+from .errors import (
+    NoLyricsAvailable,
+    InvalidFormatError,
+    InvalidSelectionError,
+    LineLimitExceededError,
+)
 
 
 class Lyrics:
@@ -20,19 +21,18 @@ class Lyrics:
     This class helps to retrieve lyrics through LRClib API.
     """
 
-    def get_lyrics(self, name: str, artist: str) -> str:
+    def get_lyrics(self, metadata: TrackMetadata) -> str:
         """
         Retrieve lyrics from LRClib.net for a given track and artist.
 
         Args:
-            name (str): The name of the track.
-            artist (str): The artist of the track.
+            metadata (TrackMetadata): Instance that holds the metadata about a track.
 
         Returns:
             str: The lyrics in plain text if found.
 
         Raises:
-            errors.NoLyricsAvailable: If no lyrics are found for the given track and artist.
+            NoLyricsAvailable: If no lyrics are found for the given track and artist.
         """
 
         user_agent = (
@@ -41,14 +41,14 @@ class Lyrics:
 
         # Prepare the API
         api = LrcLibAPI(user_agent=user_agent)
-        id = api.search_lyrics(track_name=name, artist_name=artist)
+        id = api.search_lyrics(track_name=metadata.name, artist_name=metadata.artist)
 
         # Check if lyrics are available
         if len(id) != 0:
             lyrics = api.get_lyrics_by_id(id[0].id)
             return str(lyrics.plain_lyrics)
         else:
-            raise errors.NoLyricsAvailable
+            raise NoLyricsAvailable
 
     def select_lines(self, lyrics: str, selection: str) -> str:
         """
@@ -62,9 +62,9 @@ class Lyrics:
             str: The selected lines of lyrics.
 
         Raises:
-            errors.InvalidFormatError: If the selection format is invalid.
-            errors.InvalidSelectionError: If the selection range is invalid.
-            errors.LineLimitExceededError: If the selected range doesn't contain exactly 4 lines.
+            InvalidFormatError: If the selection format is invalid.
+            InvalidSelectionError: If the selection range is invalid.
+            LineLimitExceededError: If the selected range doesn't contain exactly 4 lines.
         """
         lines = [line for line in lyrics.split("\n")]
         line_count = len(lines)
@@ -73,7 +73,7 @@ class Lyrics:
             pattern = r"^\d+-\d+$"
 
             if not re.match(pattern, selection):
-                raise errors.InvalidFormatError
+                raise InvalidFormatError
 
             selected = [int(num) for num in selection.split("-")]
 
@@ -83,13 +83,13 @@ class Lyrics:
                 or selected[0] <= 0
                 or selected[1] > line_count
             ):
-                raise errors.InvalidSelectionError
+                raise InvalidSelectionError
 
             portion = lines[selected[0] - 1 : selected[1]]
             selected_lines = [line for line in portion if line != ""]
 
             if len(selected_lines) != 4:
-                raise errors.LineLimitExceededError
+                raise LineLimitExceededError
 
             result = "\n".join(selected_lines).strip()
             return result

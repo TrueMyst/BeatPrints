@@ -2,19 +2,27 @@
 Module: spotify.py
 
 Provides functionalities related to interacting with the Spotify API.
-
-Imports:
-    - typing: Type hinting support.
-    - datetime: Work with dates and times.
-    - requests: Simplifies HTTP requests.
-    - errors: Custom error definitions for Spotify API interactions.
 """
 
-import errors
 import requests
 import datetime
 
-from typing import List, Dict
+from typing import List
+from dataclasses import dataclass
+
+from .errors import NoMatchingSongFound, InvalidTrackLimit
+
+
+@dataclass
+class TrackMetadata:
+    name: str
+    artist: str
+    album: str
+    released: str
+    duration: str
+    image: str
+    label: str
+    id: str
 
 
 class Spotify:
@@ -53,7 +61,7 @@ class Spotify:
 
         self.__AUTH_HEADER = {"Authorization": f"Bearer {token}"}
 
-    def search(self, query: str, limit: int = 6) -> List[Dict[str, str]]:
+    def search(self, query: str, limit: int = 6) -> List[TrackMetadata]:
         """
         Searches Spotify for tracks matching the given query.
 
@@ -62,16 +70,16 @@ class Spotify:
             limit (int, optional): Maximum number of tracks to retrieve. Defaults to 6.
 
         Returns:
-            List[Dict[str, str]]: A list of dictionaries containing track metadata.
-                Each dictionary includes keys 'name', 'artist', 'album', 'released',
-                'duration', 'image', 'label', 'id'.
+            List[TrackMetadata]: A list of TrackMetadata instances, where each instance holds metadata
+                                about a track, including details such as the track's name, artist, album,
+                                and release date.
 
         Raises:
-            errors.InvalidTrackLimit: If the limit is less than 1.
-            errors.NoMatchingSongFound: If no matching songs are found.
+            InvalidTrackLimit: If the limit is less than 1.
+            NoMatchingSongFound: If no matching songs are found.
         """
         if limit < 1:
-            raise errors.InvalidTrackLimit
+            raise InvalidTrackLimit
 
         track_list = []
         params = {"q": query, "type": "track", "limit": limit}
@@ -104,9 +112,9 @@ class Spotify:
                     "id": track_info["id"],
                 }
 
-                track_list.append(metadata)
+                track_list.append(TrackMetadata(**metadata))
         else:
-            raise errors.NoMatchingSongFound
+            raise NoMatchingSongFound
 
         return track_list
 

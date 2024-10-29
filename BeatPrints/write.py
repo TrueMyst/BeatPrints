@@ -2,21 +2,15 @@
 Module: write.py
 
 Provides modules for image processing and font tools.
-
-Imports:
-    - os: Provides OS interaction
-    - consts: Coordinates & sizes for necessary texts.
-    - PIL: Image processing Library
-    - fontTools: Font manipulation tools.
-    - typing: Type hinting support.
 """
 
 import os
-import consts
 
-from PIL import ImageFont, ImageDraw
 from fontTools.ttLib import TTFont
+from PIL import ImageFont, ImageDraw
 from typing import Optional, Dict, Literal, Tuple, List
+
+from .consts import P_FONTS
 
 
 def load_fonts(*font_paths: str) -> Dict[str, TTFont]:
@@ -46,7 +40,7 @@ def font(weight: Literal["Regular", "Bold", "Light"]) -> Dict[str, TTFont]:
     Returns:
         Dict[str, TTFont]: Dictionary of loaded font objects.
     """
-    fonts_path = consts.P_FONTS
+    fonts_path = P_FONTS
     font_families = [
         "Oswald",
         "NotoSansJP",
@@ -124,7 +118,7 @@ def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
     return cluster
 
 
-def text_v2(
+def singleline(
     draw: ImageDraw.ImageDraw,
     xy: Tuple[int, int],
     text: str,
@@ -157,7 +151,7 @@ def text_v2(
 
         font = ImageFont.truetype(words[1], size)
         box = font.getbbox(words[0])
-        xy = (xy[0] + x_offset, xy[1])
+        xy = (int(xy[0] + x_offset), xy[1])
 
         draw.text(
             xy=xy,
@@ -173,7 +167,7 @@ def text_v2(
         x_offset += box[2] - box[0]
 
 
-def multiline_text_v2(
+def text(
     draw: ImageDraw.ImageDraw,
     xy: Tuple[int, int],
     text: str,
@@ -185,42 +179,29 @@ def multiline_text_v2(
     align: Literal["left", "center", "right"] = "left",
     direction: Literal["rtl", "ltr", "ttb"] = "ltr",
 ) -> None:
-    """
-    Draw multiple lines of text on an image.
+    # Choose multiline function if text has line breaks
+    if "\n" in text:
+        lines = text.split("\n")
+        y_offset = 0
+        scale = int(round((size * 6) / 42, 1))
 
-    Args:
-        draw (ImageDraw.ImageDraw): ImageDraw object.
-        xy (Tuple[int, int]): Text coordinates.
-        text (str): Text to draw.
-        color (Tuple[int, int, int]): RGB color of the text.
-        fonts (Dict[str, TTFont]): Dictionary of font names to TTFont objects.
-        size (int): Font size.
-        anchor (Optional[str], optional): Anchor point for positioning. Defaults to None.
-        spacing (int, optional): Spacing between lines. Defaults to 0.
-        align (Literal["left", "center", "right"], optional): Text alignment. Defaults to "left".
-        direction (Literal["rtl", "ltr", "ttb"], optional): Text direction. Defaults to "ltr".
-    """
-
-    x, y = xy
-    y_offset = 0
-    lines = text.split("\n")
-
-    scale = int(round((size * 6) / 42, 1))
-
-    for line in lines:
-        xy = (x, y + y_offset)
-        text_v2(
-            draw,
-            xy=xy,
-            text=line,
-            fill=color,
-            fonts=fonts,
-            size=size,
-            anchor=anchor,
-            align=align,
-            direction=direction,
-        )
-        y_offset += size + scale + spacing
+        for line in lines:
+            # Call singleline drawing for each line
+            singleline(
+                draw,
+                (xy[0], xy[1] + y_offset),
+                line,
+                color,
+                fonts,
+                size,
+                anchor,
+                align,
+                direction,
+            )
+            y_offset += size + scale + spacing
+    else:
+        # Call singleline drawing for a single line
+        singleline(draw, xy, text, color, fonts, size, anchor, align, direction)
 
 
 def heading(

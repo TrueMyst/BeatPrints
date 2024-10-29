@@ -1,18 +1,10 @@
-# ---------------------------------------------------
-# This snippet below is intended for addressing
-# import issues and testing purposes. Please refrain
-# from including it in your final script.
-# ---------------------------------------------------
-import os, sys
-
-sys.path.append(os.path.join(os.pardir, "BeatPrints"))
-# ---------------------------------------------------
+import os
 
 import exutils, validate
 import dotenv, questionary
-import lyrics, spotify, poster, errors
 
 from rich import print
+from BeatPrints import lyrics, spotify, poster, errors
 
 dotenv.load_dotenv()
 
@@ -23,7 +15,7 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 # Initialize classes and variables
 SPOTIFY_SONG_LIMIT = 7
 ly = lyrics.Lyrics()
-ps = poster.Poster()
+ps = poster.Poster("../posters/")
 sp = spotify.Spotify(str(CLIENT_ID), str(CLIENT_SECRET))
 
 # Clear the screen and print the initial banner
@@ -93,10 +85,9 @@ exutils.clear()
 track = tracks[int(choice) - 1]
 
 try:
-    lyrics_result = ly.get_lyrics(track["name"], track["artist"])
-    formatted_lyrics = exutils.format_lyrics(
-        track["name"], track["artist"], lyrics_result
-    )
+    lyrics_result = ly.get_lyrics(track)
+    formatted_lyrics = exutils.format_lyrics(track.name, track.artist, lyrics_result)
+
     print(formatted_lyrics)
 
     # Prompt the user for the range of the lyrics to select

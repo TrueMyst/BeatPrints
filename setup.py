@@ -14,17 +14,10 @@ setup(
     url="https://github.com/TrueMyst/BeatPrints",
     license="MIT",
     classifiers=[
-        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Topic :: Internet",
-        "Topic :: Software Development :: Libraries",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "Topic :: Utilities",
     ],
     python_requires=">=3.8",
-    packages=find_packages(include=["Beatprints"]),
+    packages=find_packages(include=["BeatPrints"]),
     package_data={"": ["*.ttf", "*.png", "*.jpg"]},
 )

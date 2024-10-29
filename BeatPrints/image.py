@@ -2,25 +2,17 @@
 Module: image.py
 
 Provides essential image functions to generate posters.
-
-Imports:
-    - os: Provides OS interaction
-    - consts: Coordinates & sizes for necessary texts
-    - random: Generates random values
-    - requests: Simplifies HTTP requests
-    - typing: Type hinting support.
-    - Pylette: Extracts dominant colors from images
-    - PIL: Image processing library (Pillow)
 """
 
 import os
-import consts
 import random
 import requests
 
 from typing import List, Tuple
 from Pylette import extract_colors
 from PIL import Image, ImageDraw, ImageEnhance
+
+from .consts import *
 
 
 def c_palette(image_path: str) -> List[Tuple]:
@@ -52,20 +44,20 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool) -> No
     palette = c_palette(image_path)
 
     # Draw rectangles for each color on the image
-    for iter in range(6):
+    for n_th in range(6):
 
         # Position of the current color in the palette
-        x, y = consts.C_PALETTE
+        x, y = C_PALETTE
 
         # Starting Position of each color
-        start, end = 170 * iter, 170 * (iter + 1)
+        start, end = 170 * n_th, 170 * (n_th + 1)
 
         # Draw the palette coordinate-wise
-        draw.rectangle(((x + start, y), (x + end, 1160)), fill=palette[iter])
+        draw.rectangle(((x + start, y), (x + end, 1160)), fill=palette[n_th])
 
     # Optionally draw a rectangle to highlight the accent color
     if accent:
-        draw.rectangle(consts.C_ACCENT, fill=palette[random.randint(0, 2)])
+        draw.rectangle(C_ACCENT, fill=palette[random.randint(0, 2)])
 
 
 def crop(image_path: str, output_path: str) -> None:
@@ -113,17 +105,21 @@ def magicify(image_path: str) -> None:
         img_contrast.save(image_path)
 
 
-def scannable(id: str, dark_mode: bool = False) -> None:
+def scannable(id: str, path: str, dark_mode: bool = False) -> str:
     """
     Generates a Spotify scannable code based on tracks.
 
     Args:
         id (str): The ID of the track.
+        path (str): The path to save the scannable code.
         dark_mode (bool): Flag indicating whether to use dark mode. Defaults to False.
+
+    Returns:
+        scannable_path (str): The path where the scannable code will be saved.
     """
 
     # Determine the color
-    color = consts.CL_DARK_MODE if dark_mode else consts.CL_LIGHT_MODE
+    color = CL_DARK_MODE if dark_mode else CL_LIGHT_MODE
 
     # Download the Spotify scan code image
     scan = (
@@ -132,14 +128,14 @@ def scannable(id: str, dark_mode: bool = False) -> None:
     data = requests.get(scan)
 
     # Spotify code's path
-    spotify_code_path = os.path.join(consts.P_IMAGE, "scannable.png")
+    scannable_path = os.path.join(path, "scannable.png")
 
     # Save the sacannable code
-    with open(spotify_code_path, "wb") as file:
+    with open(scannable_path, "wb") as file:
         file.write(data.content)
 
     # Turn it into a transparent code
-    with Image.open(spotify_code_path) as scan_code:
+    with Image.open(scannable_path) as scan_code:
         scan_code = scan_code.convert("RGBA")
         pixels = scan_code.load()
 
@@ -149,11 +145,9 @@ def scannable(id: str, dark_mode: bool = False) -> None:
         for x in range(width):
             for y in range(height):
                 if pixels is not None:
-                    pixels[x, y] = (
-                        consts.CL_TRANSPARENT
-                        if pixels[x, y] != consts.CL_WHITE
-                        else color
-                    )
+                    pixels[x, y] = CL_TRANSPARENT if pixels[x, y] != CL_WHITE else color
 
         # Save the modified image
-        scan_code.save(spotify_code_path)
+        scan_code.save(scannable_path)
+
+    return scannable_path

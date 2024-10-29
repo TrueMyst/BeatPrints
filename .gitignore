@@ -164,4 +164,3 @@ cython_debug/
 # Added by TrueMyst
 !{example}.env
 posters/*
-BeatPrints/assets/images/*
