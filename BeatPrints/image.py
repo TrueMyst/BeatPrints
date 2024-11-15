@@ -20,7 +20,7 @@ def c_palette(image_path: str) -> List[Tuple]:
     Extracts a color palette from an image.
 
     Args:
-        image_path (str): The path of the image file.
+        image_path (str): The path to the image file.
 
     Returns:
         palette (List[Tuple]): A list of RGB tuples representing the color palette.
@@ -37,23 +37,23 @@ def draw_palette(draw: ImageDraw.ImageDraw, image_path: str, accent: bool) -> No
 
     Args:
         draw (ImageDraw.ImageDraw): An ImageDraw object to draw.
-        image_path (str): The path of the image file.
+        image_path (str): The path to the image file.
         accent (bool): Flag indicating whether to include the accent color.
     """
 
     palette = c_palette(image_path)
 
     # Draw rectangles for each color on the image
-    for n_th in range(6):
+    for n in range(6):
 
         # Position of the current color in the palette
         x, y = C_PALETTE
 
         # Starting Position of each color
-        start, end = 170 * n_th, 170 * (n_th + 1)
+        start, end = 170 * n, 170 * (n + 1)
 
         # Draw the palette coordinate-wise
-        draw.rectangle(((x + start, y), (x + end, 1160)), fill=palette[n_th])
+        draw.rectangle(((x + start, y), (x + end, 1160)), fill=palette[n])
 
     # Optionally draw a rectangle to highlight the accent color
     if accent:
@@ -65,7 +65,7 @@ def crop(image_path: str, output_path: str) -> None:
     Crops an image to a 1:1 aspect ratio.
 
     Args:
-        image_path (str): The path of the image file.
+        image_path (str): The path to the image file.
         output_path (str): The path to save the cropped image.
     """
 
@@ -86,10 +86,10 @@ def crop(image_path: str, output_path: str) -> None:
 
 def magicify(image_path: str) -> None:
     """
-    Adjusts the brightness and contrast of an image.
+    Adjusts the brightness and the contrast of the image.
 
     Args:
-        image_path (str): The path of the image file.
+        image_path (str): The path to the image file.
     """
     with Image.open(image_path) as img:
 
@@ -105,13 +105,13 @@ def magicify(image_path: str) -> None:
         img_contrast.save(image_path)
 
 
-def scannable(id: str, path: str, dark_mode: bool = False) -> str:
+def scannable(id: str, output_path: str, dark_mode: bool = False) -> str:
     """
-    Generates a Spotify scannable code based on tracks.
+    Generates a Spotify scannable code based on a track.
 
     Args:
         id (str): The ID of the track.
-        path (str): The path to save the scannable code.
+        output_path (str): The path to save the scannable code.
         dark_mode (bool): Flag indicating whether to use dark mode. Defaults to False.
 
     Returns:
@@ -128,7 +128,7 @@ def scannable(id: str, path: str, dark_mode: bool = False) -> str:
     data = requests.get(scan)
 
     # Spotify code's path
-    scannable_path = os.path.join(path, "scannable.png")
+    scannable_path = os.path.join(output_path, "scannable.png")
 
     # Save the sacannable code
     with open(scannable_path, "wb") as file:

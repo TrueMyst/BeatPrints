@@ -63,7 +63,7 @@ class Spotify:
 
     def search(self, query: str, limit: int = 6) -> List[TrackMetadata]:
         """
-        Searches Spotify for tracks matching the given query.
+        Searches for tracks matching the given query.
 
         Args:
             query (str): The search query for the track.

@@ -1,7 +1,7 @@
 """
 Module: write.py
 
-Provides modules for image processing and font tools.
+A custom module written to improve Pillow’s draw.text functionality.
 """
 
 import os

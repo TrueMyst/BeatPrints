@@ -1,7 +1,7 @@
 """
 Module: errors.py
 
-Custom error handling made for BeatPrints.
+Handles custom exceptions for error handling.
 """
 
 

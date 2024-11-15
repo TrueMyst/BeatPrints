@@ -52,14 +52,14 @@ class Lyrics:
 
     def select_lines(self, lyrics: str, selection: str) -> str:
         """
-        Selects a specific range of lines from the provided lyrics.
+        Selects a range of lines from the song lyrics.
 
         Args:
-            lyrics (str): The full lyrics of the song.
-            selection (str): The selection range in the format "start-end".
+            lyrics (str): The lyrics of the song.
+            selection (str): Line range to extract in "start-end" format.
 
         Returns:
-            str: The selected lines of lyrics.
+            str: The selected lines.
 
         Raises:
             InvalidFormatError: If the selection format is invalid.
@@ -85,14 +85,14 @@ class Lyrics:
             ):
                 raise InvalidSelectionError
 
-            portion = lines[selected[0] - 1 : selected[1]]
-            selected_lines = [line for line in portion if line != ""]
+            extracted = lines[selected[0] - 1 : selected[1]]
+            selected_lines = [line for line in extracted if line != ""]
 
             if len(selected_lines) != 4:
                 raise LineLimitExceededError
 
-            result = "\n".join(selected_lines).strip()
-            return result
+            quatrain = "\n".join(selected_lines).strip()
+            return quatrain
 
         except Exception as e:
             raise e

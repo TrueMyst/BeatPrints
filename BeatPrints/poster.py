@@ -1,7 +1,7 @@
 """
 Module: poster.py
 
-Generates poster based on track info and lyrics.
+Generates poster based on the track info and lyrics.
 """
 
 import os, requests
@@ -93,7 +93,7 @@ class Poster:
             poster = poster.convert("RGB")
             draw = ImageDraw.Draw(poster)
 
-            # Open and resize the cover image
+            # Open and resize the cover & the scannable code
             with Image.open(cover_path) as cover:
                 cover = cover.resize(S_COVER)
 

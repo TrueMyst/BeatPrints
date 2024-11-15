@@ -1,7 +1,7 @@
 """
 Module: utils.py
 
-Provides various utility functions for Spotify and Lyrics operations.
+Provides utility functions for Spotify and Lyrics operations.
 """
 
 import re
