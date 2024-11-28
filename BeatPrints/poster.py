@@ -260,11 +260,11 @@ class Poster:
             track_count = len(metadata.tracks)
             
             # Force columns based on track count
-            if track_count <= 10:
+            if track_count <= 6:
                 columns = 1
                 track_font_size = 32
                 column_positions = [(C_LYRICS[0], C_LYRICS[1])]
-            elif track_count <= 20:
+            elif track_count <= 12:
                 columns = 2
                 track_font_size = 30
                 column_positions = [
