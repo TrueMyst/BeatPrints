@@ -86,3 +86,29 @@ def format_lyrics(
         return table
 
     return None
+
+
+def tablize_albums(albums: List[dict]) -> Table:
+    """
+    Creates a pretty table for displaying album search results.
+    
+    Args:
+        albums (List[dict]): List of album data from Spotify API
+        
+    Returns:
+        Table: Formatted rich table of albums
+    """
+    table = Table(box=box.ROUNDED)
+
+    table.add_column("*", justify="center", style="cyan")
+    table.add_column("Title", style="magenta")
+    table.add_column("Artist", justify="right", style="blue")
+    table.add_column("Year", justify="left", style="white")
+
+    for pos, album in enumerate(albums, start=1):
+        name = album["name"]
+        artist = album["artists"][0]["name"]
+        year = album["release_date"][:4]  # Just get the year
+        table.add_row(f"{pos}", name, artist, year)
+
+    return table

@@ -25,6 +25,17 @@ class TrackMetadata:
     id: str
 
 
+@dataclass
+class AlbumMetadata:
+    name: str
+    artist: str
+    released: str
+    image: str
+    label: str
+    id: str
+    tracks: List[str]
+
+
 class Spotify:
     """
     Uses Spotify's API to search and retrieve information about a track.
@@ -150,3 +161,50 @@ class Spotify:
         minutes = duration_ms // 60000
         seconds = (duration_ms // 1000) % 60
         return f"{minutes:02d}:{seconds:02d}"
+
+    def get_album(self, album_id: str) -> AlbumMetadata:
+        """
+        Retrieves album metadata and track listing.
+        
+        Args:
+            album_id (str): Spotify album ID
+        
+        Returns:
+            AlbumMetadata: Album metadata including track listing
+        """
+        # Get initial album data
+        album_response = requests.get(
+            f"{self.__BASE_URL}/albums/{album_id}", 
+            headers=self.__AUTH_HEADER
+        ).json()
+        
+        # Get all tracks (handling pagination)
+        tracks = []
+        tracks_url = f"{self.__BASE_URL}/albums/{album_id}/tracks"
+        
+        while tracks_url:
+            tracks_response = requests.get(
+                tracks_url,
+                headers=self.__AUTH_HEADER,
+                params={"limit": 50}  # Maximum allowed by Spotify
+            ).json()
+            
+            tracks.extend([track["name"] for track in tracks_response["items"]])
+            
+            # Get next page URL if it exists
+            tracks_url = tracks_response.get("next")
+        
+        metadata = {
+            "name": album_response["name"],
+            "artist": album_response["artists"][0]["name"], 
+            "released": self.format_release_date(
+                album_response["release_date"],
+                album_response["release_date_precision"]
+            ),
+            "image": album_response["images"][0]["url"],
+            "label": album_response["label"],
+            "id": album_response["id"],
+            "tracks": tracks
+        }
+        
+        return AlbumMetadata(**metadata)
