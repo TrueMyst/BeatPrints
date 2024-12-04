@@ -10,7 +10,7 @@ import datetime
 from typing import List
 from dataclasses import dataclass
 
-from .errors import NoMatchingSongFound, InvalidTrackLimit
+from .errors import NoMatchingTrackFound, NoMatchingAlbumFound, InvalidSearchLimit
 
 
 @dataclass
@@ -72,64 +72,7 @@ class Spotify:
 
         self.__AUTH_HEADER = {"Authorization": f"Bearer {token}"}
 
-    def search(self, query: str, limit: int = 6) -> List[TrackMetadata]:
-        """
-        Searches for tracks matching the given query.
-
-        Args:
-            query (str): The search query for the track.
-            limit (int, optional): Maximum number of tracks to retrieve. Defaults to 6.
-
-        Returns:
-            List[TrackMetadata]: A list of TrackMetadata instances, where each instance holds metadata
-                                about a track, including details such as the track's name, artist, album,
-                                and release date.
-
-        Raises:
-            InvalidTrackLimit: If the limit is less than 1.
-            NoMatchingSongFound: If no matching songs are found.
-        """
-        if limit < 1:
-            raise InvalidTrackLimit
-
-        track_list = []
-        params = {"q": query, "type": "track", "limit": limit}
-        search_response = requests.get(
-            f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
-        ).json()
-
-        tracks = search_response["tracks"]["items"]
-
-        if len(tracks) != 0:
-            for track_info in tracks:
-                # Retrieve album details
-                album_id = track_info["album"]["id"]
-                album_response = requests.get(
-                    f"{self.__BASE_URL}/albums/{album_id}", headers=self.__AUTH_HEADER
-                ).json()
-
-                # Format metadata
-                metadata = {
-                    "name": track_info["name"],
-                    "artist": track_info["artists"][0]["name"],
-                    "album": track_info["album"]["name"],
-                    "released": self.format_release_date(
-                        track_info["album"]["release_date"],
-                        track_info["album"]["release_date_precision"],
-                    ),
-                    "duration": self.format_duration(track_info["duration_ms"]),
-                    "image": track_info["album"]["images"][0]["url"],
-                    "label": album_response["label"],
-                    "id": track_info["id"],
-                }
-
-                track_list.append(TrackMetadata(**metadata))
-        else:
-            raise NoMatchingSongFound
-
-        return track_list
-
-    def format_release_date(self, release_date: str, precision: str) -> str:
+    def _format_release_date(self, release_date: str, precision: str) -> str:
         """
         Formats the release date of a track.
 
@@ -148,7 +91,7 @@ class Spotify:
             "%B %d, %Y"
         )
 
-    def format_duration(self, duration_ms: int) -> str:
+    def _format_duration(self, duration_ms: int) -> str:
         """
         Formats the duration of a track from milliseconds to MM:SS format.
 
@@ -162,49 +105,116 @@ class Spotify:
         seconds = (duration_ms // 1000) % 60
         return f"{minutes:02d}:{seconds:02d}"
 
-    def get_album(self, album_id: str) -> AlbumMetadata:
+    def get_track(self, query: str, limit: int = 6) -> List[TrackMetadata]:
+        """
+        Searches for tracks matching the given query.
+
+        Args:
+            query (str): The search query for the track.
+            limit (int, optional): Maximum number of tracks to retrieve. Defaults to 6.
+
+        Returns:
+            List[TrackMetadata]: A list of the track's metadata.
+
+        Raises:
+            InvalidSearchLimit: If the limit is less than 1.
+            NoMatchingSongFound: If no matching songs are found.
+        """
+        if limit < 1:
+            raise InvalidSearchLimit
+
+        tracklist = []
+        params = {"q": query, "type": "track", "limit": limit}
+        track_response = requests.get(
+            f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
+        ).json()
+
+        tracks = track_response.get("tracks", {}).get("items", [])
+
+        if not tracks:
+            raise NoMatchingTrackFound
+
+        for track in tracks:
+
+            # Retrieve album details
+            id = track["album"]["id"]
+            album_details = requests.get(
+                f"{self.__BASE_URL}/albums/{id}", headers=self.__AUTH_HEADER
+            ).json()
+
+            # Format metadata
+            metadata = {
+                "name": track["name"],
+                "artist": track["artists"][0]["name"],
+                "album": track["album"]["name"],
+                "released": self._format_release_date(
+                    track["album"]["release_date"],
+                    track["album"]["release_date_precision"],
+                ),
+                "duration": self._format_duration(track["duration_ms"]),
+                "image": track["album"]["images"][0]["url"],
+                "label": album_details["label"],
+                "id": track["id"],
+            }
+
+            tracklist.append(TrackMetadata(**metadata))
+
+        return tracklist
+
+    def get_album(self, query: str, limit: int = 6) -> List[AlbumMetadata]:
         """
         Retrieves album metadata and track listing.
-        
+
         Args:
-            album_id (str): Spotify album ID
-        
+            query (str): The search query for the album.
+            limit (int, optional): Maximum number of albums to retrieve. Defaults to 6.
+
         Returns:
-            AlbumMetadata: Album metadata including track listing
+            List[AlbumMetadata]: A list of album metadata, including track listings.
+
+        Raises:
+            InvalidSearchLimit: If the limit is less than 1.
+            NoMatchingSongFound: If no matching albums are found.
         """
-        # Get initial album data
+        if limit < 1:
+            raise InvalidSearchLimit
+
+        albumlist = []
+        params = {"q": query, "type": "album", "limit": limit}
         album_response = requests.get(
-            f"{self.__BASE_URL}/albums/{album_id}", 
-            headers=self.__AUTH_HEADER
+            f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
         ).json()
-        
-        # Get all tracks (handling pagination)
-        tracks = []
-        tracks_url = f"{self.__BASE_URL}/albums/{album_id}/tracks"
-        
-        while tracks_url:
-            tracks_response = requests.get(
-                tracks_url,
-                headers=self.__AUTH_HEADER,
-                params={"limit": 50}  # Maximum allowed by Spotify
+
+        albums = album_response.get("albums", {}).get("items", [])
+
+        if not albums:
+            raise NoMatchingAlbumFound
+
+        # Process albums in one loop
+        for album in albums:
+            id = album["id"]
+            album_details = requests.get(
+                f"{self.__BASE_URL}/albums/{id}", headers=self.__AUTH_HEADER
             ).json()
-            
-            tracks.extend([track["name"] for track in tracks_response["items"]])
-            
-            # Get next page URL if it exists
-            tracks_url = tracks_response.get("next")
-        
-        metadata = {
-            "name": album_response["name"],
-            "artist": album_response["artists"][0]["name"], 
-            "released": self.format_release_date(
-                album_response["release_date"],
-                album_response["release_date_precision"]
-            ),
-            "image": album_response["images"][0]["url"],
-            "label": album_response["label"],
-            "id": album_response["id"],
-            "tracks": tracks
-        }
-        
-        return AlbumMetadata(**metadata)
+
+            # Fetch track names directly from album details
+            tracks = [
+                track["name"]
+                for track in album_details.get("tracks", {}).get("items", [])
+            ]
+
+            metadata = {
+                "name": album["name"],
+                "artist": album["artists"][0]["name"],
+                "released": self._format_release_date(
+                    album["release_date"], album["release_date_precision"]
+                ),
+                "image": album["images"][0]["url"],
+                "label": album_details.get("label", "Unknown"),
+                "id": album["id"],
+                "tracks": tracks,
+            }
+
+            albumlist.append(AlbumMetadata(**metadata))
+
+        return albumlist

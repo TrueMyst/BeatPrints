@@ -9,6 +9,47 @@ import random
 import string
 import datetime
 
+from . import write
+from . import consts
+
+
+def organize_tracks(tracks: list) -> tuple:
+    """
+    Organizes tracks into columns that fit within the maximum width.
+
+    Args:
+        draw (ImageDraw.ImageDraw): Draw context for calculating text widths.
+        tracks (list): List of track names.
+
+    Returns:
+        tuple: Organized tracks into columns and their respective widths.
+    """
+    while True:
+        # Split tracks into columns of MAX_ROWS each
+        columns = [
+            tracks[i : i + consts.MAX_ROWS]
+            for i in range(0, len(tracks), consts.MAX_ROWS)
+        ]
+
+        # Calculate the width of the longest track in each column
+        max_tracks = [max(col, key=len) for col in columns]
+        track_widths = [
+            write.get_length(track, write.font("Light"), consts.S_TRACKS)
+            for track in max_tracks
+        ]
+
+        # Calculate total width and check if it fits within the allowed space
+        total_width = sum(track_widths) + consts.S_SPACING * (len(columns) - 1)
+        if total_width <= consts.MAX_WIDTH:
+            break  # Fits, so exit the loop
+        else:
+            # Remove the longest track from the longest column and retry
+            longest_column_index = track_widths.index(max(track_widths))
+            longest_column = columns[longest_column_index]
+            tracks.remove(max(longest_column, key=len))
+
+    return columns, track_widths
+
 
 def special_code() -> int:
     """

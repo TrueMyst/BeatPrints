@@ -8,11 +8,11 @@ import os
 import random
 import requests
 
+from .consts import *
+
 from typing import List, Tuple
 from Pylette import extract_colors
 from PIL import Image, ImageDraw, ImageEnhance
-
-from .consts import *
 
 
 def c_palette(image_path: str) -> List[Tuple]:
@@ -105,14 +105,16 @@ def magicify(image_path: str) -> None:
         img_contrast.save(image_path)
 
 
-def scannable(id: str, output_path: str, dark_mode: bool = False, is_album: bool = False) -> str:
+def scannable(
+    id: str, save_path: str, darktheme: bool = False, is_album: bool = False
+) -> str:
     """
     Generates a Spotify scannable code based on a track or album.
 
     Args:
         id (str): The ID of the track or album.
-        output_path (str): The path to save the scannable code.
-        dark_mode (bool): Flag indicating whether to use dark mode. Defaults to False.
+        save_path (str): The path to save the scannable code.
+        darktheme (bool): Flag indicating whether to use dark theme. Defaults to False.
         is_album (bool): Flag indicating if the ID is for an album. Defaults to False.
 
     Returns:
@@ -120,7 +122,7 @@ def scannable(id: str, output_path: str, dark_mode: bool = False, is_album: bool
     """
 
     # Determine the color
-    color = CL_DARK_MODE if dark_mode else CL_LIGHT_MODE
+    color = CL_DARK_MODE if darktheme else CL_LIGHT_MODE
 
     # Download the Spotify scan code image
     item_type = "album" if is_album else "track"
@@ -128,7 +130,7 @@ def scannable(id: str, output_path: str, dark_mode: bool = False, is_album: bool
     data = requests.get(scan)
 
     # Spotify code's path
-    scannable_path = os.path.join(output_path, "scannable.png")
+    scannable_path = os.path.join(save_path, "scannable.png")
 
     # Save the scannable code
     with open(scannable_path, "wb") as file:

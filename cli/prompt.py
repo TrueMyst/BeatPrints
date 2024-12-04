@@ -1,10 +1,9 @@
 import os
-import requests
-
-import exutils, validate
-import dotenv, questionary
 
 from rich import print
+import dotenv, questionary
+
+from cli import exutils, validate
 from BeatPrints import lyrics, spotify, poster, errors
 
 dotenv.load_dotenv()
@@ -30,7 +29,7 @@ exutils.clear()
 poster_type = questionary.select(
     "🎨 • What type of poster would you like to create?",
     choices=["Song Poster", "Album Poster"],
-    style=exutils.default
+    style=exutils.default,
 ).ask()
 
 # Prompt the user for poster features
@@ -52,7 +51,6 @@ features = questionary.form(
     ),
 ).ask()
 
-
 image = (
     questionary.path(
         "╰─ 🍞 • Awesome, please provide the file path to the image:",
@@ -67,13 +65,16 @@ image = (
 exutils.clear()
 
 if poster_type == "Song Poster":
+
     # Prompt the user for their favorite song until a valid result is found
     query, tracks = "", []
+
     while not tracks:
         query = questionary.text(
             "🎺 • Type out the song you love the most:", style=exutils.default
         ).ask()
-        tracks = sp.search(query, limit=SPOTIFY_SONG_LIMIT)
+
+        tracks = sp.get_track(query, limit=SPOTIFY_SONG_LIMIT)
         if not tracks:
             print("╰─ 😔 • I couldn't find the song, try again")
 
@@ -82,7 +83,7 @@ if poster_type == "Song Poster":
 
     # Print the list of songs in a pretty table
     print(f'{len(tracks)} results were found for "{query}"!')
-    print(exutils.tablize(tracks))
+    print(exutils.tablize_track(tracks))
 
     # Prompt the user to select a song from the list
     choice = questionary.text(
@@ -99,7 +100,9 @@ if poster_type == "Song Poster":
 
     try:
         lyrics_result = ly.get_lyrics(track)
-        formatted_lyrics = exutils.format_lyrics(track.name, track.artist, lyrics_result)
+        formatted_lyrics = exutils.format_lyrics(
+            track.name, track.artist, lyrics_result
+        )
 
         print(formatted_lyrics)
 
@@ -111,6 +114,7 @@ if poster_type == "Song Poster":
         ).ask()
 
         lyrics_ = ly.select_lines(lyrics_result, range_)
+
     except errors.NoLyricsAvailable:
         print("\n😦 • Unfortunately, I couldn't find the lyrics from my sources")
 
@@ -124,7 +128,7 @@ if poster_type == "Song Poster":
     exutils.clear()
 
     # Generate the poster with the selected features and lyrics
-    ps.generate(track, lyrics_, features["accent"], features["theme"], image)
+    ps.generate_poster(track, lyrics_, features["accent"], features["theme"], image)
 
 else:  # Album Poster
     # Prompt the user for their favorite album until a valid result is found
@@ -133,16 +137,9 @@ else:  # Album Poster
         query = questionary.text(
             "💿 • Type out the album you love the most:", style=exutils.default
         ).ask()
-        
-        # Search for albums
-        params = {"q": query, "type": "album", "limit": SPOTIFY_SONG_LIMIT}
-        search_response = requests.get(
-            f"{sp._Spotify__BASE_URL}/search", 
-            params=params, 
-            headers=sp._Spotify__AUTH_HEADER
-        ).json()
-        
-        albums = search_response.get("albums", {}).get("items", [])
+
+        albums = sp.get_album(query, limit=SPOTIFY_SONG_LIMIT)
+
         if not albums:
             print("╰─ 😔 • I couldn't find the album, try again")
 
@@ -151,10 +148,9 @@ else:  # Album Poster
 
     # Print the list of albums
     print(f'{len(albums)} results were found for "{query}"!')
-    
+
     # Create and print album table
-    table = exutils.tablize_albums(albums)
-    print(table)
+    print(exutils.tablize_albums(albums))
 
     # Prompt user to select an album
     choice = questionary.text(
@@ -167,8 +163,7 @@ else:  # Album Poster
     exutils.clear()
 
     # Get album metadata
-    album_id = albums[int(choice) - 1]["id"]
-    album_metadata = sp.get_album(album_id)
+    album = albums[int(choice) - 1]
 
     # Generate the album poster
-    ps.generate_album(album_metadata, features["accent"], features["theme"], image)
+    ps.generate_album(album, features["accent"], features["theme"], image)
