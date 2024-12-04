@@ -6,22 +6,16 @@ A custom module written to improve Pillow’s draw.text functionality.
 
 import os
 
+from .consts import P_FONTS
+
 from fontTools.ttLib import TTFont
 from PIL import ImageFont, ImageDraw
 from typing import Optional, Dict, Literal, Tuple, List
 
-from .consts import P_FONTS
 
-
-def load_fonts(*font_paths: str) -> Dict[str, TTFont]:
+def _load_fonts(*font_paths: str) -> Dict[str, TTFont]:
     """
     Loads font files into memory and returns a dictionary of font objects.
-
-    Args:
-        *font_paths (str): Paths to the font files.
-
-    Returns:
-        Dict[str, TTFont]: Dictionary mapping font names to TTFont objects.
     """
     fonts = {}
     for path in font_paths:
@@ -33,12 +27,6 @@ def load_fonts(*font_paths: str) -> Dict[str, TTFont]:
 def font(weight: Literal["Regular", "Bold", "Light"]) -> Dict[str, TTFont]:
     """
     Loads fonts of the specified weight from the predefined assets/fonts directory.
-
-    Args:
-        weight (Literal["Regular", "Bold", "Light"]): The weight of the fonts to load.
-
-    Returns:
-        Dict[str, TTFont]: Dictionary of loaded font objects.
     """
     fonts_path = P_FONTS
     font_families = [
@@ -53,19 +41,12 @@ def font(weight: Literal["Regular", "Bold", "Light"]) -> Dict[str, TTFont]:
         os.path.join(fonts_path, family, f"{family}-{weight}.ttf")
         for family in font_families
     ]
-    return load_fonts(*font_paths)
+    return _load_fonts(*font_paths)
 
 
-def check_glyph(font: TTFont, glyph: str) -> bool:
+def _check_glyph(font: TTFont, glyph: str) -> bool:
     """
     Check if a glyph exists in a font.
-
-    Args:
-        font (TTFont): Loaded font object.
-        glyph (str): Character to check.
-
-    Returns:
-        bool: True if the glyph exists, False otherwise.
     """
     try:
         cmap = font.getBestCmap()
@@ -75,16 +56,9 @@ def check_glyph(font: TTFont, glyph: str) -> bool:
         return False
 
 
-def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
+def _merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
     """
-    Merge consecutive characters with the same font into clusters.
-
-    Args:
-        text (str): Input text.
-        fonts (Dict[str, TTFont]): Dictionary mapping font names to TTFont objects.
-
-    Returns:
-        List[List[str]]: Clusters of consecutive characters with the same font.
+    Groups consecutive characters with the same font into clusters.
     """
     chunks = []
     font_path = ""
@@ -98,7 +72,7 @@ def merge_chunks(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
             continue
 
         for font_path, font in fonts.items():
-            if check_glyph(font, char):
+            if _check_glyph(font, char):
                 last_font = font_path
                 char_found = True
                 chunks.append([char, font_path])
@@ -130,32 +104,21 @@ def singleline(
     direction: Literal["rtl", "ltr", "ttb"] = "ltr",
 ) -> None:
     """
-    Draw text on an image.
-
-    Args:
-        draw (ImageDraw.ImageDraw): ImageDraw object.
-        xy (Tuple[int, int]): Text coordinates.
-        text (str): Text to draw.
-        color (Tuple[int, int, int]): RGB color of the text.
-        fonts (Dict[str, TTFont]): Dictionary of font names to TTFont objects.
-        size (int): Font size.
-        anchor (Optional[str], optional): Anchor point for positioning. Defaults to None.
-        align (Literal["left", "center", "right"], optional): Text alignment. Defaults to "left".
-        direction (Literal["rtl", "ltr", "ttb"], optional): Text direction. Defaults to "ltr".
+    Renders a single line of text at a specified position
+    using a chosen font, color, alignment, and text direction.
     """
-
     x_offset = 0
-    sentence = merge_chunks(text, fonts)
+    sentence = _merge_chunks(text, fonts)
 
-    for words in sentence:
+    for char, font_path in sentence:
 
-        font = ImageFont.truetype(words[1], size)
-        box = font.getbbox(words[0])
+        font = ImageFont.truetype(font_path, size)
+        box = font.getbbox(char)
         xy = (int(xy[0] + x_offset), xy[1])
 
         draw.text(
             xy=xy,
-            text=words[0],
+            text=char,
             fill=fill,
             font=font,
             anchor=anchor,
@@ -165,6 +128,20 @@ def singleline(
         )
 
         x_offset += box[2] - box[0]
+
+
+def get_length(text: str, fonts: Dict[str, TTFont], size: int) -> int:
+    """
+    Calculate the width of the text without drawing it.
+    """
+    total_width = 0
+    sentence = _merge_chunks(text, fonts)
+
+    for word, path in sentence:
+        font = ImageFont.truetype(path, size)
+        total_width += font.getlength(word)  # Add width of character
+
+    return int(total_width)
 
 
 def text(
@@ -179,14 +156,18 @@ def text(
     align: Literal["left", "center", "right"] = "left",
     direction: Literal["rtl", "ltr", "ttb"] = "ltr",
 ) -> None:
+    """
+    Renders text on an image at a specified position with
+    customizable font, size, color, alignment, direction, and spacing.
+    """
     # Choose multiline function if text has line breaks
     if "\n" in text:
-        lines = text.split("\n")
         y_offset = 0
+        lines = text.split("\n")
         scale = int(round((size * 6) / 42, 1))
 
+        # Call singleline drawing for each line
         for line in lines:
-            # Call singleline drawing for each line
             singleline(
                 draw,
                 (xy[0], xy[1] + y_offset),
@@ -215,26 +196,18 @@ def heading(
 ) -> None:
     """
     Draw a heading on an image within a specified width limit.
-
-    Args:
-        draw (ImageDraw.ImageDraw): ImageDraw object to draw on the image.
-        xy (Tuple[int, int]): Coordinates for the heading.
-        width_limit (int): Maximum width for the heading.
-        text (str): Heading text.
-        color (Tuple[int, int, int]): RGB color of the text.
-        fonts (Dict[str, TTFont]): Dictionary of font names to TTFont objects.
-        size (int): Font size.
     """
-
-    # font_size = 45
     total_length_of_heading = 0
-    chunked = merge_chunks(text, fonts)
+
+    # Pairing words with their respective fonts.
+    chunked = _merge_chunks(text, fonts)
 
     while True:
         for word, path in chunked:
             font = ImageFont.truetype(path, size)
             total_length_of_heading += font.getlength(word)
 
+        # Reduce font size if length exceeds width_limit.
         if total_length_of_heading > width_limit:
             size -= 1
             total_length_of_heading = 0
@@ -244,20 +217,19 @@ def heading(
 
     y_offset = 0
 
-    # Draw song name and year
-    for words, path in chunked:
+    # Track Name or Heading
+    for word, path in chunked:
         xy_ = (xy[0] + y_offset, xy[1])
 
         font = ImageFont.truetype(path, size)
         draw.text(
             xy=xy_,
-            text=words,
+            text=word,
             fill=color,
             font=font,
             anchor="ls",
             embedded_color=True,
         )
 
-        draw.text
-        box = font.getbbox(words[0])
+        box = font.getbbox(word)
         y_offset += box[2] - box[0]

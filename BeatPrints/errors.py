@@ -5,12 +5,22 @@ Handles custom exceptions for error handling.
 """
 
 
-class NoMatchingSongFound(Exception):
+class NoMatchingTrackFound(Exception):
     """
     Exception raised when no song matching the query is found.
     """
 
     def __init__(self, message="No song found matching the query."):
+        self.message = message
+        super().__init__(self.message)
+
+
+class NoMatchingAlbumFound(Exception):
+    """
+    Exception raised when no album matching the query is found.
+    """
+
+    def __init__(self, message="No album found matching the query."):
         self.message = message
         super().__init__(self.message)
 
@@ -25,12 +35,12 @@ class NoLyricsAvailable(Exception):
         super().__init__(self.message)
 
 
-class InvalidTrackLimit(Exception):
+class InvalidSearchLimit(Exception):
     """
-    Exception raised when an invalid track limit is set for a Spotify search.
+    Exception raised when an invalid search limit is set for tracks or albums.
     """
 
-    def __init__(self, message="Track limit must be at least 1."):
+    def __init__(self, message="Search limit must be at least 1."):
         self.message = message
         super().__init__(self.message)
 
