@@ -24,6 +24,9 @@ fonttools = "^4.54.1"
 questionary = "^2.0.1"
 rich = "^13.9.4"
 
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
