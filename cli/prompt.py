@@ -128,7 +128,7 @@ if poster_type == "Song Poster":
     exutils.clear()
 
     # Generate the poster with the selected features and lyrics
-    ps.generate_poster(track, lyrics_, features["accent"], features["theme"], image)
+    ps.track(track, lyrics_, features["accent"], features["theme"], image)
 
 else:  # Album Poster
     # Prompt the user for their favorite album until a valid result is found
@@ -172,4 +172,4 @@ else:  # Album Poster
     album = albums[int(choice) - 1]
 
     # Generate the album poster
-    ps.generate_album(album, features["accent"], features["theme"], index, image)
+    ps.album(album, features["accent"], features["theme"], index, image)
