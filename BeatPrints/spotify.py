@@ -4,12 +4,10 @@ Module: spotify.py
 Provides functionalities related to interacting with the Spotify API.
 """
 
-import requests
-import datetime
-
-from typing import List
+import requests, datetime
 from dataclasses import dataclass
 
+from typing import List
 from .errors import NoMatchingTrackFound, NoMatchingAlbumFound, InvalidSearchLimit
 
 
@@ -118,18 +116,18 @@ class Spotify:
 
         Raises:
             InvalidSearchLimit: If the limit is less than 1.
-            NoMatchingSongFound: If no matching songs are found.
+            NoMatchingTrackFound: If no matching songs are found.
         """
         if limit < 1:
             raise InvalidSearchLimit
 
         tracklist = []
         params = {"q": query, "type": "track", "limit": limit}
-        track_response = requests.get(
+        response = requests.get(
             f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
         ).json()
 
-        tracks = track_response.get("tracks", {}).get("items", [])
+        tracks = response.get("tracks", {}).get("items", [])
 
         if not tracks:
             raise NoMatchingTrackFound
@@ -174,18 +172,18 @@ class Spotify:
 
         Raises:
             InvalidSearchLimit: If the limit is less than 1.
-            NoMatchingSongFound: If no matching albums are found.
+            NoMatchingAlbumFound: If no matching albums are found.
         """
         if limit < 1:
             raise InvalidSearchLimit
 
         albumlist = []
         params = {"q": query, "type": "album", "limit": limit}
-        album_response = requests.get(
+        response = requests.get(
             f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
         ).json()
 
-        albums = album_response.get("albums", {}).get("items", [])
+        albums = response.get("albums", {}).get("items", [])
 
         if not albums:
             raise NoMatchingAlbumFound

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "BeatPrints"
 version = "1.0.0"
-description = "A tool designed to create eye-catching, pinterest-style music posters."
+description = "Create eye-catching, pinterest-style music posters effortlessly."
 authors = ["elysianmyst <74355265+TrueMyst@users.noreply.github.com>"]
 license = "CC-BY-NC-4.0"
 readme = "README.md"

@@ -133,7 +133,13 @@ if poster_type == "Song Poster":
 else:  # Album Poster
     # Prompt the user for their favorite album until a valid result is found
     query, albums = "", []
+    index = questionary.confirm(
+        "🍙 • Would you like the track names to be numbered?: ",
+        style=exutils.default,
+    ).ask()
+
     while not albums:
+
         query = questionary.text(
             "💿 • Type out the album you love the most:", style=exutils.default
         ).ask()
@@ -166,4 +172,4 @@ else:  # Album Poster
     album = albums[int(choice) - 1]
 
     # Generate the album poster
-    ps.generate_album(album, features["accent"], features["theme"], image)
+    ps.generate_album(album, features["accent"], features["theme"], index, image)

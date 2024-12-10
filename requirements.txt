@@ -1,8 +1,0 @@
-lrclibapi==0.3.1
-fonttools==4.51.0
-Pillow==10.4.0
-Pylette==3.0.1
-python-dotenv==1.0.1
-questionary==2.0.1
-Requests==2.32.3
-rich==13.7.1

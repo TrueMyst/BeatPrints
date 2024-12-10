@@ -1,11 +1,11 @@
 <h3 align="center">
-	<img src="https://i.ibb.co/CWY693F/beatprints-logo.png" width="175"/>
+    <img src="https://i.ibb.co/CWY693F/beatprints-logo.png" width="175"/>
 </h3>
 <h3 align="center">
-	BeatPrints: Quick, stylish posters for your favorite tracks! 🎷☕️
+    BeatPrints: Quick, stylish posters for your favorite tracks! 🎷☕️
 </h3>
 
-<p align="center">A tool designed to create eye-catching Pinterest-style music posters that stand out. It provides a straightforward way to generate custom posters using <b>Spotify</b> and <b>LRClib API</b>. 🍀</p>
+<p align="center">Create eye-catching, Pinterest-style music posters effortlessly. BeatPrints integrates with <b>Spotify</b> and <b>LRClib API</b> to help you design custom posters for your favorite tracks or albums. 🍀</p>
 
 <p align="center">
   <a href="https://gitHub.com/TrueMyst/BeatPrints/graphs/commit-activity">
@@ -20,103 +20,145 @@
 
 ![examples](https://i.ibb.co.com/y0jKqHK/banner.png)
 
-## 📜 Getting Started
 
-### `1.1` Installation
+## 📦 Installation
 
-Clone this repository into your preferred directory using Git:
-
-```bash
-git clone --depth 1 https://github.com/TrueMyst/BeatPrints.git && cd BeatPrints
-```
-
-### `1.2` Dependencies
-
-Install the necessary dependencies using pip:
+You can install BeatPrints via `pip`:
 
 ```bash
-$ pip install -r requirements.txt
+pip install BeatPrints
 ```
 
-This ensures all required packages are installed to run the project smoothly.
-
-### `1.3` Environment Variables
-
-To run this project, you need to create a `.env` file to set up the required environmental variables. These include:
-
-- **SPOTIFY_CLIENT_ID** and **SPOTIFY_CLIENT_SECRET**, which can be obtained from [Spotify for Developers](https://developer.spotify.com/dashboard/).
-
-> [!NOTE]
-> Make sure you select **Web API** as the scope of the application.
-
-You can find an example `.env` file [here](https://github.com/TrueMyst/BeatPrints/tree/main/{example}.env). Rename this file to `.env` and use it as needed.
-
-### `1.4` Generating Posters
-
-Navigate to the [cli](https://github.com/TrueMyst/BeatPrints/tree/main/cli/) directory and execute the following command:
+Or, if you use Poetry:
 
 ```bash
-$ python3 prompt.py
+poetry add BeatPrints
 ```
 
-> [!IMPORTANT]
->
-> ```bash
-> KeyError: 'setting text direction, language or font features is not supported without libraqm'.
+## 🌱 Environment Variables
+
+To get started with BeatPrints, you’ll need a `.env` file with these keys:
+
+```env
+SPOTIFY_CLIENT_ID = "<your-client-id>"
+SPOTIFY_CLIENT_SECRET = "<your-client-secret>"
+```
+
+You can get these from the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/) by creating a new app with **Web API** as the scope.
+
+
+## 🚀 Quick Start
+
+Here’s how you can create your first poster:
+
+```python
+import os, dotenv
+from BeatPrints import lyrics, poster, spotify
+
+dotenv.load_dotenv()
+
+# Spotify credentials
+CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+
+# Initialize components
+ly = lyrics.Lyrics()
+ps = poster.Poster("./posters/")
+sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+
+# Search for a song
+search = sp.get_track("Juno Clairo", limit=1)
+
+# Get metadata and lyrics
+metadata = search[0]
+lyrics = ly.get_lyrics(metadata)
+highlighted_lyrics = ly.select_lines(lyrics, "5-9")
+
+# Generate a poster
+ps.track(metadata, highlighted_lyrics)
+```
+> [!IMPORTANT]  
+>  
+> **For Windows Users**  
+> If you encounter the following error:  
+>  
+> ```  
+> KeyError: 'setting text direction, language or font features is not supported without libraqm'  
+> ```  
+> You can resolve this by downloading `fribidi.dll` from [here](https://www.dllme.com/dll/files/fribidi) and placing it in your Python directory, such as:  
+>  
 > ```
->
-> If you're on Windows, you may encounter this problem. You can resolve this issue, by installing `fribidi.dll` for Pillow to handle complicated texts. Download the required file from [here](https://www.dllme.com/dll/files/fribidi) and place it in the following directory: `C:\Program Files\Python312\`
->
-> If you're on macOS, you can fix this issue by running these commands:
-> ```bash
-> pip3 uninstall Pillow
-> pip3 install Pillow --global-option="build_ext" --config-settings="-I = /opt/homebrew/Cellar"
-> ```
+> C:\Program Files\Python312\
+> ```  
+>  
+> **For macOS Users**  
+> If you run into the same issue, fix it by reinstalling Pillow with the correct configuration:  
+>  
+> ```bash  
+> pip uninstall Pillow  
+> pip install Pillow --global-option="build_ext" --config-settings="-I=/opt/homebrew/Cellar"
+> ```  
 
-### `1.5` Current Features
+## 🖼️ Examples
 
-For now BeatPrints offers these such features:
+Here are a few posters created with BeatPrints:  
 
-- [x] **Polaroid Filter**: Enhance cover pictures with a classic look.
-- [x] **Multi-language Support**: English, Hindi, Russian, Japanese, Chinese, Korean.
-- [x] **Custom Image**: Personalize with your own cover image.
-- [x] **Themes**: Choose between Dark mode and Light mode.
-- [x] **Song Selection**: Highlight your favorite track.
-- [x] **Lyrics Selection**: Feature meaningful lyrics.
+| **Track: Saturn by SZA**                                             | **Album: Charm by Clairo**                                             |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| ![Track Example](https://i.ibb.co.com/q5v8J9R/saturn-by-sza-1e3.png) | ![Album Example](https://i.ibb.co.com/TcrKKXV/charm-by-clairo-f8a.png) |
 
-More features are yet to come :)
+For more examples, check out the [examples directory](https://github.com/TrueMyst/BeatPrints/tree/main/examples).
 
-### `1.6` We got more samples!
 
-If you're looking for more samples, no worries—we've got you covered. Head to the [examples](https://github.com/TrueMyst/BeatPrints/tree/main/examples/) directory to find additional posters available for viewing.
+## ✨ Features
 
-## 🤝 Contributing
+- **Polaroid Filter for Covers**: Give your track or album covers a vintage Polaroid look.  
+- **Multi-language Support**: Supports English, Hindi, Russian, Japanese, Chinese, and Korean.  
+- **Custom Cover Images**: Personalize posters with your own images.  
+- **Theme Customization**: Switch between Dark and Light themes.  
+- **Track & Album Selection**: Highlight your favorite track or entire album.  
+- **Lyrics Highlighting**: Feature impactful lyrics directly on your poster.
 
-Contributions to BeatPrints are welcome. Feel free to submit your suggestions via pull requests. Your contributions are invaluable in enhancing this tool for everyone.
 
-## 💡 Inspiration & Gratitude
+## 🤝 Contributors
 
-I created this project after finding out that people sell these posters on [Etsy](https://www.etsy.com/market/spotify_poster) at high prices, offering only digital downloads instead of shipping actual posters. I wanted to make it free for everyone to print themselves, and I believe my posters are simpler, cleaner, and prettier.
-
-- Thanks to [Spotify Poster Generator](https://github.com/AnveshakR/poster-generator/) by [@AnveshakR](https://github.com/AnveshakR) for a good amount of ideas!
-- A big shoutout to [@Magniquick](https://github.com/Magniquick) & @[Krishna-Gunjan](https://github.com/Krishna-Gunjan) for their big contributions!
-- And a heartfelt thank you to [@T-Dynamos](https://github.com/T-Dynamos) and [@cherriae](https://github.com/cherriae) for their significant improvements to BeatPrints.
-
-## 📋 About License
-
-**BeatPrints** is released under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**, which grants the following permissions:
-
-- **Use:** Copy, share, and adapt the material.
-- **Attribution:** Provide appropriate credit to the owner and a link to the license.
-- **NonCommercial:** Don't use it for commercial purposes.
-- **ShareAlike:** Share adaptations under the same license.
-- **No Additional Restrictions:** Don't impose extra legal or technological limitations.
-
-For more detailed information, please check out the [LICENSE](https://github.com/TrueMyst/BeatPrints/blob/main/LICENSE)
-
-<br>
+Thank you to all contributors for making BeatPrints better!
 
 <p align="center">
-Made with 💜<br>
+ <a href="https://github.com/TrueMyst/BeatPrints/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=TrueMyst/BeatPrints" />
+</a>
+</p>
+
+
+## 💡 Why BeatPrints?
+
+I created this project after finding out that people sell these posters on [Etsy](https://www.etsy.com/market/spotify_poster) at high prices, offering only digital downloads instead of shipping actual posters. 
+
+I wanted to make it free for everyone to print themselves, as I believe my posters are simpler, cleaner, and prettier.
+
+
+## ❤️  Special Thanks
+
+- A big thanks to [Spotify Poster Generator](https://github.com/AnveshakR/poster-generator/) by [@AnveshakR](https://github.com/AnveshakR) for inspiring BeatPrints with amazing ideas!  
+- Shoutout to [@Magniquick](https://github.com/Magniquick), [@Krishna-Gunjan](https://github.com/Krishna-Gunjan), and [@itsnotrin](https://github.com/itsnotrin) for their awesome contributions!  
+- Thanks to [@T-Dynamos](https://github.com/T-Dynamos) and [@cherriae](https://github.com/cherriae) for their great improvements and tweaks.  
+- A special nod to [@itsnotrin](https://github.com/itsnotrin) for helping make album poster generation possible!  
+
+
+## 📜 License
+
+BeatPrints is distributed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**:
+
+- **Use**: Free to share and adapt.  
+- **Attribution**: Provide credit and a link to the license.  
+- **NonCommercial**: Not for commercial use.  
+- **ShareAlike**: Adaptations must follow the same license.  
+
+Read the full license [here](https://github.com/TrueMyst/BeatPrints/blob/main/LICENSE).  
+
+
+<p align="center">
+Made with 💜 <br>
 elysianmyst, 2024
 </p>

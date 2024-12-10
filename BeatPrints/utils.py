@@ -18,7 +18,6 @@ def organize_tracks(tracks: list) -> tuple:
     Organizes tracks into columns that fit within the maximum width.
 
     Args:
-        draw (ImageDraw.ImageDraw): Draw context for calculating text widths.
         tracks (list): List of track names.
 
     Returns:
@@ -34,7 +33,7 @@ def organize_tracks(tracks: list) -> tuple:
         # Calculate the width of the longest track in each column
         max_tracks = [max(col, key=len) for col in columns]
         track_widths = [
-            write.get_length(track, write.font("Light"), consts.S_TRACKS)
+            write.calculate_text_width(track, write.font("Light"), consts.S_TRACKS)
             for track in max_tracks
         ]
 
@@ -42,6 +41,7 @@ def organize_tracks(tracks: list) -> tuple:
         total_width = sum(track_widths) + consts.S_SPACING * (len(columns) - 1)
         if total_width <= consts.MAX_WIDTH:
             break  # Fits, so exit the loop
+
         else:
             # Remove the longest track from the longest column and retry
             longest_column_index = track_widths.index(max(track_widths))
@@ -61,7 +61,7 @@ def special_code() -> int:
     return ((int(datetime.datetime.now().timestamp()) % 100000) + 100000) % 100000
 
 
-def create_filename(song: str, artist: str) -> str:
+def filename(song: str, artist: str) -> str:
     """
     Creates a safe filename based on the song and artist names.
 

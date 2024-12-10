@@ -36,6 +36,15 @@ def clear() -> None:
 
 
 def tablize_track(tracks: List[TrackMetadata]):
+    """
+    Creates a pretty table for displaying track  search results.
+
+    Args:
+        tracks (List[TrackMetadata]): List of track from Spotify API
+
+    Returns:
+        Table: Formatted rich table of tracks
+    """
     table = Table(box=box.ROUNDED)
 
     table.add_column("*", justify="center", style="cyan")
@@ -55,7 +64,7 @@ def tablize_albums(albums: List[AlbumMetadata]) -> Table:
     Creates a pretty table for displaying album search results.
 
     Args:
-        albums (List[dict]): List of album data from Spotify API
+        albums (List[AlbumMetadata]): List of album data from Spotify API
 
     Returns:
         Table: Formatted rich table of albums
