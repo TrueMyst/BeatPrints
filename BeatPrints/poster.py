@@ -30,7 +30,7 @@ class Poster:
         Args:
             save_to (str): Path where posters will be saved.
         """
-        self.save_to = save_to
+        self.save_to = os.path.realpath(os.path.expanduser(save_to))
 
     def _add_common_text(
         self,
@@ -140,7 +140,7 @@ class Poster:
             poster.save(os.path.join(self.save_to, name))
 
             print(
-                f"✨ Poster for {metadata.name} by {metadata.artist} saved to {os.path.realpath(self.save_to)}"
+                f"✨ Poster for {metadata.name} by {metadata.artist} saved to {self.save_to}"
             )
 
     def album(
@@ -209,5 +209,5 @@ class Poster:
             name = utils.filename(metadata.name, metadata.artist)
             poster.save(os.path.join(self.save_to, name))
             print(
-                f"✨ Album poster for {metadata.name} by {metadata.artist} saved to {os.path.realpath(self.save_to)}"
+                f"✨ Album poster for {metadata.name} by {metadata.artist} saved to {self.save_to}"
             )

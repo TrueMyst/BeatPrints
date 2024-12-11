@@ -3,9 +3,9 @@ import os
 from rich import box
 from rich.table import Table
 from questionary import Style
-from typing import Union, List
+from typing import List, Union
 
-from BeatPrints.spotify import AlbumMetadata, TrackMetadata
+from BeatPrints.spotify import TrackMetadata, AlbumMetadata
 
 default = Style(
     [
@@ -39,13 +39,7 @@ def clear() -> None:
 
 def tablize_track(tracks: List[TrackMetadata]):
     """
-    Creates a pretty table for displaying track  search results.
-
-    Args:
-        tracks (List[TrackMetadata]): List of track from Spotify API
-
-    Returns:
-        Table: Formatted rich table of tracks
+    Creates a pretty table for displaying track search results.
     """
     table = Table(box=box.ROUNDED)
 
@@ -64,14 +58,7 @@ def tablize_track(tracks: List[TrackMetadata]):
 def tablize_albums(albums: List[AlbumMetadata]) -> Table:
     """
     Creates a pretty table for displaying album search results.
-
-    Args:
-        albums (List[AlbumMetadata]): List of album data from Spotify API
-
-    Returns:
-        Table: Formatted rich table of albums
     """
-
     table = Table(box=box.ROUNDED)
 
     table.add_column("*", justify="center", style="cyan")

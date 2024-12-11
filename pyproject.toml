@@ -9,10 +9,7 @@ readme = "README.md"
 keywords = ["spotify", "lyrics", "pinterest", "lrclibapi"]
 repository = "https://github.com/TrueMyst/BeatPrints"
 
-packages = [
-  { include = "BeatPrints" },
-  { include = "cli" },
-]
+packages = [{ include = "BeatPrints" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -23,6 +20,9 @@ lrclibapi = "^0.3.1"
 fonttools = "^4.54.1"
 questionary = "^2.0.1"
 rich = "^13.9.4"
+
+[tool.poetry.scripts]
+beatprints = 'cli.prompt:main'
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"
