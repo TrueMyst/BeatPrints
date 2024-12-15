@@ -10,11 +10,6 @@ build:
   tools:
     python: "3.13"
 
-  commands:
-    - pip install -e .
-    - cd docs
-    - make clean && make html
-
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
    configuration: docs/conf.py
