@@ -11,7 +11,7 @@
 project = "BeatPrints"
 copyright = "2024, elysianmyst"
 author = "elysianmyst"
-release = "v1.0.2"
+release = "v1.0.3"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
