@@ -19,6 +19,7 @@ jobs:
 
     environment:
       name: pypi
+      url: https://pypi.org/p/BeatPrints
 
     steps:
       - uses: actions/checkout@v4
@@ -35,8 +36,8 @@ jobs:
 
       - name: Run Black
         run: |
-          poetry add --dev black
-          poetry run black . --check
+          poetry add black
+          poetry run black .
 
         # Continue even if Black finds unformatted code
         continue-on-error: true 

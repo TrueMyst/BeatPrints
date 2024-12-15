@@ -1,18 +1,24 @@
 """
 Module: spotify.py
 
-Provides functionalities related to interacting with the Spotify API.
+Provides functionality related to interacting with the Spotify API.
 """
 
-import requests, datetime
-from dataclasses import dataclass
+import requests
+import datetime
 
 from typing import List
+from dataclasses import dataclass
+
 from .errors import NoMatchingTrackFound, NoMatchingAlbumFound, InvalidSearchLimit
 
 
 @dataclass
 class TrackMetadata:
+    """
+    Data structure to store metadata for a track.
+    """
+
     name: str
     artist: str
     album: str
@@ -25,6 +31,10 @@ class TrackMetadata:
 
 @dataclass
 class AlbumMetadata:
+    """
+    Data structure to store metadata for an album, including a track list.
+    """
+
     name: str
     artist: str
     released: str
@@ -36,7 +46,7 @@ class AlbumMetadata:
 
 class Spotify:
     """
-    Uses Spotify's API to search and retrieve information about a track.
+    A class for interacting with the Spotify API to search and retrieve track/album information.
     """
 
     def __init__(self, CLIENT_ID: str, CLIENT_SECRET: str) -> None:
@@ -47,41 +57,43 @@ class Spotify:
             CLIENT_ID (str): Spotify API client ID.
             CLIENT_SECRET (str): Spotify API client secret.
         """
-        self.__CLIENT_ID = CLIENT_ID
-        self.__CLIENT_SECRET = CLIENT_SECRET
+        self.CLIENT_ID = CLIENT_ID
+        self.CLIENT_SECRET = CLIENT_SECRET
         self.__BASE_URL = "https://api.spotify.com/v1"
         self.__authorization_header()
 
     def __authorization_header(self) -> None:
         """
         Constructs the authorization header required for API requests.
+        Retrieves an access token from Spotify's accounts service.
         """
         endpoint = "https://accounts.spotify.com/api/token"
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         payload = {
             "grant_type": "client_credentials",
-            "client_id": self.__CLIENT_ID,
-            "client_secret": self.__CLIENT_SECRET,
+            "client_id": self.CLIENT_ID,
+            "client_secret": self.CLIENT_SECRET,
         }
 
-        # Requesting token from Spotify API
+        # Request token from Spotify API
         data = requests.post(endpoint, headers=headers, params=payload)
         token = data.json()["access_token"]
 
+        # Store authorization header for use in API requests
         self.__AUTH_HEADER = {"Authorization": f"Bearer {token}"}
 
     def _format_release_date(self, release_date: str, precision: str) -> str:
         """
-        Formats the release date of a track.
+        Formats the release date of a track or album.
 
         Args:
             release_date (str): Release date string from Spotify API.
-            precision (str): Precision of the release date
-                ('day', 'month', 'year').
+            precision (str): Precision of the release date ('day', 'month', 'year').
 
         Returns:
-            str: Formatted release date.
+            str: Formatted release date in 'Month Day, Year' format.
         """
+        # Format the release date based on the precision
         date_format = {"day": "%Y-%m-%d", "month": "%Y-%m", "year": "%Y"}.get(
             precision, ""
         )
@@ -99,24 +111,25 @@ class Spotify:
         Returns:
             str: Formatted duration in MM:SS format.
         """
+        # Convert milliseconds to minutes and seconds
         minutes = duration_ms // 60000
         seconds = (duration_ms // 1000) % 60
         return f"{minutes:02d}:{seconds:02d}"
 
     def get_track(self, query: str, limit: int = 6) -> List[TrackMetadata]:
         """
-        Searches for tracks matching the given query.
+        Searches for tracks based on a query and retrieves their metadata.
 
         Args:
-            query (str): The search query for the track.
+            query (str): The search query for the track (e.g. track name - artist).
             limit (int, optional): Maximum number of tracks to retrieve. Defaults to 6.
 
         Returns:
-            List[TrackMetadata]: A list of the track's metadata.
+            List[TrackMetadata]: A list of track metadata.
 
         Raises:
             InvalidSearchLimit: If the limit is less than 1.
-            NoMatchingTrackFound: If no matching songs are found.
+            NoMatchingTrackFound: If no matching tracks are found.
         """
         if limit < 1:
             raise InvalidSearchLimit
@@ -132,15 +145,16 @@ class Spotify:
         if not tracks:
             raise NoMatchingTrackFound
 
+        # Extract track details and format them
         for track in tracks:
 
-            # Retrieve album details
+            # Get the track's album using the album ID
             id = track["album"]["id"]
-            album_details = requests.get(
+            album = requests.get(
                 f"{self.__BASE_URL}/albums/{id}", headers=self.__AUTH_HEADER
             ).json()
 
-            # Format metadata
+            # Create TrackMetadata object with formatted data
             metadata = {
                 "name": track["name"],
                 "artist": track["artists"][0]["name"],
@@ -151,7 +165,7 @@ class Spotify:
                 ),
                 "duration": self._format_duration(track["duration_ms"]),
                 "image": track["album"]["images"][0]["url"],
-                "label": album_details["label"],
+                "label": album["label"],
                 "id": track["id"],
             }
 
@@ -161,14 +175,14 @@ class Spotify:
 
     def get_album(self, query: str, limit: int = 6) -> List[AlbumMetadata]:
         """
-        Retrieves album metadata and track listing.
+        Searches for albums based on a query and retrieves their metadata, including track listing.
 
         Args:
-            query (str): The search query for the album.
+            query (str): The search query for the album (e.g. album name - artist).
             limit (int, optional): Maximum number of albums to retrieve. Defaults to 6.
 
         Returns:
-            List[AlbumMetadata]: A list of album metadata, including track listings.
+            List[AlbumMetadata]: A list of album metadata with track listings.
 
         Raises:
             InvalidSearchLimit: If the limit is less than 1.
@@ -188,19 +202,20 @@ class Spotify:
         if not albums:
             raise NoMatchingAlbumFound
 
-        # Process albums in one loop
+        # Process each album to get details and tracklist
         for album in albums:
             id = album["id"]
             album_details = requests.get(
                 f"{self.__BASE_URL}/albums/{id}", headers=self.__AUTH_HEADER
             ).json()
 
-            # Fetch track names directly from album details
+            # Extract track names from album details
             tracks = [
                 track["name"]
                 for track in album_details.get("tracks", {}).get("items", [])
             ]
 
+            # Create AlbumMetadata object with formatted data
             metadata = {
                 "name": album["name"],
                 "artist": album["artists"][0]["name"],

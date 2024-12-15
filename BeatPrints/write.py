@@ -6,16 +6,22 @@ A custom module written to improve Pillow’s draw.text functionality.
 
 import os
 
-from .consts import P_FONTS
-
 from fontTools.ttLib import TTFont
 from PIL import ImageFont, ImageDraw
 from typing import Optional, Dict, Literal, Tuple, List
+
+from .consts import P_FONTS
 
 
 def _load_fonts(*font_paths: str) -> Dict[str, TTFont]:
     """
     Loads font files into memory and returns a dictionary of font objects.
+
+    Args:
+        *font_paths (str): Paths to font files.
+
+    Returns:
+        dict: A dictionary mapping font paths to font objects.
     """
     fonts = {}
     for path in font_paths:
@@ -27,6 +33,12 @@ def _load_fonts(*font_paths: str) -> Dict[str, TTFont]:
 def font(weight: Literal["Regular", "Bold", "Light"]) -> Dict[str, TTFont]:
     """
     Loads fonts of the specified weight from the predefined assets/fonts directory.
+
+    Args:
+        weight (str): The desired font weight ("Regular", "Bold", or "Light").
+
+    Returns:
+        dict: A dictionary mapping font paths to font objects for the given weight.
     """
     fonts_path = P_FONTS
     font_families = [
@@ -46,7 +58,14 @@ def font(weight: Literal["Regular", "Bold", "Light"]) -> Dict[str, TTFont]:
 
 def _check_glyph(font: TTFont, glyph: str) -> bool:
     """
-    Check if a glyph exists in a font.
+    Checks if a specific glyph exists in the given font.
+
+    Args:
+        font (TTFont): The font to check.
+        glyph (str): The character (glyph) to search for.
+
+    Returns:
+        bool: True if the glyph exists in the font, False otherwise.
     """
     try:
         cmap = font.getBestCmap()
@@ -59,12 +78,21 @@ def _check_glyph(font: TTFont, glyph: str) -> bool:
 def group_by_font(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
     """
     Groups consecutive characters in a string based on the font required to render them.
+
+    Args:
+        text (str): The text to be grouped by font.
+        fonts (dict): A dictionary mapping font paths to font objects.
+
+    Returns:
+        list: A list of lists, where each sublist contains a group of characters
+              and their corresponding font path.
     """
     groups = []
 
-    # Characters rendered with the default font.
+    # Common characters to render with the default font.
     common_chars = """ ,!@#$%^&*(){}[]+_=-""''?"""
 
+    # Use the first font in the dictionary as the default font.
     default_font = next(iter(fonts))
     last_font_path = default_font
 
@@ -89,12 +117,12 @@ def group_by_font(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
         if not char_matched:
             groups.append([char, last_font_path])
 
-    # Merge consecutive characters with the same font into chunks.
+    # Merge consecutive characters that use the same font into one group.
     merged = [groups[0]]
     for char, font_path in groups[1:]:
-        if merged[-1][1] == font_path:
 
-            # Append character to the current chunk.
+        # Append the character to the current group.
+        if merged[-1][1] == font_path:
             merged[-1][0] += char
         else:
             merged.append([char, font_path])
@@ -115,6 +143,17 @@ def render_singleline(
 ) -> None:
     """
     Renders a single line of text on the image with specified styling.
+
+    Args:
+        draw (ImageDraw.ImageDraw): The drawing context.
+        pos (tuple): The (x, y) position to start drawing.
+        text (str): The text to render.
+        color (tuple): The text color in RGB format.
+        fonts (dict): A dictionary of fonts to use.
+        size (int): The font size.
+        anchor (str, optional): Text anchor for alignment.
+        align (str, optional): Text alignment ("left", "center", "right").
+        direction (str, optional): Text direction ("rtl", "ltr", "ttb").
     """
     offset = 0
     formatted_text = group_by_font(text, fonts)
@@ -149,6 +188,14 @@ def render_singleline(
 def calculate_text_width(text: str, fonts: Dict[str, TTFont], size: int) -> int:
     """
     Returns the width of the text without drawing it.
+
+    Args:
+        text (str): The text to measure.
+        fonts (dict): A dictionary of fonts to use.
+        size (int): The font size.
+
+    Returns:
+        int: The width of the text.
     """
     total_width = 0
 
@@ -178,8 +225,19 @@ def text(
     direction: Literal["rtl", "ltr", "ttb"] = "ltr",
 ) -> None:
     """
-    Renders text on an image at a specified position with
-    customizable font, size, color, alignment, direction, and spacing.
+    Renders text on an image at a specified position with customizable font, size, color, alignment, direction, and spacing.
+
+    Args:
+        draw (ImageDraw.ImageDraw): The drawing context.
+        pos (tuple): The (x, y) position to start drawing.
+        text (str): The text to render.
+        color (tuple): The text color in RGB format.
+        fonts (dict): A dictionary of fonts to use.
+        size (int): The font size.
+        anchor (str, optional): Text anchor for alignment.
+        spacing (int, optional): Vertical spacing between lines.
+        align (str, optional): Text alignment ("left", "center", "right").
+        direction (str, optional): Text direction ("rtl", "ltr", "ttb").
     """
     x, y = pos
 
@@ -219,6 +277,15 @@ def heading(
 ) -> None:
     """
     Draws a heading within a specified width limit on an image.
+
+    Args:
+        draw (ImageDraw.ImageDraw): The drawing context.
+        pos (tuple): The (x, y) position to start drawing.
+        max_width (int): The maximum width allowed for the heading.
+        text (str): The text to render.
+        color (tuple): The text color in RGB format.
+        fonts (dict): A dictionary of fonts to use.
+        size (int): The font size.
     """
     total_width = 0
 

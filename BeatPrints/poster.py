@@ -1,26 +1,27 @@
 """
 Module: poster.py
 
-Generate posters based on track or albums.
+Generates posters based on track or album information.
 """
 
 import os
 import random
+
+from pathlib import Path
 from typing import Optional, Union
+
 
 from PIL import Image, ImageDraw
 
-from . import image, write, utils
 from .consts import *
+from . import image, write
+from .utils import filename, organize_tracks
 from .spotify import TrackMetadata, AlbumMetadata
 
 
 class Poster:
     """
-    A class to generate and save posters containing track or album information.
-
-    Attributes:
-        save_to (str): Directory where generated posters will be saved.
+    A class for generating and saving posters containing track or album information.
     """
 
     def __init__(self, save_to: str):
@@ -30,7 +31,7 @@ class Poster:
         Args:
             save_to (str): Path where posters will be saved.
         """
-        self.save_to = os.path.realpath(os.path.expanduser(save_to))
+        self.save_to = Path(save_to).expanduser().resolve()
 
     def _add_common_text(
         self,
@@ -46,6 +47,7 @@ class Poster:
             metadata: Metadata containing the required text.
             color (tuple): Text color.
         """
+        # Add heading (track or album name) in bold
         write.heading(
             draw,
             C_HEADING,
@@ -55,6 +57,7 @@ class Poster:
             write.font("Bold"),
             S_HEADING,
         )
+        # Add artist name
         write.text(
             draw,
             C_ARTIST,
@@ -64,6 +67,7 @@ class Poster:
             S_ARTIST,
             anchor="ls",
         )
+        # Add release year and label info
         write.text(
             draw,
             C_LABEL,
@@ -83,39 +87,37 @@ class Poster:
         custom_cover: Optional[str] = None,
     ) -> None:
         """
-        Generates a track poster with lyrics, cover, and scannable code.
+        Generates a poster for a track, which includes lyrics.
 
         Args:
-            metadata (TrackMetadata): Track details.
-            lyrics (str): Track lyrics.
-            accent (bool): Flag to add design accents.
-            dark_theme (bool): Flag for dark theme.
-            custom_cover (Optional[str]): Path to custom cover.
+            metadata (TrackMetadata): Metadata containing details about the track.
+            lyrics (str): The lyrics of the track.
+            accent (bool, optional): Flag to add an accent at the bottom of the poster. Defaults to False.
+            dark_theme (bool, optional): Flag to use a dark theme. Defaults to False.
+            custom_cover (Optional[str], optional): Path to a custom cover image. Defaults to None.
         """
-
-        # Get theme colors and template
+        # Get theme colors and template for the poster
         color, template = image.get_theme(dark_theme)
 
-        # Get cover art and scannable code
+        # Get cover art and spotify scannable code
         cover = image.cover(metadata.image, custom_cover)
         scannable = image.scannable(metadata.id, dark_theme)
 
-        # Open and prepare poster
         with Image.open(template) as poster:
             poster = poster.convert("RGB")
             draw = ImageDraw.Draw(poster)
 
-            # Paste cover and scannable code
+            # Paste the cover and scannable Spotify code
             poster.paste(cover, C_COVER)
             poster.paste(scannable, C_SPOTIFY_CODE, scannable)
 
-            # Add color palette or design accents
+            # Optionally add a color palette or accent design
             image.draw_palette(draw, cover, accent)
 
-            # Add common text
+            # Add common track information (name, artist, etc.)
             self._add_common_text(draw, metadata, color)
 
-            # Add duration and lyrics
+            # Add track duration and lyrics to the poster
             write.text(
                 draw,
                 C_DURATION,
@@ -135,8 +137,8 @@ class Poster:
                 anchor="lt",
             )
 
-            # Save the poster
-            name = utils.filename(metadata.name, metadata.artist)
+            # Save the generated poster with a unique filename
+            name = filename(metadata.name, metadata.artist)
             poster.save(os.path.join(self.save_to, name))
 
             print(
@@ -146,52 +148,54 @@ class Poster:
     def album(
         self,
         metadata: AlbumMetadata,
+        indexing: bool = False,
         accent: bool = False,
         dark_theme: bool = False,
-        indexing: bool = False,
         custom_cover: Optional[str] = None,
     ) -> None:
         """
-        Generates an album poster with album info and track listing.
+        Generates a poster for an album, which includes track listing.
 
         Args:
-            metadata (AlbumMetadata): Album details.
-            accent (bool): Flag to add design accents.
-            dark_theme (bool): Flag for dark theme.
-            indexing (bool): Flag to add index numbers to tracks.
-            custom_cover (Optional[str]): Path to custom cover.
+            metadata (AlbumMetadata): Metadata containing details about the album.
+            indexing (bool, optional): Flag to add index numbers to the tracks. Defaults to False.
+            accent (bool, optional): Flag to add an accent at the bottom of the poster. Defaults to False.
+            dark_theme (bool, optional): Flag to use a dark theme. Defaults to False.
+            custom_cover (Optional[str], optional): Path to a custom cover image. Defaults to None.
         """
 
-        # Get theme and cover
-        color, template_path = image.get_theme(dark_theme)
+        # Get theme colors and template for the poster
+        color, template = image.get_theme(dark_theme)
+
+        # Get cover art and spotify scannable code
         cover = image.cover(metadata.image, custom_cover)
         scannable = image.scannable(metadata.id, dark_theme, is_album=True)
 
-        # Open and prepare poster
-        with Image.open(template_path) as poster:
+        with Image.open(template) as poster:
             poster = poster.convert("RGB")
             draw = ImageDraw.Draw(poster)
 
-            # Paste cover and scannable code
+            # Paste the album cover and scannable Spotify code
             poster.paste(cover, C_COVER)
             poster.paste(scannable, C_SPOTIFY_CODE, scannable)
 
-            # Add color palette or design accents
+            # Optionally add a color palette or design accents
             image.draw_palette(draw, cover, accent)
 
-            # Add common text
+            # Add common album information (name, artist, etc.)
             self._add_common_text(draw, metadata, color)
 
-            # Shuffle and optionally index tracks
+            # Shuffle tracks and optionally index them
             tracks = metadata.tracks[:]
             random.shuffle(tracks)
             if indexing:
                 tracks = [f"{i + 1}. {track}" for i, track in enumerate(tracks)]
 
-            # Organize and render tracks
-            tracklist, track_widths = utils.organize_tracks(tracks)
+            # Organize the tracklist and render it on the poster
+            tracklist, track_widths = organize_tracks(tracks)
             x, y = C_TRACKS
 
+            # Render the tracklist, adjusting the position for each column
             for track_column, column_width in zip(tracklist, track_widths):
                 write.text(
                     draw,
@@ -205,8 +209,8 @@ class Poster:
                 )
                 x += column_width + S_SPACING  # Adjust x for next column
 
-            # Save the poster
-            name = utils.filename(metadata.name, metadata.artist)
+            # Save the generated album poster with a unique filename
+            name = filename(metadata.name, metadata.artist)
             poster.save(os.path.join(self.save_to, name))
             print(
                 f"✨ Album poster for {metadata.name} by {metadata.artist} saved to {self.save_to}"

@@ -166,7 +166,7 @@ def create_poster():
             album = select_item("album", SEARCH_LIMIT)
 
             if album:
-                ps.album(album, features["accent"], features["theme"], index, image)
+                ps.album(album, index, features["accent"], features["theme"], image)
 
     except Exception:
         return "🤚 Exiting..."

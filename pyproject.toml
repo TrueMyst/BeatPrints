@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "BeatPrints"
-version = "1.0.1"
+version = "1.0.2"
 description = "Create eye-catching, pinterest-style music posters effortlessly."
 authors = ["elysianmyst <74355265+TrueMyst@users.noreply.github.com>"]
 license = "CC-BY-NC-4.0"
@@ -9,7 +9,7 @@ readme = "README.md"
 keywords = ["spotify", "lyrics", "pinterest", "lrclibapi"]
 repository = "https://github.com/TrueMyst/BeatPrints"
 
-packages = [{ include = "BeatPrints" }]
+packages = [{ include = "BeatPrints" }, { include = "cli" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"

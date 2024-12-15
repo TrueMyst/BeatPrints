@@ -1,0 +1,6 @@
+Misc
+====
+
+.. toctree::
+
+   FAQ

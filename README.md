@@ -20,6 +20,7 @@
 
 ![examples](https://i.ibb.co.com/y0jKqHK/banner.png)
 
+<h3 align="center">📔 Check out the new documentation <a href="https://beatprints.readthedocs.io/en/latest/">here!</a></h3>
 
 ## 📦 Installation
 
@@ -63,41 +64,20 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 # Initialize components
 ly = lyrics.Lyrics()
-ps = poster.Poster("./posters/")
+ps = poster.Poster("./")
 sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
 
-# Search for a song
-search = sp.get_track("Juno Clairo", limit=1)
+# Search for a track
+search = sp.get_track("Saturn by SZA", limit=1)
 
-# Get metadata and lyrics
+# Get the track's metadata and lyrics
 metadata = search[0]
 lyrics = ly.get_lyrics(metadata)
 highlighted_lyrics = ly.select_lines(lyrics, "5-9")
 
-# Generate a poster
+# Generate the track poster
 ps.track(metadata, highlighted_lyrics)
 ```
-> [!IMPORTANT]  
->  
-> **For Windows Users**  
-> If you encounter the following error:  
->  
-> ```  
-> KeyError: 'setting text direction, language or font features is not supported without libraqm'  
-> ```  
-> You can resolve this by downloading `fribidi.dll` from [here](https://www.dllme.com/dll/files/fribidi) and placing it in your Python directory, such as:  
->  
-> ```
-> C:\Program Files\Python312\
-> ```  
->  
-> **For macOS Users**  
-> If you run into the same issue, fix it by reinstalling Pillow with the correct configuration:  
->  
-> ```bash  
-> pip uninstall Pillow  
-> pip install Pillow --global-option="build_ext" --config-settings="-I=/opt/homebrew/Cellar"
-> ```  
 
 ## 🥞 CLI Setup
 
@@ -106,7 +86,8 @@ To get started with the BeatPrints CLI, you'll need to set up a configuration fi
 ### Windows
 
 1. Create a folder named `BeatPrints` in the following directory:
-```
+
+```python
 C:\Users\<YourUsername>\AppData\Roaming\BeatPrints\
 ```
 
@@ -127,11 +108,12 @@ Replace `<path-to-save-your-posters>` with the path where you'd like to save the
 ### Linux or macOS
 
 1. Create a folder named `BeatPrints` in your `~/.config/` directory:
-```
+
+```python
 ~/.config/BeatPrints/
 ```
 
-2. Inside this folder, create a file called `config.toml` with the same contents as mentioned above.
+3. Inside this folder, create a file called `config.toml` with the same contents as mentioned above.
 
 ### Running the CLI
 
@@ -144,7 +126,7 @@ Your poster will be saved in the output directory you specified in the `config.t
 
 ## 🖼️ Examples
 
-Here are a few posters created with BeatPrints:  
+Here are a few posters created with BeatPrints:
 
 | **Track: Saturn by SZA**                                             | **Album: Charm by Clairo**                                             |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -170,7 +152,7 @@ Thank you to all contributors for making BeatPrints better!
 <p align="center">
  <a href="https://github.com/TrueMyst/BeatPrints/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=TrueMyst/BeatPrints" />
-</a>
+ </a>
 </p>
 
 
