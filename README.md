@@ -68,7 +68,7 @@ ps = poster.Poster("./")
 sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
 
 # Search for a track
-search = sp.get_track("Saturn by SZA", limit=1)
+search = sp.get_track("Saturn SZA", limit=1)
 
 # Get the track's metadata and lyrics
 metadata = search[0]
