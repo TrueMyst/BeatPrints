@@ -20,6 +20,7 @@ lrclibapi = "^0.3.1"
 fonttools = "^4.54.1"
 questionary = "^2.0.1"
 rich = "^13.9.4"
+toml = "^0.10.2"
 
 [tool.poetry.scripts]
 beatprints = 'cli.prompt:main'

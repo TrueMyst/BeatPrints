@@ -25,7 +25,7 @@ To generate a track poster, follow the steps below.
    sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
 
    # Search for a track
-   search = sp.get_track("Saturn by SZA", limit=1)
+   search = sp.get_track("Saturn - SZA", limit=1)
 
    # Get the track's metadata and lyrics
    metadata = search[0]
@@ -56,13 +56,17 @@ Like tracks, you can also create an album poster, follow these steps below.
    sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
 
    # Search for an album
-   search = sp.get_album("Charm by Clairo", limit=1)
+   search = sp.get_album("Charm - Clairo", limit=1)
 
    # Get the album's metadata
    metadata = search[0]
 
    # Generate the album poster
    ps.album(metadata)
+
+.. tip::
+
+  Use a hyphen (-) between the track/album and the artist for more accurate results.
 
 .. seealso::
 
