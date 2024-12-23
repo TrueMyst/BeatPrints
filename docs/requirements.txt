@@ -1,2 +1,3 @@
 furo
 sphinx-copybutton
+sphinxcontrib-video

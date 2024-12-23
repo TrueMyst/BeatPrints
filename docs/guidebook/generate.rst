@@ -1,7 +1,7 @@
-Generate Posters
-================
+🎨 Code Examples
+===================
 
-This is a quick guide on how you can generate posters using *BeatPrints*.
+This is a quick guide on how to generate posters using **BeatPrints** through code.
 
 🎷 Track Posters
 ^^^^^^^^^^^^^^^^^
@@ -63,6 +63,8 @@ Like tracks, you can also create an album poster, follow these steps below.
 
    # Generate the album poster
    ps.album(metadata)
+
+This is a basic guide on generating your posters. You can extend it by creating your own functions to make them more useful.
 
 .. tip::
 

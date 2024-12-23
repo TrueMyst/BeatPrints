@@ -1,5 +1,5 @@
-Misc
-====
+Miscellaneous
+=============
 
 .. toctree::
 

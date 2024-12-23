@@ -79,50 +79,11 @@ highlighted_lyrics = ly.select_lines(lyrics, "5-9")
 ps.track(metadata, highlighted_lyrics)
 ```
 
-## 🥞 CLI Setup
+## 🥞 CLI
 
-To get started with the BeatPrints CLI, you'll need to set up a configuration file.
+Here’s a short video showing how to generate posters using the CLI. For more information refer to the documentation [here](https://beatprints.readthedocs.io/en/latest/guidebook/cli.html)
 
-### Windows
-
-1. Create a folder named `BeatPrints` in the following directory:
-
-```python
-C:\Users\<YourUsername>\AppData\Roaming\BeatPrints\
-```
-
-2. Inside this folder, create a file called `config.toml` with the following contents:
-
-```toml
-[general]
-search_limit = 7
-output_directory = "<path-to-save-your-posters>" 
-
-[credentials]
-client_id = "your-client-id"
-client_secret = "your-client-secret"
-```
-
-Replace `<path-to-save-your-posters>` with the path where you'd like to save the generated posters, and fill in the `client_id` and `client_secret` with your Spotify credentials.
-
-### Linux or macOS
-
-1. Create a folder named `BeatPrints` in your `~/.config/` directory:
-
-```python
-~/.config/BeatPrints/
-```
-
-3. Inside this folder, create a file called `config.toml` with the same contents as mentioned above.
-
-### Running the CLI
-
-Once the config file is set up, you can run the BeatPrints CLI:
-
-1. Open your terminal.
-2. Type `beatprints` and press Enter.
-
-Your poster will be saved in the output directory you specified in the `config.toml` file.
+https://github.com/user-attachments/assets/3efb7028-c533-4bf4-880b-da3a71f8a3db
 
 ## 🖼️ Examples
 

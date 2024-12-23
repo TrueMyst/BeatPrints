@@ -139,7 +139,6 @@ def render_singleline(
     size: int,
     anchor: Optional[str] = None,
     align: Literal["left", "center", "right"] = "left",
-    direction: Literal["rtl", "ltr", "ttb"] = "ltr",
 ) -> None:
     """
     Renders a single line of text on the image with specified styling.
@@ -153,7 +152,6 @@ def render_singleline(
         size (int): The font size.
         anchor (str, optional): Text anchor for alignment.
         align (str, optional): Text alignment ("left", "center", "right").
-        direction (str, optional): Text direction ("rtl", "ltr", "ttb").
     """
     offset = 0
     formatted_text = group_by_font(text, fonts)
@@ -177,7 +175,6 @@ def render_singleline(
             font=font,
             anchor=anchor,
             align=align,
-            direction=direction,
             embedded_color=True,
         )
 
@@ -222,10 +219,9 @@ def text(
     anchor: Optional[str] = None,
     spacing: int = 0,
     align: Literal["left", "center", "right"] = "left",
-    direction: Literal["rtl", "ltr", "ttb"] = "ltr",
 ) -> None:
     """
-    Renders text on an image at a specified position with customizable font, size, color, alignment, direction, and spacing.
+    Renders text on an image at a specified position with customizable font, size, color, alignment, and spacing.
 
     Args:
         draw (ImageDraw.ImageDraw): The drawing context.
@@ -237,7 +233,6 @@ def text(
         anchor (str, optional): Text anchor for alignment.
         spacing (int, optional): Vertical spacing between lines.
         align (str, optional): Text alignment ("left", "center", "right").
-        direction (str, optional): Text direction ("rtl", "ltr", "ttb").
     """
     x, y = pos
 
@@ -250,20 +245,12 @@ def text(
         # Call render_singleline drawing for each line
         for line in lines:
             render_singleline(
-                draw,
-                (x, y + y_offset),
-                line,
-                color,
-                fonts,
-                size,
-                anchor,
-                align,
-                direction,
+                draw, (x, y + y_offset), line, color, fonts, size, anchor, align
             )
             y_offset += size + scale + spacing
     else:
         # Draw a single line
-        render_singleline(draw, pos, text, color, fonts, size, anchor, align, direction)
+        render_singleline(draw, pos, text, color, fonts, size, anchor, align)
 
 
 def heading(

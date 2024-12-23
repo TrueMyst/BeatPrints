@@ -16,29 +16,3 @@ The lack of support for some languages is due to the large size of font files (a
 I've got a really interesting idea for a feature for BeatPrints.
 ----------------------------------------------------------------
 I really appreciate that you want to contribute! Feel free to create an issue on the GitHub page. Just keep in mind that I started this project for fun, so actively maintaining it can be tough for me. I’m not always able to dedicate a lot of time, but I truly appreciate all ideas and contributions, and I’ll try my best to work on it when I can. Your suggestions are always welcome!
-
-How do I fix the libraqm error?
--------------------------------
-
-If you encounter this following error:
-
-.. code::
-
-  "KeyError: 'setting text direction, language or font features is not supported without libraqm'"
-
-For Windows Users
-~~~~~~~~~~~~~~~~~
-You can resolve this by downloading ``fribidi.dll`` from `here <https://www.dllme.com/dll/files/fribidi>`_ and placing it in your Python directory, such as:
-
-.. code::
-
-  C:\Program Files\Python312\
-
-For macOS Users
-~~~~~~~~~~~~~~~
-If you run into the same issue, fix it by reinstalling Pillow with the correct configuration:
-
-.. code::
-
-  pip uninstall Pillow  
-  pip install Pillow --global-option="build_ext" --config-settings="-I=/opt/homebrew/Cellar"
