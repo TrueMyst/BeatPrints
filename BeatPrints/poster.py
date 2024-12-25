@@ -5,7 +5,6 @@ Generates posters based on track or album information.
 """
 
 import os
-import random
 
 from pathlib import Path
 from typing import Optional, Union
@@ -56,8 +55,7 @@ class Poster:
             color,
             write.font("Bold"),
             S_HEADING,
-        )
-        # Add artist name
+        )  # Add artist name
         write.text(
             draw,
             C_ARTIST,
@@ -186,8 +184,8 @@ class Poster:
             self._add_common_text(draw, metadata, color)
 
             # Shuffle tracks and optionally index them
-            tracks = metadata.tracks[:]
-            random.shuffle(tracks)
+            tracks = metadata.tracks
+
             if indexing:
                 tracks = [f"{i + 1}. {track}" for i, track in enumerate(tracks)]
 
