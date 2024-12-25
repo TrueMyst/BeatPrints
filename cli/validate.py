@@ -1,5 +1,6 @@
 import os
 from PIL import Image
+from pathlib import Path
 from questionary import Validator, ValidationError
 
 
@@ -27,7 +28,7 @@ class NumericValidator(Validator):
 class ImagePathValidator(Validator):
 
     def validate(self, document):
-        filepath = document.text
+        filepath = Path(document.text).expanduser().resolve()
 
         if not os.path.isfile(filepath):
             raise ValidationError(

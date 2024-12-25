@@ -4,6 +4,7 @@ Module: spotify.py
 Provides functionality related to interacting with the Spotify API.
 """
 
+import random
 import requests
 import datetime
 
@@ -173,13 +174,16 @@ class Spotify:
 
         return tracklist
 
-    def get_album(self, query: str, limit: int = 6) -> List[AlbumMetadata]:
+    def get_album(
+        self, query: str, limit: int = 6, shuffle: bool = True
+    ) -> List[AlbumMetadata]:
         """
         Searches for albums based on a query and retrieves their metadata, including track listing.
 
         Args:
             query (str): The search query for the album (e.g. album name - artist).
             limit (int, optional): Maximum number of albums to retrieve. Defaults to 6.
+            shuffle (bool, optional): Shuffle the tracks in the list. Defaults to False.
 
         Returns:
             List[AlbumMetadata]: A list of album metadata with track listings.
@@ -214,6 +218,10 @@ class Spotify:
                 track["name"]
                 for track in album_details.get("tracks", {}).get("items", [])
             ]
+
+            # Shuffle tracks if true
+            if shuffle:
+                random.shuffle(tracks)
 
             # Create AlbumMetadata object with formatted data
             metadata = {

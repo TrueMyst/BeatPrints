@@ -156,13 +156,13 @@ def scannable(id: str, darktheme: bool = False, is_album: bool = False) -> Image
         return scan_code.resize(S_SPOTIFY_CODE, Image.Resampling.BICUBIC)
 
 
-def cover(image_url: str, path: Optional[str]) -> Image.Image:
+def cover(image_url: str, image_path: Optional[str]) -> Image.Image:
     """
     Fetches and processes an image from a URL or local path.
 
     Args:
         image_url (str): The image URL.
-        path (Optional[str]): The local image path.
+        image_path (Optional[str]): The local image path.
 
     Returns:
         Image.Image: The processed image.
@@ -171,15 +171,16 @@ def cover(image_url: str, path: Optional[str]) -> Image.Image:
         FileNotFoundError: If the local image path does not exist.
     """
 
-    if image_url:
-        img = Image.open(BytesIO(requests.get(image_url).content))
-    else:
-        image_path = Path(str(path)).expanduser().resolve()
+    if image_path:
+        path = Path(image_path).expanduser().resolve()
 
-        if image_path.exists():
-            img = crop(image_path)
-        else:
+        if not path.exists():
             raise FileNotFoundError(f"The specified path '{path}' does not exist.")
+
+        img = crop(path)
+
+    else:
+        img = Image.open(BytesIO(requests.get(image_url).content))
 
     # Apply the magic filter and resize the image for the cover
     return magicify(img.resize(S_COVER))

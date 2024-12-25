@@ -1,74 +1,41 @@
-import os
-import toml
-import platform
 import questionary
 
 from rich import print
+
+from cli.conf import *
 from cli import exutils, validate
+
 from BeatPrints import lyrics, spotify, poster, errors
 
-# Determine the config path based on the platform
-config_dir = (
-    os.getenv("APPDATA")
-    if platform.system() == "Windows"
-    else os.path.expanduser("~/.config")
-)
-config_path = os.path.join(str(config_dir), "BeatPrints", "config.toml")
-
-with open(config_path) as config:
-    config = toml.load(config)
-
-POSTERS_DIR = config["general"]["output_directory"]
-SEARCH_LIMIT = config["general"]["search_limit"]
-CLIENT_ID = config["credentials"]["client_id"]
-CLIENT_SECRET = config["credentials"]["client_secret"]
+# Initialize components
+ly = lyrics.Lyrics()
+ps = poster.Poster(POSTERS_DIR)
+sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
 
 
-# Initialize the instances
-def initialize():
-    return (
-        lyrics.Lyrics(),
-        poster.Poster(POSTERS_DIR),
-        spotify.Spotify(CLIENT_ID, CLIENT_SECRET),
-    )
+def select_track(limit: int):
+    """
+    Prompts the user to search for a track and selects one from the results.
 
+    Args:
+        limit (int): The maximum number of search results to display.
 
-ly, ps, sp = initialize()
-
-
-def select_item(item, limit):
+    Returns:
+        TrackMetadata: The selected track from the search results.
+    """
     repeat = True
-    query, result = "", []
-    emoji, get, table = "", None, None
-
-    # Set emoji, get method, and table method based on the item
-    if item == "track":
-        emoji = "🎺"
-        get = sp.get_track
-        table = exutils.tablize_track
-
-    elif item == "album":
-        emoji = "💿️"
-        get = sp.get_album
-        table = exutils.tablize_albums
-
-    prompt = f"{emoji} • Type out the {item} you love the most:"
+    prompt = f"🎺 • Type out the track you love the most:"
 
     while repeat:
-        # Prompt the user for input
         query = questionary.text(prompt, style=exutils.default).ask()
+        result = sp.get_track(query, limit=limit)
 
-        if get:
-            result = get(query, limit=limit)
-
+        # Clear the Screen
         exutils.clear()
 
-        # Display the results in a table
         print(f'{len(result)} results found for "{query}"!')
-        if table:
-            print(table(result))
+        print(exutils.tablize_track(result))
 
-        # Ask if the user wants to search again
         repeat = questionary.confirm(
             "🥞 • Not what you wanted? Want to search again?",
             default=True,
@@ -76,38 +43,82 @@ def select_item(item, limit):
         ).ask()
 
         if not repeat:
-            # Let the user select their preferred track or album
             choice = questionary.text(
-                f"🍀 • Select the {item} you like:",
+                f"🍀 • Select the track you like:",
                 validate=validate.NumericValidator(limit=len(result)),
                 style=exutils.default,
             ).ask()
 
-            # Clear Screen and return the selected choice
             exutils.clear()
             return result[int(choice) - 1]
 
 
-def handle_lyrics(ly, track):
+def select_album(limit: int, shuffle: bool = True):
+    """
+    Prompts the user to search for an album and selects one from the results.
+
+    Args:
+        limit (int): The maximum number of search results to display.
+        shuffle (bool): Whether to shuffle the search results. Defaults to True
+
+    Returns:
+        AlbumMetadata: The selected album from the search results.
+    """
+    repeat = True
+    prompt = f"💿️ • Type out the album you love the most:"
+
+    while repeat:
+        query = questionary.text(prompt, style=exutils.default).ask()
+        result = sp.get_album(query, limit, shuffle)
+
+        # Clear the screen
+        exutils.clear()
+
+        print(f'{len(result)} results found for "{query}"!')
+        print(exutils.tablize_albums(result))
+
+        repeat = questionary.confirm(
+            "🥞 • Not what you wanted? Want to search again?",
+            default=True,
+            style=exutils.default,
+        ).ask()
+
+        if not repeat:
+            choice = questionary.text(
+                f"🍀 • Select the album you like:",
+                validate=validate.NumericValidator(limit=len(result)),
+                style=exutils.default,
+            ).ask()
+
+            exutils.clear()
+            return result[int(choice) - 1]
+
+
+def handle_lyrics(track: spotify.TrackMetadata):
+    """
+    Retrieves and selects lyrics for a given track.
+
+    Args:
+        track (TrackMetadata): The track for which to fetch lyrics.
+
+    Returns:
+        str: The selected lyrics from the track.
+    """
     try:
-        # Fetch lyrics for the selected track
         lyrics_result = ly.get_lyrics(track)
         print(exutils.format_lyrics(track.name, track.artist, lyrics_result))
 
-        # Let the user select any 4 lines from the lyrics
-        range_ = questionary.text(
+        selection_range = questionary.text(
             "🎀 • Select any 4 of your favorite lines (e.g., 2-5, 7-10):",
             validate=validate.SelectionValidator(lyrics_result),
             style=exutils.default,
         ).ask()
 
-        # Return the highlighted lyrics
-        return ly.select_lines(lyrics_result, range_)
+        return ly.select_lines(lyrics_result, selection_range)
 
     except errors.NoLyricsAvailable:
         print("\n😦 • Couldn't find lyrics from sources.")
 
-        # Handle case when no lyrics are found
         return questionary.text(
             "🎀 • Paste your lyrics below:",
             validate=validate.LineCountValidator,
@@ -115,61 +126,77 @@ def handle_lyrics(ly, track):
         ).ask()
 
 
+def poster_features():
+    """
+    Prompts the user for poster customization features.
+
+    Returns:
+        tuple: A tuple containing theme, accent, and image path options.
+    """
+    features = questionary.form(
+        theme=questionary.confirm(
+            "💫 • Enable dark mode?", default=False, style=exutils.default
+        ),
+        accent=questionary.confirm(
+            "🌈 • Add a color accent?", default=False, style=exutils.default
+        ),
+        cimage=questionary.confirm(
+            "🥞 • Use a custom image?", default=False, style=exutils.default
+        ),
+    ).ask()
+
+    cimage_path = (
+        questionary.path(
+            "╰─ 🍞 • Provide the file path to the image:",
+            validate=validate.ImagePathValidator,
+            style=exutils.default,
+        )
+        .skip_if(not features["cimage"], default=None)
+        .ask()
+    )
+
+    return features["theme"], features["accent"], cimage_path
+
+
 def create_poster():
+    """
+    Creates a poster based on user input.
+    """
     try:
-        # Ask for the poster type (Song or Album)
         poster_type = questionary.select(
             "🎨 • What type of poster would you like to create?",
             choices=["Song Poster", "Album Poster"],
             style=exutils.default,
         ).ask()
 
-        # Ask for poster features
-        features = questionary.form(
-            theme=questionary.confirm(
-                "💫 • Enable dark mode?", default=False, style=exutils.default
-            ),
-            accent=questionary.confirm(
-                "🌈 • Add a color accent?", default=False, style=exutils.default
-            ),
-            cimage=questionary.confirm(
-                "🥞 • Use a custom image?", default=False, style=exutils.default
-            ),
-        ).ask()
+        theme, accent, image = poster_features()
 
-        # Ask for custom image if required
-        image = (
-            questionary.path(
-                "╰─ 🍞 • Provide the file path to the image:",
-                validate=validate.ImagePathValidator,
-                style=exutils.default,
-            )
-            .skip_if(not features["cimage"], default=None)
-            .ask()
-        )
-
-        # Clear Screen before proceeding
+        # Clear the screen
         exutils.clear()
 
         if poster_type == "Song Poster":
-            track = select_item("track", SEARCH_LIMIT)
+            track = select_track(SEARCH_LIMIT)
 
             if track:
-                lyrics = handle_lyrics(ly, track)
-                ps.track(track, lyrics, features["accent"], features["theme"], image)
+                lyrics = handle_lyrics(track)
+                ps.track(track, lyrics, accent, theme, image)
 
         else:
             index = questionary.confirm(
                 "🍙 • Number the tracks?", style=exutils.default
             ).ask()
 
-            album = select_item("album", SEARCH_LIMIT)
+            shuffle = questionary.confirm(
+                "🚀 • Do you want to shuffle the tracks?", style=exutils.default
+            ).ask()
 
+            album = select_album(SEARCH_LIMIT, shuffle)
             if album:
-                ps.album(album, index, features["accent"], features["theme"], image)
+                ps.album(album, index, accent, theme, image)
 
-    except Exception:
-        return "🤚 Exiting..."
+    except KeyboardInterrupt and KeyError:
+        print("🤚 Exiting...")
+        exit(0)
 
 
 def main():
