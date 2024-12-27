@@ -45,6 +45,8 @@ class Lyrics:
         # Check if lyrics are available
         if len(id) != 0:
             lyrics = api.get_lyrics_by_id(id[0].id).plain_lyrics
+            if lyrics is None:
+                raise NoLyricsAvailable
             return str(lyrics)
         else:
             raise NoLyricsAvailable
