@@ -106,6 +106,8 @@ def handle_lyrics(track: spotify.TrackMetadata):
     """
     try:
         lyrics_result = ly.get_lyrics(track)
+        if lyrics_result == "None":
+            raise errors.NoLyricsAvailable
         print(exutils.format_lyrics(track.name, track.artist, lyrics_result))
 
         selection_range = questionary.text(
@@ -118,7 +120,13 @@ def handle_lyrics(track: spotify.TrackMetadata):
 
     except errors.NoLyricsAvailable:
         print("\n😦 • Couldn't find lyrics from sources.")
-
+        includeLyrics = questionary.confirm(
+            "🥞 • Want to paste the lyrics instead?",
+            default=True,
+            style=exutils.default,
+        ).ask()
+        if not includeLyrics:
+            return ["", "", "", ""]
         return questionary.text(
             "🎀 • Paste your lyrics below:",
             validate=validate.LineCountValidator,
@@ -202,3 +210,6 @@ def create_poster():
 def main():
     exutils.clear()
     create_poster()
+
+if __name__ == "__main__":
+    main()
