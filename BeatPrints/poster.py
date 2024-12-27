@@ -79,7 +79,7 @@ class Poster:
     def track(
         self,
         metadata: TrackMetadata,
-        lyrics: str,
+        lyrics: Optional[str] = " \n \n \n ",
         accent: bool = False,
         dark_theme: bool = False,
         custom_cover: Optional[str] = None,
