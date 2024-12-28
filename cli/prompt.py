@@ -121,7 +121,7 @@ def handle_lyrics(track: spotify.TrackMetadata):
     except errors.NoLyricsAvailable:
         print("\n😦 • Couldn't find lyrics from sources.")
         includeLyrics = questionary.confirm(
-            "🥞 • Want to paste the lyrics instead?",
+            "📋 • Want to paste the lyrics instead?",
             default=True,
             style=exutils.default,
         ).ask()
