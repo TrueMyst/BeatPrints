@@ -30,7 +30,7 @@ To generate a track poster, follow the steps below.
    # Get the track's metadata and lyrics
    metadata = search[0]
    lyrics = ly.get_lyrics(metadata)
-   highlighted_lyrics = ly.select_lines(lyrics, "6-9")
+   highlighted_lyrics = ly.select_lines(lyrics, "5-9")
 
    # Generate the track poster
    ps.track(metadata, highlighted_lyrics)
