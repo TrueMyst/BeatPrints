@@ -210,6 +210,3 @@ def create_poster():
 def main():
     exutils.clear()
     create_poster()
-
-if __name__ == "__main__":
-    main()
