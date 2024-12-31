@@ -55,10 +55,10 @@ def draw_palette(
     # Draw each color in the palette as a box
     for i in range(6):
         x, y = C_PALETTE
-        start, end = 170 * i, 170 * (i + 1)
+        start, end = PL_BOX_WIDTH * i, PL_BOX_WIDTH * (i + 1)
 
         # Draw the box for the current color
-        draw.rectangle(((x + start, y), (x + end, 1160)), fill=palette[i])
+        draw.rectangle(((x + start, y), (x + end, PL_BOX_HEIGHT)), fill=palette[i])
 
     # If accent is True, draw the accent color at the bottom
     if accent:
@@ -117,19 +117,22 @@ def magicify(image: Image.Image) -> Image.Image:
     return contrast.enhance(0.8)
 
 
-def scannable(id: str, darktheme: bool = False, is_album: bool = False) -> Image.Image:
+def scannable(
+    id: str, theme: THEME_OPTS = "Light", is_album: bool = False
+) -> Image.Image:
     """
     Generates a Spotify scannable code for a track or album.
 
     Args:
         id (str): The Spotify track or album ID.
-        darktheme (bool): Whether to use dark theme. Defaults to False.
+        theme (str): The theme for the scannable code. Defaults to "Light".
         is_album (bool): If True, generates for an album. Defaults to False.
 
     Returns:
         Image.Image: The resized scannable code image.
     """
-    color = CL_FONT_DARK_MODE if darktheme else CL_FONT_LIGHT_MODE
+
+    color = THEMES[theme]
     item_type = "album" if is_album else "track"
 
     # Construct the URL to fetch the scannable code from Spotify
@@ -186,22 +189,18 @@ def cover(image_url: str, image_path: Optional[str]) -> Image.Image:
     return magicify(img.resize(S_COVER))
 
 
-def get_theme(dark_theme: bool):
+def get_theme(theme: THEME_OPTS = "Light") -> Tuple[tuple, str]:
     """
     Returns theme-related properties based on the selected theme.
 
     Args:
-        dark_theme (bool): Whether to use dark theme.
+        theme (str): The selected theme. Default is "Light".
 
     Returns:
-        Tuple: The theme color and template path.
+        Tuple[tuple, str]: A tuple containing the theme color and the template path.
     """
-    # Return appropriate color and template based on theme
-    color, template = (
-        (CL_FONT_DARK_MODE, "banner_dark.png")
-        if dark_theme
-        else (CL_FONT_LIGHT_MODE, "banner_light.png")
-    )
 
-    template_path = os.path.join(P_TEMPLATES, template)
+    color = THEMES[theme]
+    template_path = os.path.join(P_TEMPLATES, f"{theme.lower()}.png")
+
     return color, template_path

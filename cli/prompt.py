@@ -1,11 +1,10 @@
 import questionary
 
 from rich import print
+from BeatPrints import lyrics, spotify, poster, errors
 
 from cli.conf import *
 from cli import exutils, validate
-
-from BeatPrints import lyrics, spotify, poster, errors
 
 # Initialize components
 ly = lyrics.Lyrics()
@@ -134,8 +133,19 @@ def poster_features():
         tuple: A tuple containing theme, accent, and image path options.
     """
     features = questionary.form(
-        theme=questionary.confirm(
-            "💫 • Enable dark mode?", default=False, style=exutils.default
+        theme=questionary.select(
+            "💫 • Which theme do you prefer?",
+            choices=[
+                "Light",
+                "Dark",
+                "Catppuccin",
+                "Gruvbox",
+                "Nord",
+                "Rosepine",
+                "Everforest",
+            ],
+            default="Light",
+            style=exutils.default,
         ),
         accent=questionary.confirm(
             "🌈 • Add a color accent?", default=False, style=exutils.default
