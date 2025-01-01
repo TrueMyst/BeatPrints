@@ -141,7 +141,7 @@ def poster_features():
                 "Catppuccin",
                 "Gruvbox",
                 "Nord",
-                "Rosepine",
+                "RosePine",
                 "Everforest",
             ],
             default="Light",
