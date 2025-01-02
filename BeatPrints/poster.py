@@ -82,7 +82,7 @@ class Poster:
     def track(
         self,
         metadata: TrackMetadata,
-        lyrics: Optional[str] = "(\\_/)\n( •.•) meow~ this is an instrumental track~!!\n/> Zero words, all vibes?",
+        lyrics: Optional[str] = "(\\_/)\n( •.•) meow~ this is an instrumental track~!!\n/> Zero words, all vibes?\n ",
         accent: bool = False,
         theme: THEME_OPTS = "Light",
         custom_cover: Optional[str] = None,

@@ -44,6 +44,8 @@ class Lyrics:
 
         # Check if lyrics are available
         if len(id) != 0:
+            if id[0].instrumental is True:
+                return "(\\_/)\n( •.•) meow~ this is an instrumental track~!!\n/> Zero words, all vibes?\n "
             lyrics = api.get_lyrics_by_id(id[0].id).plain_lyrics
             if lyrics is None:
                 raise NoLyricsAvailable
