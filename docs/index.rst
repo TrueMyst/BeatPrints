@@ -29,17 +29,24 @@ Homepage
 📦 Installation
 ---------------
 
-You can install BeatPrints via ``pip``:
+You can install BeatPrints via:
 
 .. code:: python
 
+   # For pip users
    pip install BeatPrints
 
-Or, if you use Poetry:
+   # For poetry users
+   poetry add BeatPrints
+
+Or if you prefer using just the CLI:
 
 .. code:: python
 
-   poetry add BeatPrints
+   pipx install BeatPrints
+
+This will install the CLI, making it ready for you to use.
+For more more infomation, check out `pipx <https://github.com/pypa/pipx>`_
 
 🌱 Environment Variables
 ------------------------

@@ -9,11 +9,12 @@ import os
 from pathlib import Path
 from typing import Optional, Union
 
-
 from PIL import Image, ImageDraw
 
-from .consts import *
 from . import image, write
+
+from .consts import *
+from .errors import ThemeNotFound
 from .utils import filename, organize_tracks
 from .spotify import TrackMetadata, AlbumMetadata
 
@@ -50,12 +51,14 @@ class Poster:
         write.heading(
             draw,
             C_HEADING,
-            875,
+            S_MAX_HEADING_WIDTH,
             metadata.name.upper(),
             color,
             write.font("Bold"),
             S_HEADING,
-        )  # Add artist name
+        )
+
+        # Add artist name
         write.text(
             draw,
             C_ARTIST,
@@ -81,7 +84,7 @@ class Poster:
         metadata: TrackMetadata,
         lyrics: Optional[str] = " \n \n \n ",
         accent: bool = False,
-        dark_theme: bool = False,
+        theme: THEME_OPTS = "Light",
         custom_cover: Optional[str] = None,
     ) -> None:
         """
@@ -91,15 +94,20 @@ class Poster:
             metadata (TrackMetadata): Metadata containing details about the track.
             lyrics (str): The lyrics of the track.
             accent (bool, optional): Flag to add an accent at the bottom of the poster. Defaults to False.
-            dark_theme (bool, optional): Flag to use a dark theme. Defaults to False.
+            theme (str, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest".  Defaults to "Light".
             custom_cover (Optional[str], optional): Path to a custom cover image. Defaults to None.
         """
+
+        # Check if the theme mentioned is valid or not
+        if theme not in THEMES:
+            raise ThemeNotFound
+
         # Get theme colors and template for the poster
-        color, template = image.get_theme(dark_theme)
+        color, template = image.get_theme(theme)
 
         # Get cover art and spotify scannable code
         cover = image.cover(metadata.image, custom_cover)
-        scannable = image.scannable(metadata.id, dark_theme)
+        scannable = image.scannable(metadata.id, theme)
 
         with Image.open(template) as poster:
             poster = poster.convert("RGB")
@@ -148,7 +156,7 @@ class Poster:
         metadata: AlbumMetadata,
         indexing: bool = False,
         accent: bool = False,
-        dark_theme: bool = False,
+        theme: THEME_OPTS = "Light",
         custom_cover: Optional[str] = None,
     ) -> None:
         """
@@ -158,16 +166,20 @@ class Poster:
             metadata (AlbumMetadata): Metadata containing details about the album.
             indexing (bool, optional): Flag to add index numbers to the tracks. Defaults to False.
             accent (bool, optional): Flag to add an accent at the bottom of the poster. Defaults to False.
-            dark_theme (bool, optional): Flag to use a dark theme. Defaults to False.
+            theme (str, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest". Defaults to "Light".
             custom_cover (Optional[str], optional): Path to a custom cover image. Defaults to None.
         """
 
+        # Check if the theme mentioned is valid or not
+        if theme not in THEMES:
+            raise ThemeNotFound
+
         # Get theme colors and template for the poster
-        color, template = image.get_theme(dark_theme)
+        color, template = image.get_theme(theme)
 
         # Get cover art and spotify scannable code
         cover = image.cover(metadata.image, custom_cover)
-        scannable = image.scannable(metadata.id, dark_theme, is_album=True)
+        scannable = image.scannable(metadata.id, theme, is_album=True)
 
         with Image.open(template) as poster:
             poster = poster.convert("RGB")

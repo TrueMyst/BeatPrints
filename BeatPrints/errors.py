@@ -88,3 +88,16 @@ class PathNotFoundError(Exception):
     ):
         self.message = message
         super().__init__(self.message)
+
+
+class ThemeNotFound(Exception):
+    """
+    Raised when the specified theme is not found or is invalid.
+    """
+
+    def __init__(
+        self,
+        message="The specified theme could not be found. Please ensure the theme name is valid.",
+    ):
+        self.message = message
+        super().__init__(self.message)
