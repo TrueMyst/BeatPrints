@@ -105,8 +105,6 @@ def handle_lyrics(track: spotify.TrackMetadata):
     """
     try:
         lyrics_result = ly.get_lyrics(track)
-        if lyrics_result == "None":
-            raise errors.NoLyricsAvailable
         print(exutils.format_lyrics(track.name, track.artist, lyrics_result))
 
         selection_range = questionary.text(
