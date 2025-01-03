@@ -11,6 +11,7 @@ C = Cords
 P = Path
 PL = Palette
 CL = Color
+T = Text
 """
 
 import os
@@ -79,3 +80,5 @@ P_FULLPATH = os.path.join(os.path.dirname(__file__))
 P_ASSETS = os.path.join(P_FULLPATH, "assets")
 P_FONTS = os.path.join(P_ASSETS, "fonts")
 P_TEMPLATES = os.path.join(P_ASSETS, "templates")
+
+T_INSTRUMENTAL = "(\\_/)\n( •.•) meow~ this is an instrumental track~!!\n/> Zero words, all vibes?\n "

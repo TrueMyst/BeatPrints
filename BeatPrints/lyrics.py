@@ -14,6 +14,7 @@ from .errors import (
     InvalidSelectionError,
     LineLimitExceededError,
 )
+from .consts import T_INSTRUMENTAL
 
 
 class Lyrics:
@@ -54,7 +55,7 @@ class Lyrics:
             else:
                 raise NoLyricsAvailable
         except NoLyricsAvailable:
-            return "(\\_/)\n( •.•) meow~ this is an instrumental track~!!\n/> Zero words, all vibes?\n "
+            return T_INSTRUMENTAL
 
     def select_lines(self, lyrics: str, selection: str) -> str:
         """
