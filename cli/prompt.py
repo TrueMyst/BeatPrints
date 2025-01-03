@@ -127,13 +127,15 @@ def handle_lyrics(track: spotify.TrackMetadata):
 
     except errors.NoLyricsAvailable:
         print("\n😦 • Couldn't find lyrics from sources.")
-        includeLyrics = questionary.confirm(
+        includeLyrics = questionary.select(
             "📋 • Want to paste the lyrics instead?",
-            default=True,
+            choices=["Yes", "Include instrumental text", "No (blank)"],
             style=exutils.default,
         ).ask()
-        if not includeLyrics:
-            return ["", "", "", ""]
+        if includeLyrics == "Include instrumental text":
+            return consts.T_INSTRUMENTAL
+        elif includeLyrics == "No (blank)":
+            return " \n \n \n "
         return questionary.text(
             "🎀 • Paste your lyrics below:",
             validate=validate.LineCountValidator,
