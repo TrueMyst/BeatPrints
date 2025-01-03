@@ -107,7 +107,7 @@ def handle_lyrics(track: spotify.TrackMetadata):
         lyrics_result = ly.get_lyrics(track)
         if lyrics_result == consts.T_INSTRUMENTAL:
             instrumental = questionary.confirm(
-                "🎸 • No lyrics found. Add instrumental text instead?",
+                "🎸 • This track seems to be instrumental. Include instrumental text?",
                 default=True,
                 style=exutils.default,
             ).ask()
