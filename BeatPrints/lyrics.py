@@ -44,18 +44,15 @@ class Lyrics:
         id = api.search_lyrics(track_name=metadata.name, artist_name=metadata.artist)
 
         # Check if lyrics are available
-        try:
-            if len(id) != 0:
-                if id[0].instrumental is True:
-                    raise NoLyricsAvailable
-                lyrics = api.get_lyrics_by_id(id[0].id).plain_lyrics
-                if lyrics is None:
-                    raise NoLyricsAvailable
-                return str(lyrics)
-            else:
+        if len(id) != 0:
+            if id[0].instrumental is True:
+                return T_INSTRUMENTAL
+            lyrics = api.get_lyrics_by_id(id[0].id).plain_lyrics
+            if lyrics is None:
                 raise NoLyricsAvailable
-        except NoLyricsAvailable:
-            return T_INSTRUMENTAL
+            return str(lyrics)
+        else:
+            raise NoLyricsAvailable
 
     def select_lines(self, lyrics: str, selection: str) -> str:
         """
