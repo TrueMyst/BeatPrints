@@ -175,7 +175,7 @@ class Spotify:
         return tracklist
 
     def get_album(
-        self, query: str, limit: int = 6, shuffle: bool = True
+        self, query: str, limit: int = 6, shuffle: bool = False
     ) -> List[AlbumMetadata]:
         """
         Searches for albums based on a query and retrieves their metadata, including track listing.
@@ -183,7 +183,7 @@ class Spotify:
         Args:
             query (str): The search query for the album (e.g. album name - artist).
             limit (int, optional): Maximum number of albums to retrieve. Defaults to 6.
-            shuffle (bool, optional): Shuffle the tracks in the list. Defaults to False.
+            shuffle (bool, optional): Shuffle the tracks in the tracklist. Defaults to False.
 
         Returns:
             List[AlbumMetadata]: A list of album metadata with track listings.

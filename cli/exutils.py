@@ -2,21 +2,23 @@ import os
 
 from rich import box
 from rich.table import Table
+
 from questionary import Style
-from typing import List, Union
+from typing import List, Literal, Union
 
 from BeatPrints import spotify
 
-default = Style(
+lavish = Style(
     [
         ("qmark", "fg:ansicyan bold"),
         ("answer", "fg:ansiblue bold"),
         ("pointer", "fg:ansired bold"),
+        ("highlighted", "fg:ansigreen bold"),
+        ("selected", "fg:ansimagenta bold"),
     ]
 )
 
-BEATPRINTS_ANSI = """
-
+BEATPRINTS_ASCII = """
 ██████╗ ███████╗ █████╗ ████████╗██████╗ ██████╗ ██╗███╗   ██╗████████╗███████╗
 ██╔══██╗██╔════╝██╔══██╗╚══██╔══╝██╔══██╗██╔══██╗██║████╗  ██║╚══██╔══╝██╔════╝
 ██████╔╝█████╗  ███████║   ██║   ██████╔╝██████╔╝██║██╔██╗ ██║   ██║   ███████╗
@@ -24,8 +26,8 @@ BEATPRINTS_ANSI = """
 ██████╔╝███████╗██║  ██║   ██║   ██║     ██║  ██║██║██║ ╚████║   ██║   ███████║
 ╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝
 
-🍀 Create eye-catching music posters that stand out, for FREE! by @TrueMyst
-───────────────────────────────────────────────────────────────────────────────
+🥰 Create pinterest-style music posters that stand out, for FREE! by @TrueMyst
+-------------------------------------------------------------------------------
 """
 
 
@@ -34,41 +36,35 @@ def clear() -> None:
     Clears the terminal screen.
     """
     os.system("cls" if os.name == "nt" else "clear")
-    print(BEATPRINTS_ANSI)
+    print(BEATPRINTS_ASCII)
 
 
-def tablize_track(tracks: List[spotify.TrackMetadata]):
+def tablize_items(
+    items: List[spotify.TrackMetadata] | List[spotify.AlbumMetadata],
+    item_type: Literal["track", "album"],
+) -> Table:
     """
-    Creates a pretty table for displaying track search results.
-    """
-    table = Table(box=box.ROUNDED)
+    Creates a pretty table for displaying either track or album search results.
 
-    table.add_column("*", justify="center", style="cyan")
-    table.add_column("Title", style="magenta")
-    table.add_column("Artist", justify="right", style="blue")
-    table.add_column("Album", justify="left", style="white")
-
-    for pos, track in enumerate(tracks, start=1):
-        name, artist, album = track.name, track.artist, track.album
-        table.add_row(f"{pos}", name, artist, album)
-
-    return table
-
-
-def tablize_albums(albums: List[spotify.AlbumMetadata]) -> Table:
-    """
-    Creates a pretty table for displaying album search results.
+    Args:
     """
     table = Table(box=box.ROUNDED)
+    table.add_column("*", justify="center", style="magenta")
+    table.add_column("Title", style="green")
 
-    table.add_column("*", justify="center", style="cyan")
-    table.add_column("Title", style="magenta")
-    table.add_column("Artist", justify="right", style="blue")
-    table.add_column("Year", justify="left", style="white")
+    if item_type == "track":
+        table.add_column("Artist", justify="right", style="blue")
+        table.add_column("Album", justify="left", style="cyan")
 
-    for pos, track in enumerate(albums, start=1):
-        name, artist, album = track.name, track.artist, track.released
-        table.add_row(f"{pos}", name, artist, album)
+        for pos, item in enumerate(items, start=1):
+            table.add_row(f"{pos}", item.name, item.artist, item.album)
+
+    elif item_type == "album":
+        table.add_column("Artist", justify="right", style="blue")
+        table.add_column("Year", justify="left", style="cyan")
+
+        for pos, item in enumerate(items, start=1):
+            table.add_row(f"{pos}", item.name, item.artist, item.released)
 
     return table
 

@@ -1,140 +1,175 @@
 import questionary
 
 from rich import print
-from BeatPrints import lyrics, spotify, poster, errors
 
-from cli.conf import *
-from cli import exutils, validate
+from cli import conf, exutils, validate
+from BeatPrints import lyrics, spotify, poster, errors
 
 # Initialize components
 ly = lyrics.Lyrics()
-ps = poster.Poster(POSTERS_DIR)
-sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+ps = poster.Poster(conf.POSTERS_DIR)
+sp = spotify.Spotify(conf.CLIENT_ID, conf.CLIENT_SECRET)
 
 
 def select_track(limit: int):
     """
-    Prompts the user to search for a track and selects one from the results.
+    Prompt user to search and select a track.
 
     Args:
-        limit (int): The maximum number of search results to display.
+        limit (int): Max search results.
 
     Returns:
-        TrackMetadata: The selected track from the search results.
+        TrackMetadata: The selected track.
     """
     repeat = True
-    prompt = f"🎺 • Type out the track you love the most:"
 
     while repeat:
-        query = questionary.text(prompt, style=exutils.default).ask()
+        query = questionary.text(
+            "• Type the track you love most:",
+            validate=validate.LengthValidator,
+            style=exutils.lavish,
+            qmark="🎺",
+        ).unsafe_ask()
+
         result = sp.get_track(query, limit=limit)
 
-        # Clear the Screen
+        # Clear the screen
         exutils.clear()
 
+        # Show results
         print(f'{len(result)} results found for "{query}"!')
-        print(exutils.tablize_track(result))
+        print(exutils.tablize_items(result, "track"))
 
+        # Repeat search if needed
         repeat = questionary.confirm(
-            "🥞 • Not what you wanted? Want to search again?",
+            "• Not what you wanted? Search again?",
             default=True,
-            style=exutils.default,
-        ).ask()
+            style=exutils.lavish,
+            qmark="🤷",
+        ).unsafe_ask()
 
+        # Select track
         if not repeat:
             choice = questionary.text(
-                f"🍀 • Select the track you like:",
+                f"• Select the track you like:",
                 validate=validate.NumericValidator(limit=len(result)),
-                style=exutils.default,
-            ).ask()
+                style=exutils.lavish,
+                qmark="🍀",
+            ).unsafe_ask()
 
             exutils.clear()
             return result[int(choice) - 1]
 
 
-def select_album(limit: int, shuffle: bool = True):
+def select_album(limit: int):
     """
-    Prompts the user to search for an album and selects one from the results.
+    Prompt user to search and select an album.
 
     Args:
-        limit (int): The maximum number of search results to display.
-        shuffle (bool): Whether to shuffle the search results. Defaults to True
+        limit (int): Max search results.
 
     Returns:
-        AlbumMetadata: The selected album from the search results.
+        AlbumMetadata: The selected album.
     """
     repeat = True
-    prompt = f"💿️ • Type out the album you love the most:"
+
+    # Options for track numbering and shuffling
+    index = questionary.confirm(
+        "• Number the tracks?", style=exutils.lavish, qmark="🍙"
+    ).unsafe_ask()
+
+    shuffle = questionary.confirm(
+        "• Shuffle the tracks?", style=exutils.lavish, qmark="🚀"
+    ).unsafe_ask()
 
     while repeat:
-        query = questionary.text(prompt, style=exutils.default).ask()
+        query = questionary.text(
+            "• Type the album you love most:",
+            validate=validate.LengthValidator,
+            style=exutils.lavish,
+            qmark="💿️",
+        ).unsafe_ask()
+
         result = sp.get_album(query, limit, shuffle)
 
         # Clear the screen
         exutils.clear()
 
+        # Show results
         print(f'{len(result)} results found for "{query}"!')
-        print(exutils.tablize_albums(result))
+        print(exutils.tablize_items(result, "album"))
 
+        # Repeat search if needed
         repeat = questionary.confirm(
-            "🥞 • Not what you wanted? Want to search again?",
+            "• Not what you wanted? Search again?",
             default=True,
-            style=exutils.default,
-        ).ask()
+            style=exutils.lavish,
+            qmark="🤷",
+        ).unsafe_ask()
 
+        # Select album
         if not repeat:
             choice = questionary.text(
-                f"🍀 • Select the album you like:",
+                f"• Select the album you like:",
                 validate=validate.NumericValidator(limit=len(result)),
-                style=exutils.default,
-            ).ask()
+                style=exutils.lavish,
+                qmark="🍀",
+            ).unsafe_ask()
 
             exutils.clear()
-            return result[int(choice) - 1]
+            return result[int(choice) - 1], index
 
 
 def handle_lyrics(track: spotify.TrackMetadata):
     """
-    Retrieves and selects lyrics for a given track.
+    Get lyrics and let user select lines.
 
     Args:
-        track (TrackMetadata): The track for which to fetch lyrics.
+        track (TrackMetadata): Track for lyrics.
 
     Returns:
-        str: The selected lyrics from the track.
+        str: Selected lyrics portion.
     """
     try:
+        # Fetch lyrics and print it in a pretty table
         lyrics_result = ly.get_lyrics(track)
         print(exutils.format_lyrics(track.name, track.artist, lyrics_result))
 
+        # Let user pick lyrics lines
         selection_range = questionary.text(
-            "🎀 • Select any 4 of your favorite lines (e.g., 2-5, 7-10):",
+            "• Select 4 of your favorite lines (e.g., 2-5, 7-10):",
             validate=validate.SelectionValidator(lyrics_result),
-            style=exutils.default,
-        ).ask()
+            style=exutils.lavish,
+            qmark="🎀",
+        ).unsafe_ask()
 
         return ly.select_lines(lyrics_result, selection_range)
 
     except errors.NoLyricsAvailable:
-        print("\n😦 • Couldn't find lyrics from sources.")
+        print("\n😦 • Lyrics not found.")
 
-        return questionary.text(
-            "🎀 • Paste your lyrics below:",
+        # Ask user to paste custom lyrics
+        custom_lyrics = questionary.text(
+            "• Paste your lyrics here:",
             validate=validate.LineCountValidator,
-            style=exutils.default,
-        ).ask()
+            multiline=True,
+            style=exutils.lavish,
+            qmark="🎀",
+        ).unsafe_ask()
+
+        return custom_lyrics
 
 
 def poster_features():
     """
-    Prompts the user for poster customization features.
+    Ask for poster customization options.
 
     Returns:
-        tuple: A tuple containing theme, accent, and image path options.
+        tuple: theme, accent color, and image path.
     """
     features = questionary.form(
         theme=questionary.select(
-            "💫 • Which theme do you prefer?",
+            "• Which theme do you prefer?",
             choices=[
                 "Light",
                 "Dark",
@@ -145,70 +180,74 @@ def poster_features():
                 "Everforest",
             ],
             default="Light",
-            style=exutils.default,
+            style=exutils.lavish,
+            qmark="💫",
         ),
         accent=questionary.confirm(
-            "🌈 • Add a color accent?", default=False, style=exutils.default
+            "• Add a color accent?", default=False, style=exutils.lavish, qmark="🌈"
         ),
-        cimage=questionary.confirm(
-            "🥞 • Use a custom image?", default=False, style=exutils.default
+        image=questionary.confirm(
+            "• Use a custom image?", default=False, style=exutils.lavish, qmark="🥐"
         ),
-    ).ask()
+    ).unsafe_ask()
 
-    cimage_path = (
+    theme, accent, image = features.values()
+
+    # Get the image path if custom image is selected
+    image_path = (
         questionary.path(
-            "╰─ 🍞 • Provide the file path to the image:",
+            "• Provide the file path to the image:",
             validate=validate.ImagePathValidator,
-            style=exutils.default,
+            style=exutils.lavish,
+            qmark="╰─",
         )
-        .skip_if(not features["cimage"], default=None)
-        .ask()
+        .skip_if(not image, default=None)
+        .unsafe_ask()
     )
 
-    return features["theme"], features["accent"], cimage_path
+    return theme, accent, image_path
 
 
 def create_poster():
     """
-    Creates a poster based on user input.
+    Create a poster based on user input.
     """
-    try:
-        poster_type = questionary.select(
-            "🎨 • What type of poster would you like to create?",
-            choices=["Song Poster", "Album Poster"],
-            style=exutils.default,
-        ).ask()
+    poster_type = questionary.select(
+        "• What type of poster would you like to create?",
+        choices=["Track Poster", "Album Poster"],
+        style=exutils.lavish,
+        qmark="🎨",
+    ).unsafe_ask()
 
-        theme, accent, image = poster_features()
+    theme, accent, image = poster_features()
 
-        # Clear the screen
-        exutils.clear()
+    # Clear the screen
+    exutils.clear()
 
-        if poster_type == "Song Poster":
-            track = select_track(SEARCH_LIMIT)
+    # Generate posters
+    if poster_type == "Track Poster":
+        track = select_track(conf.SEARCH_LIMIT)
 
-            if track:
-                lyrics = handle_lyrics(track)
-                ps.track(track, lyrics, accent, theme, image)
+        if track:
+            lyrics = handle_lyrics(track)
+            ps.track(track, lyrics, accent, theme, image)
+    else:
+        album = select_album(conf.SEARCH_LIMIT)
 
-        else:
-            index = questionary.confirm(
-                "🍙 • Number the tracks?", style=exutils.default
-            ).ask()
-
-            shuffle = questionary.confirm(
-                "🚀 • Do you want to shuffle the tracks?", style=exutils.default
-            ).ask()
-
-            album = select_album(SEARCH_LIMIT, shuffle)
-            if album:
-                ps.album(album, index, accent, theme, image)
-
-    except KeyboardInterrupt and KeyError:
-        print("🤚 Exiting...")
-        exit(0)
+        if album:
+            ps.album(*album, accent, theme, image)
 
 
 def main():
     exutils.clear()
-    create_poster()
+
+    try:
+        create_poster()
+
+    except KeyboardInterrupt as e:
+        print("╰─ 👋 Alright, no problem! See you next time.")
+        exit(1)
+
+    except Exception as e:
+        print(e)
+        exit(1)

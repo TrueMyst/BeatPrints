@@ -11,11 +11,11 @@ from typing import Optional, Union
 
 from PIL import Image, ImageDraw
 
-from . import image, write
-
 from .consts import *
-from .errors import ThemeNotFound
+from . import image, write
 from .utils import filename, organize_tracks
+
+from .errors import ThemeNotFound
 from .spotify import TrackMetadata, AlbumMetadata
 
 
@@ -94,8 +94,8 @@ class Poster:
             metadata (TrackMetadata): Metadata containing details about the track.
             lyrics (str): The lyrics of the track.
             accent (bool, optional): Flag to add an accent at the bottom of the poster. Defaults to False.
-            theme (str, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest".  Defaults to "Light".
-            custom_cover (Optional[str], optional): Path to a custom cover image. Defaults to None.
+            theme (Literal, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest".  Defaults to "Light".
+            custom_cover (str, optional): Path to a custom cover image. Defaults to None.
         """
 
         # Check if the theme mentioned is valid or not
@@ -166,8 +166,8 @@ class Poster:
             metadata (AlbumMetadata): Metadata containing details about the album.
             indexing (bool, optional): Flag to add index numbers to the tracks. Defaults to False.
             accent (bool, optional): Flag to add an accent at the bottom of the poster. Defaults to False.
-            theme (str, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest". Defaults to "Light".
-            custom_cover (Optional[str], optional): Path to a custom cover image. Defaults to None.
+            theme (Literal, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest". Defaults to "Light".
+            custom_cover (str, optional): Path to a custom cover image. Defaults to None.
         """
 
         # Check if the theme mentioned is valid or not
@@ -195,7 +195,7 @@ class Poster:
             # Add common album information (name, artist, etc.)
             self._add_common_text(draw, metadata, color)
 
-            # Shuffle tracks and optionally index them
+            # Album's Tracks
             tracks = metadata.tracks
 
             if indexing:

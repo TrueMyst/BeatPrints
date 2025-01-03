@@ -1,4 +1,5 @@
 import os
+
 from PIL import Image
 from pathlib import Path
 from questionary import Validator, ValidationError
@@ -33,8 +34,8 @@ class ImagePathValidator(Validator):
         if not os.path.isfile(filepath):
             raise ValidationError(
                 message="> The provided path does not exist or is not a file.",
-                cursor_position=len(document.text),
-            )  # Move cursor to end
+                cursor_position=len(document.text),  # Move cursor to end
+            )
 
         try:
             with Image.open(filepath) as img:
@@ -43,15 +44,15 @@ class ImagePathValidator(Validator):
         except (IOError, SyntaxError):
             raise ValidationError(
                 message="> The provided file is not a recognized image format.",
-                cursor_position=len(document.text),
-            )  # Move cursor to en
+                cursor_position=len(document.text),  # Move cursor to end
+            )
 
 
 class SelectionValidator(Validator):
 
     def __init__(self, lyrics):
         self.lyrics = lyrics
-        self.max_lines = 4
+        self.threshold = 4
 
     def validate(self, document):
         try:
@@ -75,15 +76,15 @@ class SelectionValidator(Validator):
             portion = lines[selected[0] - 1 : selected[1]]
             selected_lines = [line for line in portion if line != ""]
 
-            if len(selected_lines) < self.max_lines:
+            if len(selected_lines) < self.threshold:
                 raise ValidationError(
-                    message=f"> Selection is less than the minimum required lines ({self.max_lines}).",
+                    message=f"> Selection is less than the minimum required lines ({self.threshold}).",
                     cursor_position=len(selection),  # Move cursor to end
                 )
 
-            if len(selected_lines) > self.max_lines:
+            if len(selected_lines) > self.threshold:
                 raise ValidationError(
-                    message=f"> Selection exceeds the maximum allowed lines ({self.max_lines}).",
+                    message=f"> Selection exceeds the maximum allowed lines ({self.threshold}).",
                     cursor_position=len(selection),  # Move cursor to end
                 )
 
@@ -104,5 +105,17 @@ class LineCountValidator(Validator):
         if len(splitted) > 4 or len(splitted) < 4:
             raise ValidationError(
                 message="> Exactly 4 lines must be given, no more, no less.",
+                cursor_position=len(document.text),  # Move cursor to end
+            )
+
+
+class LengthValidator(Validator):
+
+    def validate(self, document):
+        name = document.text
+
+        if len(name) <= 0:
+            raise ValidationError(
+                message="> You can't leave the search query empty when searching.",
                 cursor_position=len(document.text),  # Move cursor to end
             )
