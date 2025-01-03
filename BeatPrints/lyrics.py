@@ -49,10 +49,10 @@ class Lyrics:
                 return T_INSTRUMENTAL
             lyrics = api.get_lyrics_by_id(id[0].id).plain_lyrics
             if lyrics is None:
-                raise NoLyricsAvailable
+                return T_INSTRUMENTAL
             return str(lyrics)
         else:
-            raise NoLyricsAvailable
+            return T_INSTRUMENTAL
 
     def select_lines(self, lyrics: str, selection: str) -> str:
         """
