@@ -6,6 +6,7 @@ Provides functionality for retrieving song lyrics using the LRClib API.
 
 import re
 from lrclib import LrcLibAPI
+from random import choice
 
 from .spotify import TrackMetadata
 from .errors import (
@@ -14,6 +15,7 @@ from .errors import (
     InvalidSelectionError,
     LineLimitExceededError,
 )
+from .consts import T_INSTRUMENTAL
 
 
 class Lyrics:
@@ -44,7 +46,11 @@ class Lyrics:
 
         # Check if lyrics are available
         if len(id) != 0:
+            if id[0].instrumental is True:
+                return choice(T_INSTRUMENTAL)
             lyrics = api.get_lyrics_by_id(id[0].id).plain_lyrics
+            if lyrics is None:
+                raise NoLyricsAvailable
             return str(lyrics)
         else:
             raise NoLyricsAvailable

@@ -1,6 +1,9 @@
 import questionary
 
 from rich import print
+from BeatPrints import lyrics, spotify, poster, errors, consts
+from random import choice
+
 
 from cli import conf, exutils, validate
 from BeatPrints import lyrics, spotify, poster, errors
@@ -133,6 +136,16 @@ def handle_lyrics(track: spotify.TrackMetadata):
     try:
         # Fetch lyrics and print it in a pretty table
         lyrics_result = ly.get_lyrics(track)
+        if lyrics_result in consts.T_INSTRUMENTAL:
+            instrumental = questionary.confirm(
+                "🎸 • This track seems to be instrumental. Include instrumental text?",
+                default=True,
+                style=exutils.default,
+            ).ask()
+            if instrumental:
+                return ly.select_lines(choice(consts.T_INSTRUMENTAL), "1-4")
+            else:
+                return " \n \n \n "
         print(exutils.format_lyrics(track.name, track.artist, lyrics_result))
 
         # Let user pick lyrics lines
@@ -146,11 +159,15 @@ def handle_lyrics(track: spotify.TrackMetadata):
         return ly.select_lines(lyrics_result, selection_range)
 
     except errors.NoLyricsAvailable:
-        print("\n😦 • Lyrics not found.")
-
-        # Ask user to paste custom lyrics
-        custom_lyrics = questionary.text(
-            "• Paste your lyrics here:",
+        print("\n😦 • Couldn't find lyrics from sources.")
+        pasteLyrics = questionary.confirm(
+            "📋 • Would you like to paste the lyrics instead?", default=False
+        ).ask()
+        if not pasteLyrics:
+            print("🎸 • Adding instrumental text...")
+            return ly.select_lines(choice(consts.T_INSTRUMENTAL), "1-4")
+        return questionary.text(
+            "🎀 • Paste your lyrics below:",
             validate=validate.LineCountValidator,
             multiline=True,
             style=exutils.lavish,
