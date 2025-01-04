@@ -81,4 +81,23 @@ P_ASSETS = os.path.join(P_FULLPATH, "assets")
 P_FONTS = os.path.join(P_ASSETS, "fonts")
 P_TEMPLATES = os.path.join(P_ASSETS, "templates")
 
-T_INSTRUMENTAL = "(\\_/)\n( •.•) meow~ this is an instrumental track~!!\n/> Zero words, all vibes?\n "
+T_INSTRUMENTAL = [
+"""\
+(\\_/)
+( •.•) meow~ this is an instrumental track~!!
+/> Zero words, all vibes?
+ 
+""",
+"""\
+(\\_/)
+( •.•) woosh~ instrumental vibes ahead~!!
+/> No words, all melody~
+ 
+""",
+"""\
+(\\_/)
+( •.•) no words, just vibes~!!
+/> Instrumental track ahead~!!
+ 
+""",
+]
