@@ -100,4 +100,82 @@ T_INSTRUMENTAL = [
 /> Instrumental track ahead~!!
  
 """,
+"""\
+(\\_/)
+( •.•) here's a track full of feels~!!
+/> Let the rhythm carry you~
+ 
+""",
+"""\
+(\\_/)
+( •.•) instrumental groove incoming~!!
+/> No lyrics, just soundscapes~
+ 
+""",
+"""\
+(\\_/)
+( •.•) the melody speaks for itself~!!
+/> All tunes, no chatter~
+ 
+""",
+"""\
+(\\_/)
+( •.•) here’s a vibe-filled track~!!
+/> Let the music do the talking~
+ 
+""",
+"""\
+(\\_/)
+( •.•) this one’s an instrumental bop~!!
+/> Just rhythm and flow~
+
+""",
+"""\
+(\\_/)
+( •.•) pure instrumental joy ahead~!!
+/> Words off, beats on~
+ 
+""",
+"""\
+(\\_/)
+( •.•) it’s all melody, no lyrics~!!
+/> Vibes so smooth~
+ 
+""",
+"""\
+(\\_/)
+( •.•) tap to the rhythm~!!
+/> No words, just feels~
+ 
+""",
+"""\
+(\\_/)
+( •.•) instrumental bliss unlocked~!!
+/> Music to move you~
+ 
+""",
+"""\
+(\\_/)
+( •.•) all beats, no chatter~!!
+/> Tune in, zone out~
+ 
+""",
+"""\
+(\\_/)
+( •.•) it’s a wordless masterpiece~!!
+/> Just the melody to guide you~
+ 
+""",
+"""\
+(\\_/)
+( •.•) immerse in the instrumental~!!
+/> No lyrics needed~
+ 
+""",
+"""\
+(\\_/)
+( •.•) word-free and beat-full~!!
+/> Dive into the sound~
+ 
+"""
 ]
