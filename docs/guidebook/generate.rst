@@ -3,6 +3,10 @@
 
 This is a quick guide on how to generate posters using **BeatPrints** through code.
 
+.. note::
+
+   It is important for you to have the ``.env`` file in the same directory.
+
 🎷 Track Posters
 ^^^^^^^^^^^^^^^^^
 
@@ -34,6 +38,11 @@ To generate a track poster, follow the steps below.
 
    # Generate the track poster
    ps.track(metadata, highlighted_lyrics)
+
+.. tip::
+
+  You can create a **helper function** to display lyrics with line numbers in a nice format using `rich <https://github.com/Textualize/rich/>`_. 
+  This is just a **basic way** to generate the poster. The sky's the limit!
 
 💿️ Album Posters 
 ^^^^^^^^^^^^^^^^^

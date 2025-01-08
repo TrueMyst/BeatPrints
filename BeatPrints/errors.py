@@ -78,19 +78,7 @@ class InvalidFormatError(Exception):
         super().__init__(self.message)
 
 
-class PathNotFoundError(Exception):
-    """
-    Raised when the specified path cannot be found.
-    """
-
-    def __init__(
-        self, message="The specified path for saving the image could not be found."
-    ):
-        self.message = message
-        super().__init__(self.message)
-
-
-class ThemeNotFound(Exception):
+class ThemeNotFoundError(Exception):
     """
     Raised when the specified theme is not found or is invalid.
     """

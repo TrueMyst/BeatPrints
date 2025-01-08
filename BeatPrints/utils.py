@@ -11,7 +11,29 @@ import string
 from . import write, consts
 
 
-def organize_tracks(tracks: list) -> tuple:
+def add_flat_indexes(nlist: list) -> list:
+    """
+    Adds a flat index to each track name in a nested list.
+
+    Args:
+        nlist (list): A nested list of track names.
+
+    Returns:
+        list: The modified nested list with flat indexes added to track names.
+    """
+
+    index = 1
+
+    for idx, cols in enumerate(nlist):
+        for jdx, row in enumerate(cols):
+
+            nlist[idx][jdx] = f"{index}. {row}"
+            index += 1
+
+    return nlist
+
+
+def organize_tracks(tracks: list, indexing: bool = False) -> tuple:
     """
     Organizes tracks into columns that fit within the maximum allowed width.
 
@@ -23,6 +45,29 @@ def organize_tracks(tracks: list) -> tuple:
             - List of lists where each inner list contains a column of track names.
             - List of widths for each track column.
     """
+
+    def calculate_column_width(tracks_column: list, additional_width: int = 0):
+        """
+        Helper function to calculate the width of the longest track in a column.
+        """
+
+        tracks = max(tracks_column, key=len)
+
+        return (
+            write.calculate_text_width(tracks, write.font("Light"), consts.S_TRACKS)
+            + additional_width
+        )
+
+    additional_width = 0
+
+    # Account for the space that index numbers take
+    if indexing:
+        index = len(tracks) + 1
+
+        additional_width = write.calculate_text_width(
+            f"{index}", write.font("Light"), consts.S_TRACKS
+        )
+
     while True:
         # Split tracks into columns with a maximum of MAX_ROWS per column
         columns = [
@@ -30,11 +75,9 @@ def organize_tracks(tracks: list) -> tuple:
             for i in range(0, len(tracks), consts.MAX_ROWS)
         ]
 
-        # Determine the width of the longest track in each column
-        max_tracks = [max(col, key=len) for col in columns]
+        # Determine the width of each column
         track_widths = [
-            write.calculate_text_width(track, write.font("Light"), consts.S_TRACKS)
-            for track in max_tracks
+            calculate_column_width(col, additional_width) for col in columns
         ]
 
         # Sum the total width and check if it fits within the allowed MAX_WIDTH
@@ -44,10 +87,14 @@ def organize_tracks(tracks: list) -> tuple:
             break  # If it fits, exit the loop
 
         else:
-            # If it doesn't fit, remove the longest track from the longest column
+            # If it doesn't fit, remove the longest track from the column with the widest width
             longest_column_index = track_widths.index(max(track_widths))
             longest_column = columns[longest_column_index]
             tracks.remove(max(longest_column, key=len))
+
+    # Add flat indexes to tracks if indexing is enabled
+    if indexing:
+        columns = add_flat_indexes(columns)
 
     return columns, track_widths
 

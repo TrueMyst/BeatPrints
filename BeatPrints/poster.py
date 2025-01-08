@@ -15,7 +15,7 @@ from .consts import *
 from . import image, write
 from .utils import filename, organize_tracks
 
-from .errors import ThemeNotFound
+from .errors import ThemeNotFoundError
 from .spotify import TrackMetadata, AlbumMetadata
 
 
@@ -100,7 +100,7 @@ class Poster:
 
         # Check if the theme mentioned is valid or not
         if theme not in THEMES:
-            raise ThemeNotFound
+            raise ThemeNotFoundError
 
         # Get theme colors and template for the poster
         color, template = image.get_theme(theme)
@@ -172,7 +172,7 @@ class Poster:
 
         # Check if the theme mentioned is valid or not
         if theme not in THEMES:
-            raise ThemeNotFound
+            raise ThemeNotFoundError
 
         # Get theme colors and template for the poster
         color, template = image.get_theme(theme)
@@ -198,11 +198,10 @@ class Poster:
             # Album's Tracks
             tracks = metadata.tracks
 
-            if indexing:
-                tracks = [f"{i + 1}. {track}" for i, track in enumerate(tracks)]
-
             # Organize the tracklist and render it on the poster
-            tracklist, track_widths = organize_tracks(tracks)
+            tracklist, track_widths = organize_tracks(tracks, indexing)
+
+            # Starting Position
             x, y = C_TRACKS
 
             # Render the tracklist, adjusting the position for each column
