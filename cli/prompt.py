@@ -1,9 +1,6 @@
 import questionary
 
 from rich import print
-from BeatPrints import lyrics, spotify, poster, errors, consts
-from random import choice
-
 
 from cli import conf, exutils, validate
 from BeatPrints import lyrics, spotify, poster, errors
@@ -135,46 +132,37 @@ def handle_lyrics(track: spotify.TrackMetadata):
     """
     try:
         # Fetch lyrics and print it in a pretty table
-        lyrics_result = ly.get_lyrics(track)
-        if lyrics_result in consts.T_INSTRUMENTAL:
-            instrumental = questionary.confirm(
-                "🎸 • This track seems to be instrumental. Include instrumental text?",
-                default=True,
-                style=exutils.default,
-            ).ask()
-            if instrumental:
-                return ly.select_lines(choice(consts.T_INSTRUMENTAL), "1-4")
-            else:
-                return " \n \n \n "
-        print(exutils.format_lyrics(track.name, track.artist, lyrics_result))
+        lyrics = ly.get_lyrics(track)
+
+        if ly.check_instrumental(track):
+            print("🎸 • The track is detected to be an instrumental track")
+            return lyrics
+
+        print(exutils.format_lyrics(track.name, track.artist, lyrics))
 
         # Let user pick lyrics lines
         selection_range = questionary.text(
             "• Select 4 of your favorite lines (e.g., 2-5, 7-10):",
-            validate=validate.SelectionValidator(lyrics_result),
+            validate=validate.SelectionValidator(lyrics),
             style=exutils.lavish,
             qmark="🎀",
         ).unsafe_ask()
 
-        return ly.select_lines(lyrics_result, selection_range)
+        return ly.select_lines(lyrics, selection_range)
 
     except errors.NoLyricsAvailable:
-        print("\n😦 • Couldn't find lyrics from sources.")
-        pasteLyrics = questionary.confirm(
-            "📋 • Would you like to paste the lyrics instead?", default=False
-        ).ask()
-        if not pasteLyrics:
-            print("🎸 • Adding instrumental text...")
-            return ly.select_lines(choice(consts.T_INSTRUMENTAL), "1-4")
-        return questionary.text(
-            "🎀 • Paste your lyrics below:",
+        print("\n😦 • Lyrics not found.")
+
+        # Ask user to paste custom lyrics
+        lyrics = questionary.text(
+            "• Paste your lyrics here:",
             validate=validate.LineCountValidator,
             multiline=True,
             style=exutils.lavish,
             qmark="🎀",
         ).unsafe_ask()
 
-        return custom_lyrics
+        return lyrics
 
 
 def poster_features():
@@ -260,11 +248,6 @@ def main():
 
     try:
         create_poster()
-
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         print("╰─ 👋 Alright, no problem! See you next time.")
-        exit(1)
-
-    except Exception as e:
-        print(e)
         exit(1)

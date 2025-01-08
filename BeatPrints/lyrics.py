@@ -6,7 +6,6 @@ Provides functionality for retrieving song lyrics using the LRClib API.
 
 import re
 from lrclib import LrcLibAPI
-from random import choice
 
 from .spotify import TrackMetadata
 from .errors import (
@@ -23,6 +22,25 @@ class Lyrics:
     A class for interacting with the LRClib API to fetch and manage song lyrics.
     """
 
+    def check_instrumental(self, metadata: TrackMetadata) -> bool:
+        """
+        Determines if a track is instrumental.
+
+        Args:
+            metadata (TrackMetadata): The metadata of the track.
+
+        Returns:
+            bool: True if the track is instrumental, False otherwise.
+        """
+        api = LrcLibAPI(
+            user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"
+        )
+        results = api.search_lyrics(
+            track_name=metadata.name, artist_name=metadata.artist
+        )
+
+        return results[0].instrumental
+
     def get_lyrics(self, metadata: TrackMetadata) -> str:
         """
         Retrieves lyrics from LRClib.net for a specified track and artist.
@@ -36,24 +54,25 @@ class Lyrics:
         Raises:
             NoLyricsAvailable: If no lyrics are found for the specified track and artist.
         """
-        user_agent = (
-            "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"
+        api = LrcLibAPI(
+            user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0"
+        )
+        results = api.search_lyrics(
+            track_name=metadata.name, artist_name=metadata.artist
         )
 
-        # Prepare the LRClib API with the user agent
-        api = LrcLibAPI(user_agent=user_agent)
-        id = api.search_lyrics(track_name=metadata.name, artist_name=metadata.artist)
-
-        # Check if lyrics are available
-        if len(id) != 0:
-            if id[0].instrumental is True:
-                return choice(T_INSTRUMENTAL)
-            lyrics = api.get_lyrics_by_id(id[0].id).plain_lyrics
-            if lyrics is None:
-                raise NoLyricsAvailable
-            return str(lyrics)
-        else:
+        if not results:
             raise NoLyricsAvailable
+
+        if self.check_instrumental(metadata):
+            return T_INSTRUMENTAL
+
+        lyrics = api.get_lyrics_by_id(results[0].id).plain_lyrics
+
+        if not lyrics:
+            raise NoLyricsAvailable
+
+        return lyrics
 
     def select_lines(self, lyrics: str, selection: str) -> str:
         """
