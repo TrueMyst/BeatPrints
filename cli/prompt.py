@@ -189,10 +189,16 @@ def poster_features():
             qmark="💫",
         ),
         accent=questionary.confirm(
-            "• Add a color accent?", default=False, style=exutils.lavish, qmark="🌈"
+            "• Add a colored accent to the bottom?",
+            default=False,
+            style=exutils.lavish,
+            qmark="🌈",
         ),
         image=questionary.confirm(
-            "• Use a custom image?", default=False, style=exutils.lavish, qmark="🥐"
+            "• Use a custom image as the poster's cover art?",
+            default=False,
+            style=exutils.lavish,
+            qmark="🥐",
         ),
     ).unsafe_ask()
 
@@ -218,7 +224,7 @@ def create_poster():
     Create a poster based on user input.
     """
     poster_type = questionary.select(
-        "• What type of poster would you like to create?",
+        "• What do you want to create?",
         choices=["Track Poster", "Album Poster"],
         style=exutils.lavish,
         qmark="🎨",

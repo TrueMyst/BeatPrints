@@ -77,7 +77,6 @@ class InvalidFormatError(Exception):
         self.message = message
         super().__init__(self.message)
 
-
 class ThemeNotFound(Exception):
     """
     Raised when the specified theme is not found or is invalid.

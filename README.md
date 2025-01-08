@@ -20,7 +20,7 @@
 
 ![examples](https://i.ibb.co.com/y0jKqHK/banner.png)
 
-<h3 align="center">📔 Check out the new documentation <a href="https://beatprints.readthedocs.io/en/latest/">here!</a></h3>
+<h3 align="center">📔 Check out the documentation <a href="https://beatprints.readthedocs.io/en/latest/">here!</a></h3>
 
 ## 📦 Installation
 
@@ -134,9 +134,7 @@ I wanted to make it free for everyone to print themselves, as I believe my poste
 ## ❤️  Special Thanks
 
 - A big thanks to [Spotify Poster Generator](https://github.com/AnveshakR/poster-generator/) by [@AnveshakR](https://github.com/AnveshakR) for inspiring BeatPrints with amazing ideas!  
-- Shoutout to [@Magniquick](https://github.com/Magniquick), [@Krishna-Gunjan](https://github.com/Krishna-Gunjan), and [@itsnotrin](https://github.com/itsnotrin) for their awesome contributions!  
-- Thanks to [@T-Dynamos](https://github.com/T-Dynamos) and [@cherriae](https://github.com/cherriae) for their great improvements and tweaks.  
-- A special nod to [@itsnotrin](https://github.com/itsnotrin) for helping make album poster generation possible!  
+- Shoutout to [@Magniquick](https://github.com/Magniquick), [@Krishna-Gunjan](https://github.com/Krishna-Gunjan), [@itsnotrin](https://github.com/itsnotrin), [@T-Dynamos](https://github.com/T-Dynamos), and [@cherriae](https://github.com/cherriae) for their awesome contributions!
 
 
 ## 📜 License

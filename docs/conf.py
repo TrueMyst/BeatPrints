@@ -11,7 +11,7 @@
 project = "BeatPrints"
 copyright = "2024, elysianmyst"
 author = "elysianmyst"
-release = "v1.1.1"
+release = "v1.1.2"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -22,6 +22,9 @@ extensions = [
     "sphinx_copybutton",
     "sphinxcontrib.video",
 ]
+
+# Hides the module name in documentation
+add_module_names = False
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
