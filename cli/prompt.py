@@ -140,7 +140,7 @@ def handle_lyrics(track: spotify.TrackMetadata):
             instrumental = questionary.confirm(
                 "🎸 • This track seems to be instrumental. Include instrumental text?",
                 default=True,
-                style=exutils.default,
+                style=exutils.lavish,
             ).ask()
             if instrumental:
                 return ly.select_lines(choice(consts.T_INSTRUMENTAL), "1-4")
