@@ -151,7 +151,8 @@ def handle_lyrics(track: spotify.TrackMetadata):
         return ly.select_lines(lyrics, selection_range)
 
     except errors.NoLyricsAvailable:
-        print("\n😦 • Lyrics not found.")
+        print("😦 • Couldn't find the lyrics with LRClib.")
+        print("╰─ You can try getting them from other sources!")
 
         # Ask user to paste custom lyrics
         lyrics = questionary.text(

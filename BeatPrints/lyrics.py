@@ -49,7 +49,7 @@ class Lyrics:
             metadata (TrackMetadata): An object containing the track's metadata.
 
         Returns:
-            str: The lyrics in plain text, if available.
+            str: Returns the lyrics in plain text if available; otherwise, provides a placeholder for instrumental tracks.
 
         Raises:
             NoLyricsAvailable: If no lyrics are found for the specified track and artist.

@@ -155,6 +155,13 @@ class Spotify:
                 f"{self.__BASE_URL}/albums/{id}", headers=self.__AUTH_HEADER
             ).json()
 
+            # If the label name is too long, switch to the artist's name
+            label = (
+                track["artists"][0]["name"]
+                if len(album["label"]) > 45
+                else album["label"]
+            )
+
             # Create TrackMetadata object with formatted data
             metadata = {
                 "name": track["name"],
@@ -166,7 +173,7 @@ class Spotify:
                 ),
                 "duration": self._format_duration(track["duration_ms"]),
                 "image": track["album"]["images"][0]["url"],
-                "label": album["label"],
+                "label": label,
                 "id": track["id"],
             }
 
@@ -223,6 +230,13 @@ class Spotify:
             if shuffle:
                 random.shuffle(tracks)
 
+            # If the label name is too long, switch to the artist's name
+            label = (
+                album["artists"][0]["name"]
+                if len(album_details["label"]) > 45
+                else album_details["label"]
+            )
+
             # Create AlbumMetadata object with formatted data
             metadata = {
                 "name": album["name"],
@@ -231,7 +245,7 @@ class Spotify:
                     album["release_date"], album["release_date_precision"]
                 ),
                 "image": album["images"][0]["url"],
-                "label": album_details.get("label", "Unknown"),
+                "label": label,
                 "id": album["id"],
                 "tracks": tracks,
             }

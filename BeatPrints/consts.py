@@ -81,7 +81,7 @@ CL_TRANSPARENT = (0, 0, 0, 0)
 PLACEHOLDER = random.choice(
     [
         "woosh- instrumental vibes ahead!",
-        "here's a track with some serious feels~!",
+        "here's a track with some serious feels!",
         "the melody speaks for itself!",
         "all melody, no lyrics!",
         "it's a wordless masterpiece!",
@@ -89,7 +89,7 @@ PLACEHOLDER = random.choice(
 )
 
 T_INSTRUMENTAL = (
-    f"""(\\_/)\n( •.•) mmm- this is an instrumental track !!!\n/> {PLACEHOLDER}"""
+    f"""(\\_/)\n( •.•) mmm, this is an instrumental track !!!\n/> {PLACEHOLDER}"""
 )
 
 P_FULLPATH = os.path.join(os.path.dirname(__file__))

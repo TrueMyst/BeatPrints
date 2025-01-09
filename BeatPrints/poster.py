@@ -11,8 +11,9 @@ from typing import Optional, Union
 
 from PIL import Image, ImageDraw
 
-from .consts import *
 from . import image, write
+
+from .consts import *
 from .utils import filename, organize_tracks
 
 from .errors import ThemeNotFoundError
