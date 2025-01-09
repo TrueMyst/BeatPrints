@@ -11,9 +11,12 @@ C = Cords
 P = Path
 PL = Palette
 CL = Color
+T = Text
 """
 
 import os
+import random
+
 from typing import Literal
 
 MAX_ROWS = 5
@@ -74,6 +77,20 @@ THEME_OPTS = Literal[
 
 CL_WHITE = (255, 255, 255, 255)
 CL_TRANSPARENT = (0, 0, 0, 0)
+
+PLACEHOLDER = random.choice(
+    [
+        "woosh- instrumental vibes ahead!",
+        "here's a track with some serious feels~!",
+        "the melody speaks for itself!",
+        "all melody, no lyrics!",
+        "it's a wordless masterpiece!",
+    ]
+)
+
+T_INSTRUMENTAL = (
+    f"""(\\_/)\n( •.•) mmm- this is an instrumental track !!!\n/> {PLACEHOLDER}"""
+)
 
 P_FULLPATH = os.path.join(os.path.dirname(__file__))
 P_ASSETS = os.path.join(P_FULLPATH, "assets")
