@@ -242,6 +242,8 @@ def create_poster():
 
         if track:
             lyrics = handle_lyrics(track)
+
+            exutils.clear()
             ps.track(track, lyrics, accent, theme, image)
     else:
         album = select_album(conf.SEARCH_LIMIT)
@@ -256,5 +258,6 @@ def main():
     try:
         create_poster()
     except KeyboardInterrupt:
-        print("╰─ 👋 Alright, no problem! See you next time.")
+        exutils.clear()
+        print("👋 Alright, no problem! See you next time.")
         exit(1)
