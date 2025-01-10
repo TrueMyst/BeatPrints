@@ -9,9 +9,9 @@
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#module-sphinx.ext.autodoc
 
 project = "BeatPrints"
-copyright = "2024, elysianmyst"
+copyright = "2025, elysianmyst"
 author = "elysianmyst"
-release = "v1.1.2"
+release = "v1.1.3"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

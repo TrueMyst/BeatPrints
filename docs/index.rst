@@ -1,5 +1,5 @@
-Homepage
-========
+☕️ BeatPrints
+=============
 
 .. raw:: html
 
@@ -48,8 +48,12 @@ Or if you prefer using just the CLI:
 This will install the CLI, making it ready for you to use.
 For more more infomation, check out `pipx <https://github.com/pypa/pipx>`_
 
+
+🚀 Quick Start
+--------------
+
 🌱 Environment Variables
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 To get started with BeatPrints, you’ll need a ``.env`` file with these
 keys:
@@ -61,37 +65,44 @@ keys:
 
 You can get these from the `Spotify Developer Dashboard <https://developer.spotify.com/dashboard/>`_ by creating a new app with **Web API** as the scope.
 
-🚀 Quick Start
---------------
+
+🎀 Creating your FIRST Poster
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Here’s how you can create your first poster:
 
 .. code:: python
 
-   import os, dotenv
-   from BeatPrints import lyrics, poster, spotify
+  import os, dotenv
+  from BeatPrints import lyrics, poster, spotify
 
-   dotenv.load_dotenv()
+  dotenv.load_dotenv()
 
-   # Spotify credentials
-   CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-   CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+  # Spotify credentials
+  CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+  CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
-   # Initialize components
-   ly = lyrics.Lyrics()
-   ps = poster.Poster("./")
-   sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+  # Initialize components
+  ly = lyrics.Lyrics()
+  ps = poster.Poster("./")
+  sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
 
-   # Search for a track
-   search = sp.get_track("Saturn - SZA", limit=1)
+  # Search for the track and fetch metadata
+  search = sp.get_track("Saturn - SZA", limit=1)
 
-   # Get the track's metadata and lyrics
-   metadata = search[0]
-   lyrics = ly.get_lyrics(metadata)
-   highlighted_lyrics = ly.select_lines(lyrics, "5-9")
+  # Pick the first result
+  metadata = search[0]
 
-   # Generate the track poster
-   ps.track(metadata, highlighted_lyrics)
+  # Get lyrics for the track
+  lyrics = ly.get_lyrics(metadata)
+
+  # Use the placeholder for instrumental tracks; otherwise, select specific lines
+  highlighted_lyrics = (
+      lyrics if ly.check_instrumental(metadata) else ly.select_lines(lyrics, "5-9")
+  )
+
+  # Generate the track poster
+  ps.track(metadata, highlighted_lyrics)
 
 🥞 CLI
 ------
@@ -104,8 +115,6 @@ Here’s a short video showing how to generate posters using the CLI. For more i
 🖼️ Examples
 -----------
 
-Here are a few posters created with BeatPrints:
-
 ======================== ==========================
 **Track: Saturn by SZA** **Album: Charm by Clairo**
 ======================== ==========================
@@ -114,6 +123,18 @@ Here are a few posters created with BeatPrints:
 
 .. |Track Example| image:: https://i.ibb.co.com/q5v8J9R/saturn-by-sza-1e3.png
 .. |Album Example| image:: https://i.ibb.co.com/TcrKKXV/charm-by-clairo-f8a.png
+
+
+🎨 Themes
+---------
+
+BeatPrints currently offers you **5 additional themes**  to use!
+
+-  Catppuccin
+-  Gruvbox
+-  Nord
+-  Rosepine
+-  Everforest
 
 For more examples, check out the `examples directory <https://github.com/TrueMyst/BeatPrints/tree/main/examples>`_.
 
@@ -125,7 +146,7 @@ For more examples, check out the `examples directory <https://github.com/TrueMys
 -  **Multi-language Support**: Supports English, Hindi, Russian,
    Japanese, Chinese, and Korean.
 -  **Custom Cover Images**: Personalize posters with your own images.
--  **Theme Customization**: Switch between Dark and Light themes.
+-  **Theme Customization**: Switch between different other themes.
 -  **Track & Album Selection**: Highlight your favorite track or entire
    album.
 -  **Lyrics Highlighting**: Feature impactful lyrics directly on your

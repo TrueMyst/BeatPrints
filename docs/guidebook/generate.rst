@@ -14,30 +14,36 @@ To generate a track poster, follow the steps below.
 
 .. code-block:: python
 
-   import os, dotenv
-   from BeatPrints import lyrics, poster, spotify
+  import os, dotenv
+  from BeatPrints import lyrics, poster, spotify
 
-   dotenv.load_dotenv()
+  dotenv.load_dotenv()
 
-   # Spotify credentials
-   CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-   CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+  # Spotify credentials
+  CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+  CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
-   # Initialize components
-   ly = lyrics.Lyrics()
-   ps = poster.Poster("./")
-   sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+  # Initialize components
+  ly = lyrics.Lyrics()
+  ps = poster.Poster("./")
+  sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
 
-   # Search for a track
-   search = sp.get_track("Saturn - SZA", limit=1)
+  # Search for the track and fetch metadata
+  search = sp.get_track("Saturn - SZA", limit=1)
 
-   # Get the track's metadata and lyrics
-   metadata = search[0]
-   lyrics = ly.get_lyrics(metadata)
-   highlighted_lyrics = ly.select_lines(lyrics, "5-9")
+  # Pick the first result
+  metadata = search[0]
 
-   # Generate the track poster
-   ps.track(metadata, highlighted_lyrics)
+  # Get lyrics for the track
+  lyrics = ly.get_lyrics(metadata)
+
+  # Use the placeholder for instrumental tracks; otherwise, select specific lines
+  highlighted_lyrics = (
+      lyrics if ly.check_instrumental(metadata) else ly.select_lines(lyrics, "5-9")
+  )
+
+  # Generate the track poster
+  ps.track(metadata, highlighted_lyrics)
 
 .. tip::
 
