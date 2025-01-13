@@ -1,4 +1,5 @@
 import questionary
+import re
 
 from rich import print
 
@@ -120,6 +121,47 @@ def select_album(limit: int):
             return result[int(choice) - 1], index
 
 
+def parse_spotify_url(url: str) -> tuple:
+    """
+    Parses a Spotify URL to extract the type and ID.
+
+    Args:
+        url (str): The Spotify URL to be parsed.
+
+    Returns:
+        tuple: A tuple containing two elements:
+            - The type of the Spotify URL (e.g., "track", "album").
+            - The ID of the Spotify URL.
+    """
+
+    # Extract the type and ID from the Spotify URL
+    match = re.match(r"https://open.spotify.com/(track|album)/(\w+)", url)
+
+    if match:
+        return match.groups()
+
+    return None, None
+
+
+def select_from_spotify_url():
+    """
+    Prompt user to input url.
+
+    Returns:
+        TrackMetadata or AlbumMetadata.
+    """
+    url = questionary.text(
+        "• Type the spotify url:",
+        validate=validate.SpotifyURLValidator,
+        style=exutils.lavish,
+        qmark="🎺",
+    ).unsafe_ask()
+
+    type, id = parse_spotify_url(url)
+    result = sp.get_from_id(type, id)
+    return result
+
+
 def handle_lyrics(track: spotify.TrackMetadata):
     """
     Get lyrics and let user select lines.
@@ -226,7 +268,7 @@ def create_poster():
     """
     poster_type = questionary.select(
         "• What do you want to create?",
-        choices=["Track Poster", "Album Poster"],
+        choices=["Track Poster", "Album Poster", "From Spotify URL"],
         style=exutils.lavish,
         qmark="🎨",
     ).unsafe_ask()
@@ -245,12 +287,20 @@ def create_poster():
 
             exutils.clear()
             ps.track(track, lyrics, accent, theme, image)
-    else:
+    elif poster_type == "Album Poster":
         album = select_album(conf.SEARCH_LIMIT)
 
         if album:
             ps.album(*album, accent, theme, image)
+    else:
+        result = select_from_spotify_url()
 
+        if isinstance(result, spotify.TrackMetadata):
+            lyrics = handle_lyrics(result)
+            exutils.clear()
+            ps.track(result, lyrics, accent, theme, image)
+        elif isinstance(result, spotify.AlbumMetadata):
+            ps.album(result, False, accent, theme, image)
 
 def main():
     exutils.clear()
