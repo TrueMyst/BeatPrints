@@ -8,7 +8,7 @@ import random
 import requests
 import datetime
 
-from typing import List
+from typing import List, Union
 from dataclasses import dataclass
 
 from .errors import NoMatchingTrackFound, NoMatchingAlbumFound, InvalidSearchLimit
@@ -183,7 +183,7 @@ class Spotify:
 
     def get_album(
         self, query: str, limit: int = 6, shuffle: bool = False
-    ) -> List[AlbumMetadata]:
+        ) -> List[AlbumMetadata]:
         """
         Searches for albums based on a query and retrieves their metadata, including track listing.
 
@@ -253,3 +253,78 @@ class Spotify:
             albumlist.append(AlbumMetadata(**metadata))
 
         return albumlist
+
+    def get_from_id(
+        self, type: str, id: str, shuffle: bool = False
+       ) -> Union[TrackMetadata, AlbumMetadata]:
+        """
+        Searches for albums based on a query and retrieves their metadata, including track listing.
+
+        Args:
+            query (str): The search query for the album (e.g. album name - artist).
+            shuffle (bool, optional): Shuffle the tracks in the tracklist. Defaults to False.
+
+        Returns:
+            Union[TrackMetadat, AlbumMetadata]: A track/album metadata.
+
+        Raises:
+            NoMatchingAlbumFound: If no matching albums are found.
+        """
+
+        if type not in ["track", "album"]:
+            raise ValueError("Invalid Spotify URL")
+
+        result = requests.get(
+            f"{self.__BASE_URL}/{type}s/{id}", headers=self.__AUTH_HEADER
+        ).json()
+
+        id = result.get("id")
+
+        if not id:
+            if type == "track":
+                raise NoMatchingTrackFound
+            else:
+                raise NoMatchingAlbumFound
+
+        if type == "track":
+            album_id = result["album"]["id"]
+            album = requests.get(
+                f"{self.__BASE_URL}/albums/{album_id}", headers=self.__AUTH_HEADER
+            ).json()
+        else:
+            album = result
+
+        label = (
+            result["artists"][0]["name"]
+            if len(album["label"]) > 45
+            else album["label"]
+        )
+
+        # Create AlbumMetadata object with formatted data
+        metadata = {
+            "name": result["name"],
+            "artist": result["artists"][0]["name"],
+            "released": self._format_release_date(
+                album["release_date"], album["release_date_precision"]
+            ),
+            "image": album["images"][0]["url"],
+            "label": label,
+            "id": result["id"],
+        }
+
+        if type == "track":
+            metadata["album"] = album["name"]
+            metadata["duration"] = self._format_duration(result["duration_ms"])
+            return TrackMetadata(**metadata)
+        else:
+            tracks = [
+                track["name"]
+                for track in result.get("tracks", {}).get("items", [])
+            ]
+
+            # Shuffle tracks if true
+            if shuffle:
+                random.shuffle(tracks)
+
+            metadata["tracks"] = tracks
+            return AlbumMetadata(**metadata)

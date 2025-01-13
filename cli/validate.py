@@ -1,4 +1,4 @@
-import os
+import os, re
 
 from PIL import Image
 from pathlib import Path
@@ -119,3 +119,23 @@ class LengthValidator(Validator):
                 message="> You can't leave the search query empty when searching.",
                 cursor_position=len(document.text),  # Move cursor to end
             )
+
+
+class SpotifyURLValidator(Validator):
+
+    def validate(self, document):
+        url = document.text
+
+        if not url.startswith("https://open.spotify.com"):
+            raise ValidationError(
+                message="> The URL must be a Spotify URL.",
+                cursor_position=len(document.text),
+            )
+
+        pattern = r'https://open\.spotify\.com/(track|album)/[a-zA-Z0-9]{22}(?:\?.*)?$'
+        if not re.match(pattern, url):
+            raise ValidationError(
+                message="> Invalid Spotify URL format. Must be a track or album URL.",
+                cursor_position=len(document.text),
+            )
+
