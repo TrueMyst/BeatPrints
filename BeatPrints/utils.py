@@ -132,3 +132,4 @@ def filename(song: str, artist: str) -> str:
     filename = f"{safe_text}_{random_hex}.png"
 
     return filename
+

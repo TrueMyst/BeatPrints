@@ -91,7 +91,7 @@ def select_album(limit: int):
             qmark="💿️",
         ).unsafe_ask()
 
-        result = sp.get_album(query, limit, shuffle)
+        result = sp.get_album(query, limit=limit, shuffle=shuffle)
 
         # Clear the screen
         exutils.clear()
@@ -121,45 +121,26 @@ def select_album(limit: int):
             return result[int(choice) - 1], index
 
 
-def parse_spotify_url(url: str) -> tuple:
-    """
-    Parses a Spotify URL to extract the type and ID.
-
-    Args:
-        url (str): The Spotify URL to be parsed.
-
-    Returns:
-        tuple: A tuple containing two elements:
-            - The type of the Spotify URL (e.g., "track", "album").
-            - The ID of the Spotify URL.
-    """
-
-    # Extract the type and ID from the Spotify URL
-    match = re.match(r"https://open.spotify.com/(track|album)/(\w+)", url)
-
-    if match:
-        return match.groups()
-
-    return None, None
-
-
 def select_from_spotify_url():
     """
-    Prompt user to input url.
+    Prompt user to input track or album URL and retrieve the metadata.
 
     Returns:
-        TrackMetadata or AlbumMetadata.
+        Union[TrackMetadata, AlbumMetadata]: Metadata for the track or album from Spotify URL.
     """
     url = questionary.text(
-        "• Type the spotify url:",
+        "• Type the spotify track or album url:",
         validate=validate.SpotifyURLValidator,
         style=exutils.lavish,
         qmark="🎺",
     ).unsafe_ask()
 
-    type, id = parse_spotify_url(url)
-    result = sp.get_from_id(type, id)
-    return result
+    type, _ = sp.parse_url(url)
+
+    if type == "track":
+        return sp.get_track(url=url)[0]
+    elif type == "album":
+        return sp.get_album(url=url)[0]
 
 
 def handle_lyrics(track: spotify.TrackMetadata):
@@ -293,14 +274,15 @@ def create_poster():
         if album:
             ps.album(*album, accent, theme, image)
     else:
-        result = select_from_spotify_url()
+        metadata = select_from_spotify_url()
 
-        if isinstance(result, spotify.TrackMetadata):
-            lyrics = handle_lyrics(result)
+        if isinstance(metadata, spotify.TrackMetadata):
+            lyrics = handle_lyrics(metadata)
+
             exutils.clear()
-            ps.track(result, lyrics, accent, theme, image)
-        elif isinstance(result, spotify.AlbumMetadata):
-            ps.album(result, False, accent, theme, image)
+            ps.track(metadata, lyrics, accent, theme, image)
+        elif isinstance(metadata, spotify.AlbumMetadata):
+            ps.album(metadata, False, accent, theme, image)
 
 def main():
     exutils.clear()
