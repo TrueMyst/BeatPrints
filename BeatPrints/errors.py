@@ -89,3 +89,37 @@ class ThemeNotFoundError(Exception):
     ):
         self.message = message
         super().__init__(self.message)
+
+
+class MissingParameterError(Exception):
+    """
+    Raised when a required parameter is missing.
+    """
+
+    def __init__(self, param_name=None):
+        self.param_name = param_name
+        message = (
+            f"Required parameter '{param_name}' is missing"
+            if param_name
+            else "A required parameter is missing"
+        )
+        self.message = message
+        super().__init__(self.message)
+
+class InvalidTrackUrlError(Exception):
+    """
+    Raised when the track URL is invalid.
+    """
+
+    def __init__(self, message="The track URL is invalid."):
+        self.message = message
+        super().__init__(self.message)
+
+class InvalidAlbumUrlError(Exception):
+    """
+    Raised when the album URL is invalid.
+    """
+
+    def __init__(self, message="The album URL is invalid."):
+        self.message = message
+        super().__init__(self.message)
