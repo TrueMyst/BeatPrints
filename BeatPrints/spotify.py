@@ -235,7 +235,7 @@ class Spotify:
 
         Args:
             query (str): The search query for the album (e.g. album name - artist).
-            url (str): The Spotify track URL.
+            url (str): The Spotify album URL.
             limit (int, optional): Maximum number of albums to retrieve. Defaults to 6.
             shuffle (bool, optional): Shuffle the tracks in the tracklist. Defaults to False.
 
