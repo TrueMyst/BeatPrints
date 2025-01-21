@@ -1,5 +1,4 @@
 import questionary
-import re
 
 from rich import print
 
