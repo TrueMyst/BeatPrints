@@ -18,7 +18,7 @@
     <img alt="Static Badge" src="https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-%23c4b9a6?style=for-the-badge&logo=Pinboard&logoColor=%23b5a790&labelColor=%23312123"></a>
 </p>
 
-![examples](https://i.ibb.co.com/y0jKqHK/banner.png)
+![examples](https://i.imgur.com/tQdIeIU.png)
 
 <h3 align="center">📔 Check out the documentation <a href="https://beatprints.readthedocs.io/en/latest/">here!</a></h3>
 
@@ -102,7 +102,7 @@ https://github.com/user-attachments/assets/3efb7028-c533-4bf4-880b-da3a71f8a3db
 
 | **Track: Saturn by SZA**                                             | **Album: Charm by Clairo**                                             |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| ![Track Example](https://i.ibb.co.com/q5v8J9R/saturn-by-sza-1e3.png) | ![Album Example](https://i.ibb.co.com/TcrKKXV/charm-by-clairo-f8a.png) |
+| ![Track Example](https://i.imgur.com/wWUbdK1.png)                    | ![Album Example](https://i.imgur.com/9vlD94t.png)                      |
 
 
 ## 🎨 Themes
