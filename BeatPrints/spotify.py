@@ -7,11 +7,14 @@ Provides functionality related to interacting with the Spotify API.
 import random
 import requests
 import datetime
+import re
 
-from typing import List
+from typing import List, Optional
 from dataclasses import dataclass
 
-from .errors import NoMatchingTrackFound, NoMatchingAlbumFound, InvalidSearchLimit
+from .errors import (InvalidAlbumUrlError, InvalidSearchLimit,
+                     InvalidTrackUrlError, MissingParameterError,
+                     NoMatchingAlbumFound, NoMatchingTrackFound)
 
 
 @dataclass
@@ -43,6 +46,10 @@ class AlbumMetadata:
     label: str
     id: str
     tracks: List[str]
+
+
+TYPE_TRACK = "track"
+TYPE_ALBUM = "album"
 
 
 class Spotify:
@@ -117,12 +124,37 @@ class Spotify:
         seconds = (duration_ms // 1000) % 60
         return f"{minutes:02d}:{seconds:02d}"
 
-    def get_track(self, query: str, limit: int = 6) -> List[TrackMetadata]:
+    def parse_url(self, url: str) -> tuple:
         """
-        Searches for tracks based on a query and retrieves their metadata.
+        Parses a Spotify URL to extract the type and ID.
+
+        Args:
+            url (str): The Spotify URL to be parsed.
+
+        Returns:
+            tuple: A tuple containing two elements:
+                - The type of the Spotify URL (e.g., "track", "album").
+                - The ID of the Spotify URL.
+        """
+
+        # Extract the type and ID from the Spotify URL
+        match = re.match(r"https://open.spotify.com/(track|album)/(\w+)", url)
+
+        if match:
+            return match.groups()
+
+        return None, None
+
+    def get_track(
+        self, query: Optional[str] = None, url: Optional[str] = None, limit: int = 6
+    ) -> List[TrackMetadata]:
+        """
+        Searches for tracks using a query to retrieve metadata.
+        Alternatively, fetches track details directly from a Spotify album URL.
 
         Args:
             query (str): The search query for the track (e.g. track name - artist).
+            url (str): The Spotify track URL.
             limit (int, optional): Maximum number of tracks to retrieve. Defaults to 6.
 
         Returns:
@@ -131,17 +163,26 @@ class Spotify:
         Raises:
             InvalidSearchLimit: If the limit is less than 1.
             NoMatchingTrackFound: If no matching tracks are found.
+            MissingParameterError: If no query or URL is provided.
         """
         if limit < 1:
             raise InvalidSearchLimit
 
-        tracklist = []
-        params = {"q": query, "type": "track", "limit": limit}
-        response = requests.get(
-            f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
-        ).json()
+        if not query and not url:
+            raise MissingParameterError("query or url")
 
-        tracks = response.get("tracks", {}).get("items", [])
+        tracklist = []
+
+        if url:
+            response, _ = self.get_from_url(url, TYPE_TRACK)
+            tracks = [response]
+        else:
+            params = {"q": query, "type": TYPE_TRACK, "limit": limit}
+            response = requests.get(
+                f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
+            ).json()
+
+            tracks = response.get("tracks", {}).get("items", [])
 
         if not tracks:
             raise NoMatchingTrackFound
@@ -182,13 +223,19 @@ class Spotify:
         return tracklist
 
     def get_album(
-        self, query: str, limit: int = 6, shuffle: bool = False
+        self,
+        query: Optional[str] = None,
+        url: Optional[str] = None,
+        limit: int = 6,
+        shuffle: bool = False,
     ) -> List[AlbumMetadata]:
         """
-        Searches for albums based on a query and retrieves their metadata, including track listing.
+        Searches for albums using a query parameter to retrieve metadata, including track listings.
+        Alternatively, fetches album details directly from a Spotify album URL.
 
         Args:
             query (str): The search query for the album (e.g. album name - artist).
+            url (str): The Spotify album URL.
             limit (int, optional): Maximum number of albums to retrieve. Defaults to 6.
             shuffle (bool, optional): Shuffle the tracks in the tracklist. Defaults to False.
 
@@ -202,13 +249,21 @@ class Spotify:
         if limit < 1:
             raise InvalidSearchLimit
 
-        albumlist = []
-        params = {"q": query, "type": "album", "limit": limit}
-        response = requests.get(
-            f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
-        ).json()
+        if not query and not url:
+            raise MissingParameterError("query or url")
 
-        albums = response.get("albums", {}).get("items", [])
+        albumlist = []
+
+        if url:
+            response, _ = self.get_from_url(url, TYPE_ALBUM)
+            albums = [response]
+        else:
+            params = {"q": query, "type": TYPE_ALBUM, "limit": limit}
+            response = requests.get(
+                f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
+            ).json()
+
+            albums = response.get("albums", {}).get("items", [])
 
         if not albums:
             raise NoMatchingAlbumFound
@@ -216,9 +271,15 @@ class Spotify:
         # Process each album to get details and tracklist
         for album in albums:
             id = album["id"]
-            album_details = requests.get(
-                f"{self.__BASE_URL}/albums/{id}", headers=self.__AUTH_HEADER
-            ).json()
+
+            if query:
+                # If searching by query, fetch additional album details using the album ID
+                album_details = requests.get(
+                    f"{self.__BASE_URL}/albums/{id}", headers=self.__AUTH_HEADER
+                ).json()
+            else:
+                # If using URL, we already have full album details from the initial request
+                album_details = album
 
             # Extract track names from album details
             tracks = [
@@ -253,3 +314,36 @@ class Spotify:
             albumlist.append(AlbumMetadata(**metadata))
 
         return albumlist
+
+    def get_from_url(self, url: str, type: Optional[str] = None) -> tuple[dict, str]:
+        """
+        Fetches a track or album from a Spotify URL.
+
+        Args:
+            url (str): The Spotify track or album URL.
+            type (str, optional): The type of the URL (track or album). Defaults to None.
+
+        Returns:
+            tuple[dict, str]: A tuple containing:
+                - dict: The track or album metadata from Spotify API
+                - str: The type of content ('track' or 'album')
+
+        Raises:
+            InvalidTrackUrlError: If the URL provided is not a valid track URL.
+            InvalidAlbumUrlError: If the URL provided is not a valid album URL.
+        """
+
+        resource_type, id = self.parse_url(url)
+
+        # Verify the URL matches the expected content type (track/album)
+        if type and type != resource_type:
+            if type == TYPE_TRACK:
+                raise InvalidTrackUrlError
+            else:
+                raise InvalidAlbumUrlError
+
+        response = requests.get(
+            f"{self.__BASE_URL}/{resource_type}s/{id}", headers=self.__AUTH_HEADER
+        ).json()
+
+        return response, resource_type

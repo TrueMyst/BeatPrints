@@ -90,7 +90,7 @@ def select_album(limit: int):
             qmark="💿️",
         ).unsafe_ask()
 
-        result = sp.get_album(query, limit, shuffle)
+        result = sp.get_album(query, limit=limit, shuffle=shuffle)
 
         # Clear the screen
         exutils.clear()
@@ -118,6 +118,28 @@ def select_album(limit: int):
 
             exutils.clear()
             return result[int(choice) - 1], index
+
+
+def select_from_spotify_url():
+    """
+    Prompt user to input track or album URL and retrieve the metadata.
+
+    Returns:
+        Union[TrackMetadata, AlbumMetadata]: Metadata for the track or album from Spotify URL.
+    """
+    url = questionary.text(
+        "• Type the spotify track or album url:",
+        validate=validate.SpotifyURLValidator,
+        style=exutils.lavish,
+        qmark="🎺",
+    ).unsafe_ask()
+
+    type, _ = sp.parse_url(url)
+
+    if type == "track":
+        return sp.get_track(url=url)[0]
+    elif type == "album":
+        return sp.get_album(url=url)[0]
 
 
 def handle_lyrics(track: spotify.TrackMetadata):
@@ -226,7 +248,7 @@ def create_poster():
     """
     poster_type = questionary.select(
         "• What do you want to create?",
-        choices=["Track Poster", "Album Poster"],
+        choices=["Track Poster", "Album Poster", "From Spotify URL"],
         style=exutils.lavish,
         qmark="🎨",
     ).unsafe_ask()
@@ -245,12 +267,21 @@ def create_poster():
 
             exutils.clear()
             ps.track(track, lyrics, accent, theme, image)
-    else:
+    elif poster_type == "Album Poster":
         album = select_album(conf.SEARCH_LIMIT)
 
         if album:
             ps.album(*album, accent, theme, image)
+    else:
+        metadata = select_from_spotify_url()
 
+        if isinstance(metadata, spotify.TrackMetadata):
+            lyrics = handle_lyrics(metadata)
+
+            exutils.clear()
+            ps.track(metadata, lyrics, accent, theme, image)
+        elif isinstance(metadata, spotify.AlbumMetadata):
+            ps.album(metadata, False, accent, theme, image)
 
 def main():
     exutils.clear()
