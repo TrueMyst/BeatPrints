@@ -333,7 +333,7 @@ class Spotify:
             InvalidAlbumUrlError: If the URL provided is not a valid album URL.
         """
 
-        resource_type, _ = self.parse_url(url)
+        resource_type, id = self.parse_url(url)
 
         # Verify the URL matches the expected content type (track/album)
         if type and type != resource_type:
