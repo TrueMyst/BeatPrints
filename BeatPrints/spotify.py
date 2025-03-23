@@ -4,12 +4,15 @@ Module: spotify.py
 Provides functionality related to interacting with the Spotify API.
 """
 
+import spotipy
 import random
-import requests
 import datetime
 
 from typing import List
 from dataclasses import dataclass
+
+from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.cache_handler import MemoryCacheHandler
 
 from .errors import NoMatchingTrackFound, NoMatchingAlbumFound, InvalidSearchLimit
 
@@ -58,32 +61,15 @@ class Spotify:
             CLIENT_ID (str): Spotify API client ID.
             CLIENT_SECRET (str): Spotify API client secret.
         """
-        self.CLIENT_ID = CLIENT_ID
-        self.CLIENT_SECRET = CLIENT_SECRET
-        self.__BASE_URL = "https://api.spotify.com/v1"
-        self.__authorization_header()
+        authorization = SpotifyClientCredentials(
+            client_id=CLIENT_ID,
+            client_secret=CLIENT_SECRET,
+            cache_handler=MemoryCacheHandler(),
+        )
 
-    def __authorization_header(self) -> None:
-        """
-        Constructs the authorization header required for API requests.
-        Retrieves an access token from Spotify's accounts service.
-        """
-        endpoint = "https://accounts.spotify.com/api/token"
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        payload = {
-            "grant_type": "client_credentials",
-            "client_id": self.CLIENT_ID,
-            "client_secret": self.CLIENT_SECRET,
-        }
+        self.spotify = spotipy.Spotify(client_credentials_manager=authorization)
 
-        # Request token from Spotify API
-        data = requests.post(endpoint, headers=headers, params=payload)
-        token = data.json()["access_token"]
-
-        # Store authorization header for use in API requests
-        self.__AUTH_HEADER = {"Authorization": f"Bearer {token}"}
-
-    def _format_release_date(self, release_date: str, precision: str) -> str:
+    def _format_released(self, release_date: str, precision: str) -> str:
         """
         Formats the release date of a track or album.
 
@@ -136,48 +122,51 @@ class Spotify:
             raise InvalidSearchLimit
 
         tracklist = []
-        params = {"q": query, "type": "track", "limit": limit}
-        response = requests.get(
-            f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
-        ).json()
+        result = self.spotify.search(q=query, type="track", limit=limit)
 
-        tracks = response.get("tracks", {}).get("items", [])
-
-        if not tracks:
+        if not result:
             raise NoMatchingTrackFound
 
-        # Extract track details and format them
+        tracks = result["tracks"]["items"]
+
         for track in tracks:
+            album_id = track["album"]["id"]
 
-            # Get the track's album using the album ID
-            id = track["album"]["id"]
-            album = requests.get(
-                f"{self.__BASE_URL}/albums/{id}", headers=self.__AUTH_HEADER
-            ).json()
+            # If a track doesn't have an album id, skip it
+            if album_id == None:
+                continue
 
-            # If the label name is too long, switch to the artist's name
-            label = (
-                track["artists"][0]["name"]
-                if len(album["label"]) > 45
-                else album["label"]
-            )
+            album = self.spotify.album(album_id)
 
-            # Create TrackMetadata object with formatted data
-            metadata = {
-                "name": track["name"],
-                "artist": track["artists"][0]["name"],
-                "album": track["album"]["name"],
-                "released": self._format_release_date(
+            if album != None:
+                id = track["id"]
+                name = track["name"]
+                album_name = album["name"]
+                artist = track["artists"][0]["name"]
+                image = track["album"]["images"][0]["url"]
+
+                # If the label name is too long, use the artist's name
+                label = album["label"] if len(album["label"]) < 35 else artist
+
+                duration = self._format_duration(track["duration_ms"])
+                released = self._format_released(
                     track["album"]["release_date"],
                     track["album"]["release_date_precision"],
-                ),
-                "duration": self._format_duration(track["duration_ms"]),
-                "image": track["album"]["images"][0]["url"],
-                "label": label,
-                "id": track["id"],
-            }
+                )
 
-            tracklist.append(TrackMetadata(**metadata))
+                # Create TrackMetadata object with formatted data
+                metadata = {
+                    "name": name,
+                    "artist": artist,
+                    "album": album_name,
+                    "released": released,
+                    "duration": duration,
+                    "image": image,
+                    "label": label,
+                    "id": id,
+                }
+
+                tracklist.append(TrackMetadata(**metadata))
 
         return tracklist
 
@@ -199,57 +188,55 @@ class Spotify:
             InvalidSearchLimit: If the limit is less than 1.
             NoMatchingAlbumFound: If no matching albums are found.
         """
+
         if limit < 1:
             raise InvalidSearchLimit
 
         albumlist = []
-        params = {"q": query, "type": "album", "limit": limit}
-        response = requests.get(
-            f"{self.__BASE_URL}/search", params=params, headers=self.__AUTH_HEADER
-        ).json()
+        result = self.spotify.search(q=query, type="album", limit=limit)
 
-        albums = response.get("albums", {}).get("items", [])
-
-        if not albums:
+        if not result:
             raise NoMatchingAlbumFound
 
-        # Process each album to get details and tracklist
+        albums = result["albums"]["items"]
+
         for album in albums:
             id = album["id"]
-            album_details = requests.get(
-                f"{self.__BASE_URL}/albums/{id}", headers=self.__AUTH_HEADER
-            ).json()
+            album = self.spotify.album(id)
 
-            # Extract track names from album details
-            tracks = [
-                track["name"]
-                for track in album_details.get("tracks", {}).get("items", [])
-            ]
+            if album != None:
+                # Extract track names from album details
+                items = album["tracks"]["items"]
+                tracks = [track["name"] for track in items]
 
-            # Shuffle tracks if true
-            if shuffle:
-                random.shuffle(tracks)
+                # Shuffle tracks if true
+                if shuffle:
+                    random.shuffle(tracks)
 
-            # If the label name is too long, switch to the artist's name
-            label = (
-                album["artists"][0]["name"]
-                if len(album_details["label"]) > 45
-                else album_details["label"]
-            )
+                id = album["id"]
+                name = album["name"]
+                artist = album["artists"][0]["name"]
+                image = album["images"][0]["url"]
 
-            # Create AlbumMetadata object with formatted data
-            metadata = {
-                "name": album["name"],
-                "artist": album["artists"][0]["name"],
-                "released": self._format_release_date(
-                    album["release_date"], album["release_date_precision"]
-                ),
-                "image": album["images"][0]["url"],
-                "label": label,
-                "id": album["id"],
-                "tracks": tracks,
-            }
+                # If the label name is too long, use the artist's name
+                label = album["label"] if len(album["label"]) < 35 else artist
 
-            albumlist.append(AlbumMetadata(**metadata))
+                released = self._format_released(
+                    album["release_date"],
+                    album["release_date_precision"],
+                )
+
+                # Create AlbumMetadata object with formatted data
+                metadata = {
+                    "name": name,
+                    "artist": artist,
+                    "released": released,
+                    "image": image,
+                    "label": label,
+                    "id": id,
+                    "tracks": tracks,
+                }
+
+                albumlist.append(AlbumMetadata(**metadata))
 
         return albumlist

@@ -31,6 +31,10 @@ jobs:
         with:
           virtualenvs-create: false
 
+      - name: Update Dependencies
+        run: |
+          poetry update
+
       - name: Run Black
         run: |
           poetry add black
