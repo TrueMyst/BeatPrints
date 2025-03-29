@@ -8,10 +8,15 @@ import re
 import random
 import string
 
-from . import write, consts
+from BeatPrints import write
+from BeatPrints.consts import Size, Position
+
+# Initialize the components
+s = Size()
+p = Position()
 
 
-def add_flat_indexes(nlist: list) -> list:
+def add_indexes(nlist: list) -> list:
     """
     Adds a flat index to each track name in a nested list.
 
@@ -26,77 +31,62 @@ def add_flat_indexes(nlist: list) -> list:
 
     for idx, cols in enumerate(nlist):
         for jdx, row in enumerate(cols):
-
             nlist[idx][jdx] = f"{index}. {row}"
             index += 1
 
     return nlist
 
 
-def organize_tracks(tracks: list, indexing: bool = False) -> tuple:
+def organize_tracks(tracks: list, index: bool = False) -> tuple:
     """
-    Organizes tracks into columns that fit within the maximum allowed width.
+    Distributes tracks into columns while ensuring they fit within the maximum allowed width.
 
-    Args:
-        tracks (list): List of track names to be organized.
+    Parameters:
+        tracks (list): A list of track names to be organized into columns.
+        index (bool, optional): If True, adds index numbers to the tracks. Defaults to False.
 
     Returns:
-        tuple: A tuple containing two elements:
-            - List of lists where each inner list contains a column of track names.
-            - List of widths for each track column.
+        tuple: A tuple containing:
+            - list: The organized columns of tracks.
+            - list: The width of each column.
     """
 
-    def calculate_column_width(tracks_column: list, additional_width: int = 0):
+    def get_column_width(cols: list, idx_width: int) -> int:
         """
-        Helper function to calculate the width of the longest track in a column.
+        Calculates the width of a column, accounting for index spacing if applicable.
         """
 
-        tracks = max(tracks_column, key=len)
+        size = s.TRACKS
+        font = write.font("Light")
 
-        return (
-            write.calculate_text_width(tracks, write.font("Light"), consts.S_TRACKS)
-            + additional_width
-        )
+        return max(write.text_width(item, font, size) for item in cols) + idx_width
 
-    additional_width = 0
-
-    # Account for the space that index numbers take
-    if indexing:
-        index = len(tracks) + 1
-
-        additional_width = write.calculate_text_width(
-            f"{index}", write.font("Light"), consts.S_TRACKS
-        )
+    # Determine index width if index is True
+    idx_width = write.text_width("00. ", write.font("Light"), s.TRACKS) if index else 0
 
     while True:
-        # Split tracks into columns with a maximum of MAX_ROWS per column
-        columns = [
-            tracks[i : i + consts.MAX_ROWS]
-            for i in range(0, len(tracks), consts.MAX_ROWS)
-        ]
+        # Split tracks into columns based on MAX_ROWS
+        cols = [tracks[i : i + s.MAX_ROWS] for i in range(0, len(tracks), s.MAX_ROWS)]
 
-        # Determine the width of each column
-        track_widths = [
-            calculate_column_width(col, additional_width) for col in columns
-        ]
+        # Compute widths of each column
+        col_widths = [get_column_width(col, idx_width) for col in cols]
 
-        # Sum the total width and check if it fits within the allowed MAX_WIDTH
-        total_width = sum(track_widths) + consts.S_SPACING * (len(columns) - 1)
+        # Calculate total width including spacing
+        total_width = sum(col_widths) + s.SPACING * (len(cols) - 1)
 
-        if total_width <= consts.MAX_WIDTH:
-            break  # If it fits, exit the loop
+        if total_width <= s.MAX_WIDTH:
+            # If columns fit within the max width, stop adjusting
+            break
 
-        else:
-            # If it doesn't fit, remove the longest track from the column with the widest width
-            longest_column_index = track_widths.index(max(track_widths))
-            longest_column = columns[longest_column_index]
-            tracks.remove(max(longest_column, key=len))
+        # Otherwise, remove the longest track from the widest column
+        widest_col = cols[col_widths.index(max(col_widths))]
+        tracks.remove(max(widest_col, key=len))
 
-    # Add flat indexes to tracks if indexing is enabled
-    if indexing:
-        columns = add_flat_indexes(columns)
+    # Add indexes to tracks if enabled
+    if index:
+        cols = add_indexes(cols)
 
-    return columns, track_widths
+    return cols, col_widths
 
 
 def filename(song: str, artist: str) -> str:

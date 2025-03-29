@@ -6,11 +6,11 @@ A custom module written to improve Pillow’s draw.text functionality.
 
 import os
 
-from fontTools.ttLib import TTFont
-from PIL import ImageFont, ImageDraw
 from typing import Optional, Dict, Literal, Tuple, List
 
-from .consts import P_FONTS
+from fontTools.ttLib import TTFont
+from PIL import ImageFont, ImageDraw
+from BeatPrints.consts import FilePath
 
 
 def _load_fonts(*font_paths: str) -> Dict[str, TTFont]:
@@ -21,7 +21,7 @@ def _load_fonts(*font_paths: str) -> Dict[str, TTFont]:
         *font_paths (str): Paths to font files.
 
     Returns:
-        dict: A dictionary mapping font paths to font objects.
+        Dict[str, TTFont]: A dictionary mapping font paths to font objects.
     """
     fonts = {}
     for path in font_paths:
@@ -35,12 +35,12 @@ def font(weight: Literal["Regular", "Bold", "Light"]) -> Dict[str, TTFont]:
     Loads fonts of the specified weight from the predefined assets/fonts directory.
 
     Args:
-        weight (str): The desired font weight ("Regular", "Bold", or "Light").
+        weight (Literal): The desired font weight ("Regular", "Bold", or "Light").
 
     Returns:
-        dict: A dictionary mapping font paths to font objects for the given weight.
+        Dict[str, TTFont]: A dictionary mapping font paths to font objects for the given weight.
     """
-    fonts_path = P_FONTS
+    fonts_path = FilePath().FONTS
     font_families = [
         "Oswald",
         "NotoSansJP",
@@ -120,7 +120,6 @@ def group_by_font(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
     # Merge consecutive characters that use the same font into one group.
     merged = [groups[0]]
     for char, font_path in groups[1:]:
-
         # Append the character to the current group.
         if merged[-1][1] == font_path:
             merged[-1][0] += char
@@ -145,7 +144,7 @@ def render_singleline(
 
     Args:
         draw (ImageDraw.ImageDraw): The drawing context.
-        pos (tuple): The (x, y) position to start drawing.
+        pos (tuple): The position of the text.
         text (str): The text to render.
         color (tuple): The text color in RGB format.
         fonts (dict): A dictionary of fonts to use.
@@ -182,7 +181,7 @@ def render_singleline(
         offset += char_box[2] - char_box[0]
 
 
-def calculate_text_width(text: str, fonts: Dict[str, TTFont], size: int) -> int:
+def text_width(text: str, fonts: Dict[str, TTFont], size: int) -> int:
     """
     Returns the width of the text without drawing it.
 
@@ -202,9 +201,10 @@ def calculate_text_width(text: str, fonts: Dict[str, TTFont], size: int) -> int:
     # Sum widths of all words
     for word, path in formatted_text:
         font = ImageFont.truetype(path, size)
+        bound = font.getbbox(word)
 
         # Add word width
-        total_width += font.getlength(word)
+        total_width += bound[2] - bound[0]
 
     return int(total_width)
 
@@ -225,7 +225,7 @@ def text(
 
     Args:
         draw (ImageDraw.ImageDraw): The drawing context.
-        pos (tuple): The (x, y) position to start drawing.
+        pos (tuple): The position of the text.
         text (str): The text to render.
         color (tuple): The text color in RGB format.
         fonts (dict): A dictionary of fonts to use.
@@ -267,7 +267,7 @@ def heading(
 
     Args:
         draw (ImageDraw.ImageDraw): The drawing context.
-        pos (tuple): The (x, y) position to start drawing.
+        pos (tuple): The position of the text.
         max_width (int): The maximum width allowed for the heading.
         text (str): The text to render.
         color (tuple): The text color in RGB format.

@@ -7,14 +7,17 @@ Provides functionality for retrieving song lyrics using the LRClib API.
 import re
 from lrclib import LrcLibAPI
 
-from .spotify import TrackMetadata
-from .errors import (
+from BeatPrints.spotify import TrackMetadata
+from BeatPrints.errors import (
     NoLyricsAvailable,
     InvalidFormatError,
     InvalidSelectionError,
     LineLimitExceededError,
 )
-from .consts import T_INSTRUMENTAL
+from BeatPrints.consts import Instrumental
+
+# Initialize the components
+i = Instrumental()
 
 
 class Lyrics:
@@ -30,7 +33,7 @@ class Lyrics:
             metadata (TrackMetadata): The metadata of the track.
 
         Returns:
-            bool: True if the track is instrumental, False otherwise.
+            bool: True if the track is instrumental (i.e., no lyrics found), False otherwise.
         """
         api = LrcLibAPI(
             user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"
@@ -46,10 +49,10 @@ class Lyrics:
         Retrieves lyrics from LRClib.net for a specified track and artist.
 
         Args:
-            metadata (TrackMetadata): An object containing the track's metadata.
+            metadata (TrackMetadata): The metadata of the track.
 
         Returns:
-            str: Returns the lyrics in plain text if available; otherwise, provides a placeholder for instrumental tracks.
+            str: The lyrics of the track in plain text if available; otherwise, a placeholder message for instrumental tracks.
 
         Raises:
             NoLyricsAvailable: If no lyrics are found for the specified track and artist.
@@ -65,7 +68,7 @@ class Lyrics:
             raise NoLyricsAvailable
 
         if self.check_instrumental(metadata):
-            return T_INSTRUMENTAL
+            return i.DESC
 
         lyrics = api.get_lyrics_by_id(results[0].id).plain_lyrics
 
@@ -83,12 +86,12 @@ class Lyrics:
             selection (str): The range of lines to extract, specified in the format "start-end" (e.g., "2-5").
 
         Returns:
-            str: The extracted lines, exactly 4 in total, as a single string.
+            str: A string containing exactly 4 extracted lines, separated by newline characters.
 
         Raises:
             InvalidFormatError: If the selection argument is not in the correct "start-end" format.
             InvalidSelectionError: If the specified range is out of bounds or otherwise invalid.
-            LineLimitExceededError: If the selected range does not include exactly 4 lines.
+            LineLimitExceededError: If the selected range does not include exactly 4 non-empty lines.
         """
 
         # Split lyrics into lines

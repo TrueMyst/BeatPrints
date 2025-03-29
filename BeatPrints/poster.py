@@ -7,76 +7,80 @@ Generates posters based on track or album information.
 import os
 
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 from PIL import Image, ImageDraw
 
-from . import image, write
+from BeatPrints import image, write
+from BeatPrints.utils import filename, organize_tracks
 
-from .consts import *
-from .utils import filename, organize_tracks
+from BeatPrints.errors import ThemeNotFoundError
+from BeatPrints.spotify import TrackMetadata, AlbumMetadata
+from BeatPrints.consts import Size, Position, ThemesSelector
 
-from .errors import ThemeNotFoundError
-from .spotify import TrackMetadata, AlbumMetadata
+# Initialize the components
+s = Size()
+p = Position()
+t = ThemesSelector()
 
 
 class Poster:
     """
     A class for generating and saving posters containing track or album information.
+
+    Args:
+        output (str): Path where posters will be saved.
     """
 
-    def __init__(self, save_to: str):
+    def __init__(self, output: str):
         """
         Initializes the Poster instance.
-
-        Args:
-            save_to (str): Path where posters will be saved.
         """
-        self.save_to = Path(save_to).expanduser().resolve()
+        self.save_to = Path(output).expanduser().resolve()
 
-    def _add_common_text(
+    def _draw_template(
         self,
         draw: ImageDraw.ImageDraw,
         metadata: Union[TrackMetadata, AlbumMetadata],
-        color: tuple,
+        color: Tuple[int, int, int],
     ):
         """
-        Adds common text like title, artist, and label info.
+        Adds text like title, artist, and label info.
 
         Args:
             draw (ImageDraw.ImageDraw): Draw context.
-            metadata: Metadata containing the required text.
-            color (tuple): Text color.
+            metadata (Union[TrackMetadata, AlbumMetadata]): Metadata containing the required text.
+            color (Tuple[int, int, int]): Text color.
         """
         # Add heading (track or album name) in bold
         write.heading(
             draw,
-            C_HEADING,
-            S_MAX_HEADING_WIDTH,
+            p.HEADING,
+            s.HEADING_WIDTH,
             metadata.name.upper(),
             color,
             write.font("Bold"),
-            S_HEADING,
+            s.HEADING,
         )
 
         # Add artist name
         write.text(
             draw,
-            C_ARTIST,
+            p.ARTIST,
             metadata.artist,
             color,
             write.font("Regular"),
-            S_ARTIST,
+            s.ARTIST,
             anchor="ls",
         )
         # Add release year and label info
         write.text(
             draw,
-            C_LABEL,
+            p.LABEL,
             f"{metadata.released}\n{metadata.label}",
             color,
             write.font("Regular"),
-            S_LABEL,
+            s.LABEL,
             anchor="rt",
         )
 
@@ -85,62 +89,62 @@ class Poster:
         metadata: TrackMetadata,
         lyrics: str,
         accent: bool = False,
-        theme: THEME_OPTS = "Light",
-        custom_cover: Optional[str] = None,
+        theme: ThemesSelector.Options = "Light",
+        pcover: Optional[str] = None,
     ) -> None:
         """
         Generates a poster for a track, which includes lyrics.
 
         Args:
-            metadata (TrackMetadata): Metadata containing details about the track.
+            metadata (TrackMetadata): Track's Metadata.
             lyrics (str): The lyrics of the track.
-            accent (bool, optional): Flag to add an accent at the bottom of the poster. Defaults to False.
-            theme (Literal, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest".  Defaults to "Light".
-            custom_cover (str, optional): Path to a custom cover image. Defaults to None.
+            accent (bool, optional): Adds an accent at the bottom of the poster. Defaults to False.
+            theme (ThemesSelector.Options, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest".  Defaults to "Light".
+            pcover (Optional[str]): Path to a custom cover image. Defaults to None.
         """
 
-        # Check if the theme mentioned is valid or not
-        if theme not in THEMES:
+        # Check if the theme is valid or not
+        if theme not in t.THEMES:
             raise ThemeNotFoundError
 
-        # Get theme colors and template for the poster
+        # Get theme and template for the poster
         color, template = image.get_theme(theme)
 
-        # Get cover art and spotify scannable code
-        cover = image.cover(metadata.image, custom_cover)
-        scannable = image.scannable(metadata.id, theme)
+        # Get cover art and scancode
+        cover = image.cover(metadata.image, pcover)
+        scannable = image.scannable(metadata.id, theme, "track")
 
         with Image.open(template) as poster:
             poster = poster.convert("RGB")
             draw = ImageDraw.Draw(poster)
 
-            # Paste the cover and scannable Spotify code
-            poster.paste(cover, C_COVER)
-            poster.paste(scannable, C_SPOTIFY_CODE, scannable)
+            # Paste the cover and scancode
+            poster.paste(cover, p.COVER)
+            poster.paste(scannable, p.SCANCODE, scannable)
 
-            # Optionally add a color palette or accent design
+            # Add an accent at the bottom if True
             image.draw_palette(draw, cover, accent)
 
-            # Add common track information (name, artist, etc.)
-            self._add_common_text(draw, metadata, color)
+            # Add the track's metadata
+            self._draw_template(draw, metadata, color)
 
-            # Add track duration and lyrics to the poster
+            # Add the track's duration and lyrics to the poster
             write.text(
                 draw,
-                C_DURATION,
+                p.DURATION,
                 metadata.duration,
                 color,
                 write.font("Regular"),
-                S_DURATION,
+                s.DURATION,
                 anchor="rs",
             )
             write.text(
                 draw,
-                C_LYRICS,
+                p.LYRICS,
                 lyrics,
                 color,
                 write.font("Light"),
-                S_LYRICS,
+                s.LYRICS,
                 anchor="lt",
             )
 
@@ -157,44 +161,44 @@ class Poster:
         metadata: AlbumMetadata,
         indexing: bool = False,
         accent: bool = False,
-        theme: THEME_OPTS = "Light",
-        custom_cover: Optional[str] = None,
+        theme: ThemesSelector.Options = "Light",
+        pcover: Optional[str] = None,
     ) -> None:
         """
         Generates a poster for an album, which includes track listing.
 
         Args:
             metadata (AlbumMetadata): Metadata containing details about the album.
-            indexing (bool, optional): Flag to add index numbers to the tracks. Defaults to False.
-            accent (bool, optional): Flag to add an accent at the bottom of the poster. Defaults to False.
-            theme (Literal, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest". Defaults to "Light".
-            custom_cover (str, optional): Path to a custom cover image. Defaults to None.
+            indexing (bool, optional): Add index numbers to the tracks. Defaults to False.
+            accent (bool, optional): Add an accent at the bottom of the poster. Defaults to False.
+            theme (ThemesSelector.Options, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest". Defaults to "Light".
+            pcover (Optional[str]): Path to a custom cover image. Defaults to None.
         """
 
         # Check if the theme mentioned is valid or not
-        if theme not in THEMES:
+        if theme not in t.THEMES:
             raise ThemeNotFoundError
 
         # Get theme colors and template for the poster
         color, template = image.get_theme(theme)
 
         # Get cover art and spotify scannable code
-        cover = image.cover(metadata.image, custom_cover)
-        scannable = image.scannable(metadata.id, theme, is_album=True)
+        cover = image.cover(metadata.image, pcover)
+        scannable = image.scannable(metadata.id, theme, "album")
 
         with Image.open(template) as poster:
             poster = poster.convert("RGB")
             draw = ImageDraw.Draw(poster)
 
             # Paste the album cover and scannable Spotify code
-            poster.paste(cover, C_COVER)
-            poster.paste(scannable, C_SPOTIFY_CODE, scannable)
+            poster.paste(cover, p.COVER)
+            poster.paste(scannable, p.SCANCODE, scannable)
 
             # Optionally add a color palette or design accents
             image.draw_palette(draw, cover, accent)
 
-            # Add common album information (name, artist, etc.)
-            self._add_common_text(draw, metadata, color)
+            # Add album information (name, artist, etc.)
+            self._draw_template(draw, metadata, color)
 
             # Album's Tracks
             tracks = metadata.tracks
@@ -203,7 +207,7 @@ class Poster:
             tracklist, track_widths = organize_tracks(tracks, indexing)
 
             # Starting Position
-            x, y = C_TRACKS
+            x, y = p.TRACKS
 
             # Render the tracklist, adjusting the position for each column
             for track_column, column_width in zip(tracklist, track_widths):
@@ -213,11 +217,11 @@ class Poster:
                     "\n".join(track_column),
                     color,
                     write.font("Light"),
-                    S_TRACKS,
+                    s.TRACKS,
                     anchor="lt",
                     spacing=2,
                 )
-                x += column_width + S_SPACING  # Adjust x for next column
+                x += column_width + s.SPACING  # Adjust x for next column
 
             # Save the generated album poster with a unique filename
             name = filename(metadata.name, metadata.artist)

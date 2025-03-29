@@ -14,7 +14,11 @@ from dataclasses import dataclass
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.cache_handler import MemoryCacheHandler
 
-from .errors import NoMatchingTrackFound, NoMatchingAlbumFound, InvalidSearchLimit
+from BeatPrints.errors import (
+    NoMatchingTrackFound,
+    NoMatchingAlbumFound,
+    InvalidSearchLimit,
+)
 
 
 @dataclass
@@ -133,12 +137,12 @@ class Spotify:
             album_id = track["album"]["id"]
 
             # If a track doesn't have an album id, skip it
-            if album_id == None:
+            if album_id is None:
                 continue
 
             album = self.spotify.album(album_id)
 
-            if album != None:
+            if album is not None:
                 id = track["id"]
                 name = track["name"]
                 album_name = album["name"]
@@ -204,7 +208,7 @@ class Spotify:
             id = album["id"]
             album = self.spotify.album(id)
 
-            if album != None:
+            if album is not None:
                 # Extract track names from album details
                 items = album["tracks"]["items"]
                 tracks = [track["name"] for track in items]
