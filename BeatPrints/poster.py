@@ -112,8 +112,8 @@ class Poster:
 
         # Get cover art and scancode
         cover = image.cover(metadata.image, pcover)
-        scannable = image.scannable(metadata.id, theme, "track")
-
+        # scannable = image.scannable(metadata.id, theme, "track")
+        scannable = image.qr_code(metadata.url, theme, "track")
         with Image.open(template) as poster:
             poster = poster.convert("RGB")
             draw = ImageDraw.Draw(poster)
@@ -184,7 +184,8 @@ class Poster:
 
         # Get cover art and spotify scannable code
         cover = image.cover(metadata.image, pcover)
-        scannable = image.scannable(metadata.id, theme, "album")
+        # scannable = image.scannable(metadata.id, theme, "album")
+        scannable = image.qr_code(metadata.url, theme, "track")
 
         with Image.open(template) as poster:
             poster = poster.convert("RGB")

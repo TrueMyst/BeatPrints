@@ -18,6 +18,7 @@ class Size:
     # Resolution Size
     COVER = (2040, 2040)
     SCANCODE = (660, 170)
+    QRCODE = (200, 200)
 
     # Track/Album Metadata
     TRACKS = 70

@@ -3,12 +3,13 @@ import questionary
 from rich import print
 
 from cli import conf, exutils, validate
-from BeatPrints import lyrics, spotify, poster, errors
+from BeatPrints import lyrics, spotify, yt_music, poster, errors
 
 # Initialize components
 ly = lyrics.Lyrics()
 ps = poster.Poster(conf.POSTERS_DIR)
 sp = spotify.Spotify(conf.CLIENT_ID, conf.CLIENT_SECRET)
+yt = yt_music.YtMusic()
 
 
 def select_track(limit: int):
@@ -31,7 +32,7 @@ def select_track(limit: int):
             qmark="🎺",
         ).unsafe_ask()
 
-        result = sp.get_track(query, limit=limit)
+        result = yt.get_track(query, limit=limit)
 
         # Clear the screen
         exutils.clear()
@@ -90,7 +91,7 @@ def select_album(limit: int):
             qmark="💿️",
         ).unsafe_ask()
 
-        result = sp.get_album(query, limit, shuffle)
+        result = yt.get_album(query, limit, shuffle)
 
         # Clear the screen
         exutils.clear()

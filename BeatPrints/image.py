@@ -14,6 +14,7 @@ from typing import List, Literal, Tuple, Optional
 
 from Pylette import extract_colors
 from PIL import Image, ImageDraw, ImageEnhance
+import qrcode
 from BeatPrints.consts import Size, Position, Color, ThemesSelector, FilePath
 
 # Initialize the components
@@ -122,6 +123,47 @@ def magicify(image: Image.Image) -> Image.Image:
     # Reduce contrast by 20%
     contrast = ImageEnhance.Contrast(magic)
     return contrast.enhance(0.8)
+
+
+def qr_code(
+    url: str,
+    theme: ThemesSelector.Options = "Light",
+    item: Literal["track", "album"] = "track",
+) -> Image.Image:
+    """
+    Generates a QR Code as an alternative to Spotify scannable codes for YouTube Music links.
+
+    Args:
+        url (str): The YouTube Music track/album URL.
+        theme (ThemesSelector.Options, optional): The theme for the QR Code. Defaults to "Light".
+        item (Literal["track", "album"], optional): Specifies the type of the QR Code. Defaults to "track".
+    """
+    variant = t.THEMES[theme]
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    # Convert to RGBA to support transparency
+    img = img.convert("RGBA")
+    print("url", url)
+
+    pixels = img.load()
+    width, height = img.size
+
+    # Iterate over all pixels and replace white pixels with transparency code
+    for x in range(width):
+        for y in range(height):
+            if pixels is not None:
+                pixels[x, y] = c.TRANSPARENT if pixels[x, y] != c.WHITE else variant
+
+    # Resize the image
+    return img.resize(s.QRCODE, Image.Resampling.BICUBIC)
 
 
 def scannable(
