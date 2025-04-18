@@ -18,7 +18,8 @@ class Size:
     # Resolution Size
     COVER = (2040, 2040)
     SCANCODE = (660, 170)
-    QRCODE = (200, 200)
+    QRCODE = (150, 150)
+    LOGO = (150, 150)
 
     # Track/Album Metadata
     TRACKS = 70
@@ -51,6 +52,8 @@ class Position:
     PALETTE = (120, 2240)
     ACCENT = (0, 3440, 2280, 3480)
     SCANCODE = (90, 3220)
+    QRCODE = (230, 3220)
+    LOGO = (90, 3220)
 
 
 class Color:
@@ -68,6 +71,9 @@ class Color:
     # Spotify Scancode
     WHITE = (255, 255, 255, 255)
     TRANSPARENT = (0, 0, 0, 0)
+
+    # YT Music logo
+    RED = (255, 0, 51, 255)
 
 
 class ThemesSelector:

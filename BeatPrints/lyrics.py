@@ -7,7 +7,7 @@ Provides functionality for retrieving song lyrics using the LRClib API.
 import re
 from lrclib import LrcLibAPI
 
-from BeatPrints.spotify import TrackMetadata
+from BeatPrints.metadata import TrackMetadata
 from BeatPrints.errors import (
     NoLyricsAvailable,
     InvalidFormatError,

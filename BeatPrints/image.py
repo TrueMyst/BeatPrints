@@ -128,7 +128,6 @@ def magicify(image: Image.Image) -> Image.Image:
 def qr_code(
     url: str,
     theme: ThemesSelector.Options = "Light",
-    item: Literal["track", "album"] = "track",
 ) -> Image.Image:
     """
     Generates a QR Code as an alternative to Spotify scannable codes for YouTube Music links.
@@ -138,6 +137,7 @@ def qr_code(
         theme (ThemesSelector.Options, optional): The theme for the QR Code. Defaults to "Light".
         item (Literal["track", "album"], optional): Specifies the type of the QR Code. Defaults to "track".
     """
+
     variant = t.THEMES[theme]
     qr = qrcode.QRCode(
         version=1,
@@ -147,23 +147,13 @@ def qr_code(
     )
     qr.add_data(url)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
+    img = qr.make_image(fill_color=c.WHITE, back_color=variant)
 
     # Convert to RGBA to support transparency
     img = img.convert("RGBA")
-    print("url", url)
-
-    pixels = img.load()
-    width, height = img.size
-
-    # Iterate over all pixels and replace white pixels with transparency code
-    for x in range(width):
-        for y in range(height):
-            if pixels is not None:
-                pixels[x, y] = c.TRANSPARENT if pixels[x, y] != c.WHITE else variant
 
     # Resize the image
-    return img.resize(s.QRCODE, Image.Resampling.BICUBIC)
+    return convert_image_colors(img, variant, s.QRCODE)
 
 
 def scannable(
@@ -193,20 +183,51 @@ def scannable(
     img_bytes = io.BytesIO(data)
 
     with Image.open(img_bytes) as scan_code:
-        # Convert to RGBA to support transparency
-        scan_code = scan_code.convert("RGBA")
+        return convert_image_colors(scan_code, variant, s.SCANCODE)
 
-        pixels = scan_code.load()
-        width, height = scan_code.size
 
-        # Iterate over all pixels and replace white pixels with transparency code
-        for x in range(width):
-            for y in range(height):
-                if pixels is not None:
-                    pixels[x, y] = c.TRANSPARENT if pixels[x, y] != c.WHITE else variant
+def convert_image_colors(
+    image: Image.Image, variant: Tuple, size: Tuple, color_to_replace: Tuple = c.WHITE
+) -> Image.Image:
+    # Convert to RGBA to support transparency
+    image = image.convert("RGBA")
 
-        # Resize the image
-        return scan_code.resize(s.SCANCODE, Image.Resampling.BICUBIC)
+    pixels = image.load()
+    width, height = image.size
+
+    # Iterate over all pixels and replace white pixels with transparency code
+    for x in range(width):
+        for y in range(height):
+            if pixels is not None:
+                pixels[x, y] = (
+                    c.TRANSPARENT if pixels[x, y] != color_to_replace else variant
+                )
+
+    # Resize the image
+    return image.resize(size, Image.Resampling.BICUBIC)
+
+
+def logo(path: str, theme: ThemesSelector.Options = "Light") -> Image.Image:
+    """
+    Creates an image for the specified logo.
+
+    Args:
+        path: The path to the logo
+
+    Returns:
+        Image.Image: The created image
+    """
+
+    path_ = Path(path).expanduser().resolve()
+
+    if not path_.exists():
+        raise FileNotFoundError(f"The specified path '{path_}' does not exist.")
+
+    variant = t.THEMES[theme]
+
+    img = Image.open(path_)
+    # TODO: generalize logo color
+    return convert_image_colors(img, variant, s.LOGO)
 
 
 def cover(url: str, path: Optional[str]) -> Image.Image:
@@ -224,7 +245,6 @@ def cover(url: str, path: Optional[str]) -> Image.Image:
     Raises:
         FileNotFoundError: If the provided local image path does not exist.
     """
-
     if path:
         path_ = Path(path).expanduser().resolve()
 

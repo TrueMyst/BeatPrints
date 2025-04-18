@@ -4,6 +4,7 @@ Module: utils.py
 Provides utility functions for Spotify and Lyrics operations.
 """
 
+import datetime
 import re
 import random
 import string
@@ -122,3 +123,19 @@ def filename(song: str, artist: str) -> str:
     filename = f"{safe_text}_{random_hex}.png"
 
     return filename
+
+
+def format_released(release_date: str, precision: str) -> str:
+    """
+    Formats the release date of a track or album.
+
+    Args:
+        release_date (str): Release date string from Spotify API.
+        precision (str): Precision of the release date ('day', 'month', 'year').
+
+    Returns:
+        str: Formatted release date in 'Month Day, Year' format.
+    """
+    # Format the release date based on the precision
+    date_format = {"day": "%Y-%m-%d", "month": "%Y-%m", "year": "%Y"}.get(precision, "")
+    return datetime.datetime.strptime(release_date, date_format).strftime("%B %d, %Y")

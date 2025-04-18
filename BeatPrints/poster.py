@@ -7,7 +7,7 @@ Generates posters based on track or album information.
 import os
 
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Literal, Optional, Tuple, Union
 
 from PIL import Image, ImageDraw
 
@@ -15,13 +15,14 @@ from BeatPrints import image, write
 from BeatPrints.utils import filename, organize_tracks
 
 from BeatPrints.errors import ThemeNotFoundError
-from BeatPrints.spotify import TrackMetadata, AlbumMetadata
-from BeatPrints.consts import Size, Position, ThemesSelector
+from BeatPrints.metadata import TrackMetadata, AlbumMetadata
+from BeatPrints.consts import Size, Position, ThemesSelector, FilePath
 
 # Initialize the components
 s = Size()
 p = Position()
 t = ThemesSelector()
+f = FilePath()
 
 
 class Poster:
@@ -90,6 +91,7 @@ class Poster:
         lyrics: str,
         accent: bool = False,
         theme: ThemesSelector.Options = "Light",
+        code_type: Literal["qr", "scannable"] = "qr",
         pcover: Optional[str] = None,
     ) -> None:
         """
@@ -112,15 +114,24 @@ class Poster:
 
         # Get cover art and scancode
         cover = image.cover(metadata.image, pcover)
-        # scannable = image.scannable(metadata.id, theme, "track")
-        scannable = image.qr_code(metadata.url, theme, "track")
+        code = ""
+        if code_type == "qr":
+            code = image.qr_code(metadata.url, theme)
+        elif code_type == "scannable":
+            code = image.scannable(metadata.id, theme, "track")
+
         with Image.open(template) as poster:
             poster = poster.convert("RGB")
             draw = ImageDraw.Draw(poster)
 
-            # Paste the cover and scancode
+            # Paste the cover, code and logo
             poster.paste(cover, p.COVER)
-            poster.paste(scannable, p.SCANCODE, scannable)
+            if code_type == "qr":
+                logo = image.logo(f"{f.ASSETS}/logos/yt_music.png", theme)
+                poster.paste(logo, p.LOGO, logo)
+                poster.paste(code, p.QRCODE, code)
+            elif code_type == "scannable":
+                poster.paste(code, p.SCANCODE, code)
 
             # Add an accent at the bottom if True
             image.draw_palette(draw, cover, accent)
@@ -162,6 +173,7 @@ class Poster:
         indexing: bool = False,
         accent: bool = False,
         theme: ThemesSelector.Options = "Light",
+        code_type: Literal["scannable", "qr"] = "qr",
         pcover: Optional[str] = None,
     ) -> None:
         """
@@ -184,17 +196,24 @@ class Poster:
 
         # Get cover art and spotify scannable code
         cover = image.cover(metadata.image, pcover)
-        # scannable = image.scannable(metadata.id, theme, "album")
-        scannable = image.qr_code(metadata.url, theme, "track")
+        code = ""
+        if code_type == "qr":
+            code = image.qr_code(metadata.url, theme)
+        elif code_type == "scannable":
+            code = image.scannable(metadata.id, theme, "album")
 
         with Image.open(template) as poster:
             poster = poster.convert("RGB")
             draw = ImageDraw.Draw(poster)
 
-            # Paste the album cover and scannable Spotify code
+            # Paste the album cover and code Spotify code
             poster.paste(cover, p.COVER)
-            poster.paste(scannable, p.SCANCODE, scannable)
-
+            if code_type == "qr":
+                logo = image.logo(f"{f.ASSETS}/logos/yt_music.png", theme)
+                poster.paste(logo, p.LOGO, logo)
+                poster.paste(code, p.QRCODE, code)
+            elif code_type == "scannable":
+                poster.paste(code, p.SCANCODE, code)
             # Optionally add a color palette or design accents
             image.draw_palette(draw, cover, accent)
 

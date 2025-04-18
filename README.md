@@ -5,7 +5,7 @@
     BeatPrintsYTMusic: Quick, stylish posters for your favorite tracks! 🎷☕️
 </h3>
 
-<p>This repository is a fork of <a href="https://github.com/mosturia/BeatPrintsYTMusic">BeatPrints</a> that aims to provide support for YouTube Music API (thus making it 100% free!). Below is the original README, which mostly still applies:</p>
+<p>This repository is a fork of <a href="https://github.com/mosturia/BeatPrintsYTMusic">BeatPrints</a> that aims to provide support for YouTube Music API. Below is the original README, tweaked where necessary:</p>
 
 <p align="center">Create eye-catching, Pinterest-style music posters effortlessly. BeatPrints integrates with <b>Spotify</b> and <b>LRClib API</b> to help you design custom posters for your favorite tracks or albums. 🍀</p>
 
@@ -81,10 +81,16 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 # Initialize components
 ly = lyrics.Lyrics()
 ps = poster.Poster("./")
-sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+cl = api_client.ApiClient(CLIENT_ID, CLIENT_SECRET)
+
+# If you want to use the Spotify API
+cl.setSpotifyClient(CLIENT_ID, CLIENT_SECRET)
+
+# If you want to use the YT Music API (default)
+cl.setYtMusicClient()
 
 # Search for the track and fetch metadata
-search = sp.get_track("Saturn - SZA", limit=1)
+search = cl.get_track("Saturn - SZA", limit=1)
 
 # Pick the first result
 metadata = search[0]

@@ -236,7 +236,6 @@ def text(
         align (str, optional): Text alignment ("left", "center", "right").
     """
     x, y = pos
-    print("text", text)
     # Choose multiline function if text has line breaks
     if "\n" in text:
         y_offset = 0
