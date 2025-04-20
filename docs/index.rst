@@ -55,7 +55,10 @@ For more more infomation, check out `pipx <https://github.com/pypa/pipx>`_
 🌱 Environment Variables
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-To get started with BeatPrints, you’ll need a ``.env`` file with these
+🎷 Spotify
+**********
+
+If you want to use the Spotify API, you’ll need a ``.env`` file with these
 keys:
 
 .. code:: python
@@ -73,36 +76,43 @@ Here’s how you can create your first poster:
 
 .. code:: python
 
-  import os, dotenv
-  from BeatPrints import lyrics, poster, spotify
+ import os, dotenv
+ from BeatPrints import lyrics, poster
+ from BeatPrints.api import api_client
 
-  dotenv.load_dotenv()
+ dotenv.load_dotenv()
 
-  # Spotify credentials
-  CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-  CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+ # Spotify credentials
+ CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
-  # Initialize components
-  ly = lyrics.Lyrics()
-  ps = poster.Poster("./")
-  sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+ # Initialize components
+ ly = lyrics.Lyrics()
+ ps = poster.Poster("./")
+ cl = api_client.ApiClient()
 
-  # Search for the track and fetch metadata
-  search = sp.get_track("Saturn - SZA", limit=1)
+ # If you want to use the Spotify API
+ cl.setSpotifyClient(CLIENT_ID, CLIENT_SECRET)
 
-  # Pick the first result
-  metadata = search[0]
+ # If you want to use the YT Music API (default)
+ cl.setYtMusicClient()
 
-  # Get lyrics for the track
-  lyrics = ly.get_lyrics(metadata)
+ # Search for the track and fetch metadata
+ search = cl.get_track("Saturn - SZA", limit=1)
 
-  # Use the placeholder for instrumental tracks; otherwise, select specific lines
-  highlighted_lyrics = (
-      lyrics if ly.check_instrumental(metadata) else ly.select_lines(lyrics, "5-9")
-  )
+ # Pick the first result
+ metadata = search[0]
 
-  # Generate the track poster
-  ps.track(metadata, highlighted_lyrics)
+ # Get lyrics and determine if the track is instrumental
+ lyrics = ly.get_lyrics(metadata)
+
+ # Use the placeholder for instrumental tracks; otherwise, select specific lines
+ highlighted_lyrics = (
+   lyrics if ly.check_instrumental(metadata) else ly.select_lines(lyrics, "5-9")
+ )
+
+ # Generate the track poster
+ ps.track(metadata, highlighted_lyrics)
 
 🥞 CLI
 ------

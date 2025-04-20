@@ -12,10 +12,12 @@ This is a quick guide on how to generate posters using **BeatPrints** through co
 
 To generate a track poster, follow the steps below.
 
+
 .. code-block:: python
 
   import os, dotenv
-  from BeatPrints import lyrics, poster, spotify
+  from BeatPrints import lyrics, poster
+  from BeatPrints.api import api_client
 
   dotenv.load_dotenv()
 
@@ -26,15 +28,21 @@ To generate a track poster, follow the steps below.
   # Initialize components
   ly = lyrics.Lyrics()
   ps = poster.Poster("./")
-  sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+  cl = api_client.ApiClient()
+
+  # If you want to use the Spotify API
+  cl.setSpotifyClient(CLIENT_ID, CLIENT_SECRET)
+
+  # If you want to use the YT Music API (default)
+  cl.setYtMusicClient()
 
   # Search for the track and fetch metadata
-  search = sp.get_track("Saturn - SZA", limit=1)
+  search = cl.get_track("Saturn - SZA", limit=1)
 
   # Pick the first result
   metadata = search[0]
 
-  # Get lyrics for the track
+  # Get lyrics and determine if the track is instrumental
   lyrics = ly.get_lyrics(metadata)
 
   # Use the placeholder for instrumental tracks; otherwise, select specific lines
@@ -57,27 +65,34 @@ Like tracks, you can also create an album poster, follow these steps below.
 
 .. code-block:: python
 
-   import os, dotenv
-   from BeatPrints import poster, spotify
+  import os, dotenv
+  from BeatPrints import poster
+  from BeatPrints.api import api_client
 
-   dotenv.load_dotenv()
+  dotenv.load_dotenv()
 
-   # Spotify credentials
-   CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-   CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+  # Spotify credentials
+  CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+  CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
-   # Initialize components
-   ps = poster.Poster("./")
-   sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+  # Initialize components
+  ps = poster.Poster("./")
+  cl = api_client.ApiClient()
 
-   # Search for an album
-   search = sp.get_album("Charm - Clairo", limit=1)
+  # If you want to use the Spotify API
+  cl.setSpotifyClient(CLIENT_ID, CLIENT_SECRET)
 
-   # Get the album's metadata
-   metadata = search[0]
+  # If you want to use the YT Music API (default)
+  cl.setYtMusicClient()
 
-   # Generate the album poster
-   ps.album(metadata)
+  # Search for an album
+  search = cl.get_album("Charm - Clairo", limit=1)
+
+  # Get the album's metadata
+  metadata = search[0]
+
+  # Generate the album poster
+  ps.album(metadata)
 
 This is a basic guide on generating your posters. You can extend it by creating your own functions to make them more useful.
 

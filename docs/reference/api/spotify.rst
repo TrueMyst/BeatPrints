@@ -1,6 +1,6 @@
 🎷 Spotify
 ===========
 
-.. automodule:: BeatPrints.spotify
+.. automodule:: BeatPrints.api.spotify
    :members: Spotify
    :member-order: bysource

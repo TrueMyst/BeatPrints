@@ -1,3 +1,9 @@
+"""
+Module: api_client.py
+
+Provides functionality related to interacting with any API.
+"""
+
 from typing import List
 from BeatPrints.api.spotify import Spotify
 from BeatPrints.api.yt_music import YtMusic
@@ -30,7 +36,7 @@ class Client:
 
     def set_yt_music_client(self) -> None:
         """
-        Sets a YouTUbe Music API client as the client in use.
+        Sets a YouTube Music API client as the client in use.
         """
         self.client = YtMusic()
         self.use_scannable_code = False

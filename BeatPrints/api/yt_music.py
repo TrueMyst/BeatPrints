@@ -123,6 +123,7 @@ class YtMusic:
 
         Args:
             duration (str): The duration to convert to ms
+
         Returns:
             int: The duration of the track in ms
         """
@@ -145,7 +146,7 @@ class YtMusic:
         Asynchronously get metadata from a tracK.
 
         Args:
-            track: The track to get the metadata from
+            track (dict): The track to get the metadata from
 
         Returns:
             TrackMetadata: The metadata related to the track
@@ -195,7 +196,7 @@ class YtMusic:
         Asynchronously get metadata from an album.
 
         Args:
-            id: The album id to get metadata from
+            id (str): The album id to get metadata from
 
         Returns:
             AlbumMetadata: The metadata related to the album

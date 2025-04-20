@@ -104,7 +104,10 @@ class FilePath:
 class Logos:
     # Defines logos to render next to the code (doesn't apply to Spotify)
     f = FilePath()
-    YT_MUSIC = {"path": os.path.join(f.LOGOS, "yt_music.png"), "color": (255, 0, 51, 255)}
+    YT_MUSIC = {
+        "path": os.path.join(f.LOGOS, "yt_music.png"),
+        "color": (255, 0, 51, 255),
+    }
 
 
 class Instrumental:

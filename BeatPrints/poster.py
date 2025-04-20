@@ -93,7 +93,7 @@ class Poster:
         theme: ThemesSelector.Options = "Light",
         code_type: Literal["qr", "scannable"] = "qr",
         pcover: Optional[str] = None,
-        logo: Optional[dict] = None,
+        logo: Optional[dict[str, Tuple]] = None,
     ) -> None:
         """
         Generates a poster for a track, which includes lyrics.
@@ -104,9 +104,7 @@ class Poster:
             accent (bool, optional): Adds an accent at the bottom of the poster. Defaults to False.
             theme (ThemesSelector.Options, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest".  Defaults to "Light".
             pcover (Optional[str]): Path to a custom cover image. Defaults to None.
-            logo (Optional[dict]): Object defining a logo, with:
-                path: The file path of the logo
-                color: The color to be replaced with the theme variant
+            logo (Optional[dict]): Object defining a logo, with a path(str) and a color (Tuple).
         """
 
         # Check if the theme is valid or not
@@ -192,7 +190,7 @@ class Poster:
             accent (bool, optional): Add an accent at the bottom of the poster. Defaults to False.
             theme (ThemesSelector.Options, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest". Defaults to "Light".
             pcover (Optional[str]): Path to a custom cover image. Defaults to None.
-            logo (Optional[dict]): TODO
+            logo (Optional[dict]): Object defining a logo, with a path(str) and a color (Tuple).
         """
 
         # Check if the theme mentioned is valid or not
