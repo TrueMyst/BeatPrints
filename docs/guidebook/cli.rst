@@ -22,7 +22,7 @@ Windows
    output_directory = "<path-to-save-your-posters>"
 
    [credentials]
-   # Spotify API credentials - mandatory if you want to use the Spotify API
+   # Spotify API credentials - the Spotify API will be use if these are set
    client_id = "<your-client-id>"
    client_secret = "<your-client-secret>"
 
