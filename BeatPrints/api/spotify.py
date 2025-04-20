@@ -4,10 +4,10 @@ Module: spotify.py
 Provides functionality related to interacting with the Spotify API.
 """
 
-import spotipy
-import random
-
 from typing import List
+import random
+import spotipy
+
 
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.cache_handler import MemoryCacheHandler
@@ -19,7 +19,7 @@ from BeatPrints.errors import (
 )
 
 from BeatPrints.metadata import AlbumMetadata, TrackMetadata
-from BeatPrints.utils import format_released
+from BeatPrints.utils import format_released, format_duration
 
 
 class Spotify:
@@ -42,21 +42,6 @@ class Spotify:
         )
 
         self.spotify = spotipy.Spotify(client_credentials_manager=authorization)
-
-    def _format_duration(self, duration_ms: int) -> str:
-        """
-        Formats the duration of a track from milliseconds to MM:SS format.
-
-        Args:
-            duration_ms (int): Duration of the track in milliseconds.
-
-        Returns:
-            str: Formatted duration in MM:SS format.
-        """
-        # Convert milliseconds to minutes and seconds
-        minutes = duration_ms // 60000
-        seconds = (duration_ms // 1000) % 60
-        return f"{minutes:02d}:{seconds:02d}"
 
     def get_track(self, query: str, limit: int = 6) -> List[TrackMetadata]:
         """
@@ -103,7 +88,7 @@ class Spotify:
                 # If the label name is too long, use the artist's name
                 label = album["label"] if len(album["label"]) < 35 else artist
 
-                duration = self._format_duration(track["duration_ms"])
+                duration = format_duration(track["duration_ms"])
                 released = format_released(
                     track["album"]["release_date"],
                     track["album"]["release_date_precision"],

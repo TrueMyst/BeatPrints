@@ -254,12 +254,12 @@ def create_poster():
             lyrics = handle_lyrics(track)
 
             exutils.clear()
-            ps.track(track, lyrics, accent, theme, code_type, image)
+            ps.track(track, lyrics, accent, theme, code_type, image, cl.logo)
     else:
         album = select_album(conf.SEARCH_LIMIT)
 
         if album:
-            ps.album(*album, accent, theme, code_type, image)
+            ps.album(*album, accent, theme, code_type, image, cl.logo)
 
 
 def main():

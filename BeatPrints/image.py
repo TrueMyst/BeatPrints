@@ -7,10 +7,10 @@ Provides essential image functions to generate posters.
 import io
 import os
 import random
-import requests
-
 from pathlib import Path
 from typing import List, Literal, Tuple, Optional
+import requests
+
 
 from Pylette import extract_colors
 from PIL import Image, ImageDraw, ImageEnhance
@@ -135,7 +135,6 @@ def qr_code(
     Args:
         url (str): The YouTube Music track/album URL.
         theme (ThemesSelector.Options, optional): The theme for the QR Code. Defaults to "Light".
-        item (Literal["track", "album"], optional): Specifies the type of the QR Code. Defaults to "track".
     """
 
     variant = t.THEMES[theme]
@@ -153,7 +152,7 @@ def qr_code(
     img = img.convert("RGBA")
 
     # Resize the image
-    return convert_image_colors(img, variant, s.QRCODE)
+    return replace_color_in_image(img, variant, s.QRCODE)
 
 
 def scannable(
@@ -183,12 +182,24 @@ def scannable(
     img_bytes = io.BytesIO(data)
 
     with Image.open(img_bytes) as scan_code:
-        return convert_image_colors(scan_code, variant, s.SCANCODE)
+        return replace_color_in_image(scan_code, variant, s.SCANCODE)
 
 
-def convert_image_colors(
+def replace_color_in_image(
     image: Image.Image, variant: Tuple, size: Tuple, color_to_replace: Tuple = c.WHITE
 ) -> Image.Image:
+    """
+    Converts a color in the given image to another color and resizes it.
+
+    Args:
+        image (Image.Image): The image to convert the color of
+        variant (Tuple): The color to replace to
+        size (Tuple): The size to resize the image to.
+        color_to_replace (Tuple): The color to replace the selected color to
+
+    Returns:
+        Image.Image: The converted and resized image
+    """
     # Convert to RGBA to support transparency
     image = image.convert("RGBA")
 
@@ -207,18 +218,20 @@ def convert_image_colors(
     return image.resize(size, Image.Resampling.BICUBIC)
 
 
-def logo(path: str, theme: ThemesSelector.Options = "Light") -> Image.Image:
+def logo(logo_to_draw: dict, theme: ThemesSelector.Options = "Light") -> Image.Image:
     """
     Creates an image for the specified logo.
 
     Args:
-        path: The path to the logo
+        logo_to_draw (dict): The logo to draw
+        theme (ThemesSelector.Options): The theme to draw the logo colors with.
+            Defaults to "Light".
 
     Returns:
-        Image.Image: The created image
+        Image.Image: The created logo image
     """
 
-    path_ = Path(path).expanduser().resolve()
+    path_ = Path(logo_to_draw.get("path")).expanduser().resolve()
 
     if not path_.exists():
         raise FileNotFoundError(f"The specified path '{path_}' does not exist.")
@@ -226,8 +239,7 @@ def logo(path: str, theme: ThemesSelector.Options = "Light") -> Image.Image:
     variant = t.THEMES[theme]
 
     img = Image.open(path_)
-    # TODO: generalize logo color
-    return convert_image_colors(img, variant, s.LOGO)
+    return replace_color_in_image(img, variant, s.LOGO)
 
 
 def cover(url: str, path: Optional[str]) -> Image.Image:

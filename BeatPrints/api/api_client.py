@@ -2,6 +2,7 @@ from typing import List
 from BeatPrints.api.spotify import Spotify
 from BeatPrints.api.yt_music import YtMusic
 from BeatPrints.metadata import AlbumMetadata, TrackMetadata
+from BeatPrints.consts import Logos
 
 
 class Client:
@@ -10,7 +11,9 @@ class Client:
     """
 
     def __init__(self):
+        self.l = Logos()
         self.client = YtMusic()
+        self.logo = self.l.YT_MUSIC
         self.use_scannable_code = False
 
     def set_spotify_client(self, CLIENT_ID: str, CLIENT_SECRET: str) -> None:
@@ -23,6 +26,7 @@ class Client:
         """
         self.client = Spotify(CLIENT_ID, CLIENT_SECRET)
         self.use_scannable_code = True
+        self.logo = None
 
     def set_yt_music_client(self) -> None:
         """
@@ -30,6 +34,7 @@ class Client:
         """
         self.client = YtMusic()
         self.use_scannable_code = False
+        self.logo = self.l.YT_MUSIC
 
     def get_track(self, query: str, limit: int = 6) -> List[TrackMetadata]:
         """

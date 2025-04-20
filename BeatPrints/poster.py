@@ -93,6 +93,7 @@ class Poster:
         theme: ThemesSelector.Options = "Light",
         code_type: Literal["qr", "scannable"] = "qr",
         pcover: Optional[str] = None,
+        logo: Optional[dict] = None,
     ) -> None:
         """
         Generates a poster for a track, which includes lyrics.
@@ -103,6 +104,9 @@ class Poster:
             accent (bool, optional): Adds an accent at the bottom of the poster. Defaults to False.
             theme (ThemesSelector.Options, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest".  Defaults to "Light".
             pcover (Optional[str]): Path to a custom cover image. Defaults to None.
+            logo (Optional[dict]): Object defining a logo, with:
+                path: The file path of the logo
+                color: The color to be replaced with the theme variant
         """
 
         # Check if the theme is valid or not
@@ -127,11 +131,13 @@ class Poster:
             # Paste the cover, code and logo
             poster.paste(cover, p.COVER)
             if code_type == "qr":
-                logo = image.logo(f"{f.ASSETS}/logos/yt_music.png", theme)
-                poster.paste(logo, p.LOGO, logo)
                 poster.paste(code, p.QRCODE, code)
             elif code_type == "scannable":
                 poster.paste(code, p.SCANCODE, code)
+
+            if logo is not None:
+                logo_image = image.logo(logo, theme)
+                poster.paste(logo_image, p.LOGO, logo_image)
 
             # Add an accent at the bottom if True
             image.draw_palette(draw, cover, accent)
@@ -175,6 +181,7 @@ class Poster:
         theme: ThemesSelector.Options = "Light",
         code_type: Literal["scannable", "qr"] = "qr",
         pcover: Optional[str] = None,
+        logo: Optional[dict] = None,
     ) -> None:
         """
         Generates a poster for an album, which includes track listing.
@@ -185,6 +192,7 @@ class Poster:
             accent (bool, optional): Add an accent at the bottom of the poster. Defaults to False.
             theme (ThemesSelector.Options, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest". Defaults to "Light".
             pcover (Optional[str]): Path to a custom cover image. Defaults to None.
+            logo (Optional[dict]): TODO
         """
 
         # Check if the theme mentioned is valid or not
@@ -209,11 +217,14 @@ class Poster:
             # Paste the album cover and code Spotify code
             poster.paste(cover, p.COVER)
             if code_type == "qr":
-                logo = image.logo(f"{f.ASSETS}/logos/yt_music.png", theme)
-                poster.paste(logo, p.LOGO, logo)
                 poster.paste(code, p.QRCODE, code)
             elif code_type == "scannable":
                 poster.paste(code, p.SCANCODE, code)
+
+            if logo is not None:
+                logo_image = image.logo(logo, theme)
+                poster.paste(logo_image, p.LOGO, logo_image)
+
             # Optionally add a color palette or design accents
             image.draw_palette(draw, cover, accent)
 

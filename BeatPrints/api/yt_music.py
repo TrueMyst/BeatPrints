@@ -19,7 +19,7 @@ from BeatPrints.errors import (
     InvalidSearchLimit,
 )
 from BeatPrints.metadata import AlbumMetadata, TrackMetadata
-from BeatPrints.utils import format_released
+from BeatPrints.utils import format_released, format_duration
 
 
 class YtMusic:
@@ -66,8 +66,8 @@ class YtMusic:
             ):
                 tracklist.append(track)
 
-        # A track requires to get its album, meaning too many blocking events
-        # would occur
+        # A track requires to get its album for additional data,
+        # meaning too many blocking events would occur
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
@@ -117,6 +117,29 @@ class YtMusic:
         finally:
             loop.close()
 
+    def format_time_ms(self, duration: str):
+        """
+        Formats a string duration (HH:MM:SS) to miliseconds.
+
+        Args:
+            duration (str): The duration to convert to ms
+        Returns:
+            int: The duration of the track in ms
+        """
+        durations = duration.split(":")
+
+        mults = [60 * 60 * 1000, 60 * 1000, 1000]
+        if len(durations) == 2:
+            mults = [60 * 1000, 1000]
+        elif len(durations) == 1:
+            mults = [1000]
+
+        duration_ms = 0
+        for duration, mult in zip(durations, mults):
+            duration_ms += int(duration) * mult
+
+        return duration_ms
+
     async def get_track_metadata(self, track: dict):
         """
         Asynchronously get metadata from a tracK.
@@ -137,16 +160,9 @@ class YtMusic:
         artist = track["artists"][0]["name"]
         # Replace img url with a higher res one
         image = self._get_upscaled_image(track["thumbnails"][0]["url"])
-        # TODO: get label
+        # YT Music doesn't record the label
         label = artist
-        # Display "MM:SS" *or* whatever we get (the track could last days for all we know!)
-        duration = (
-            track["duration"]
-            if len(track["duration"].split(":")) >= 5
-            else f"0{track["duration"]}"
-        )
-
-        # TODO: find how to get a more precise release date
+        duration = format_duration(self.format_time_ms(track["duration"]))
         release_date = album.get("releaseDate")
         # Worst case scenario: get the date from the track, which could be the upload date!
         if release_date is None:
@@ -184,7 +200,6 @@ class YtMusic:
         Returns:
             AlbumMetadata: The metadata related to the album
         """
-        print("doing one")
         loop = asyncio.get_running_loop()
         album = await loop.run_in_executor(None, self.yt_music.get_album, id)
         if album is not None:
