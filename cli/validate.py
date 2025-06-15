@@ -95,7 +95,7 @@ class SelectionValidator(Validator):
             )
 
 
-class LineCountValidator(Validator):
+class LineValidator(Validator):
 
     def validate(self, document):
         lyrics = document.text
@@ -107,6 +107,13 @@ class LineCountValidator(Validator):
                 message="> Exactly 4 lines must be given, no more, no less.",
                 cursor_position=len(document.text),  # Move cursor to end
             )
+
+        for line in splitted:
+            if len(line) == 0:
+                raise ValidationError(
+                    message="> No empty lines allowed.",
+                    cursor_position=len(document.text),  # Move cursor to end
+                )
 
 
 class LengthValidator(Validator):
