@@ -4,12 +4,10 @@ Module: spotify.py
 Provides functionality related to interacting with the Spotify API.
 """
 
-import spotipy
-import random
-import datetime
-
 from typing import List
-from dataclasses import dataclass
+import random
+import spotipy
+
 
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.cache_handler import MemoryCacheHandler
@@ -20,36 +18,8 @@ from BeatPrints.errors import (
     InvalidSearchLimit,
 )
 
-
-@dataclass
-class TrackMetadata:
-    """
-    Data structure to store metadata for a track.
-    """
-
-    name: str
-    artist: str
-    album: str
-    released: str
-    duration: str
-    image: str
-    label: str
-    id: str
-
-
-@dataclass
-class AlbumMetadata:
-    """
-    Data structure to store metadata for an album, including a track list.
-    """
-
-    name: str
-    artist: str
-    released: str
-    image: str
-    label: str
-    id: str
-    tracks: List[str]
+from BeatPrints.metadata import AlbumMetadata, TrackMetadata
+from BeatPrints.utils import format_released, format_duration
 
 
 class Spotify:
@@ -72,40 +42,6 @@ class Spotify:
         )
 
         self.spotify = spotipy.Spotify(client_credentials_manager=authorization)
-
-    def _format_released(self, release_date: str, precision: str) -> str:
-        """
-        Formats the release date of a track or album.
-
-        Args:
-            release_date (str): Release date string from Spotify API.
-            precision (str): Precision of the release date ('day', 'month', 'year').
-
-        Returns:
-            str: Formatted release date in 'Month Day, Year' format.
-        """
-        # Format the release date based on the precision
-        date_format = {"day": "%Y-%m-%d", "month": "%Y-%m", "year": "%Y"}.get(
-            precision, ""
-        )
-        return datetime.datetime.strptime(release_date, date_format).strftime(
-            "%B %d, %Y"
-        )
-
-    def _format_duration(self, duration_ms: int) -> str:
-        """
-        Formats the duration of a track from milliseconds to MM:SS format.
-
-        Args:
-            duration_ms (int): Duration of the track in milliseconds.
-
-        Returns:
-            str: Formatted duration in MM:SS format.
-        """
-        # Convert milliseconds to minutes and seconds
-        minutes = duration_ms // 60000
-        seconds = (duration_ms // 1000) % 60
-        return f"{minutes:02d}:{seconds:02d}"
 
     def get_track(self, query: str, limit: int = 6) -> List[TrackMetadata]:
         """
@@ -152,8 +88,8 @@ class Spotify:
                 # If the label name is too long, use the artist's name
                 label = album["label"] if len(album["label"]) < 35 else artist
 
-                duration = self._format_duration(track["duration_ms"])
-                released = self._format_released(
+                duration = format_duration(track["duration_ms"])
+                released = format_released(
                     track["album"]["release_date"],
                     track["album"]["release_date_precision"],
                 )
@@ -225,7 +161,7 @@ class Spotify:
                 # If the label name is too long, use the artist's name
                 label = album["label"] if len(album["label"]) < 35 else artist
 
-                released = self._format_released(
+                released = format_released(
                     album["release_date"],
                     album["release_date_precision"],
                 )

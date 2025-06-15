@@ -118,6 +118,7 @@ def group_by_font(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
             groups.append([char, last_font_path])
 
     # Merge consecutive characters that use the same font into one group.
+    # Should we do something if the user inserted an empty string?
     merged = [groups[0]]
     for char, font_path in groups[1:]:
         # Append the character to the current group.
@@ -235,7 +236,6 @@ def text(
         align (str, optional): Text alignment ("left", "center", "right").
     """
     x, y = pos
-
     # Choose multiline function if text has line breaks
     if "\n" in text:
         y_offset = 0

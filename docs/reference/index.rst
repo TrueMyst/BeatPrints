@@ -4,9 +4,9 @@ Reference
 =========
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   spotify
+   api/index
    lyrics
    poster
    errors

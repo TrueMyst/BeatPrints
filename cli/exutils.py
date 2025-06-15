@@ -6,7 +6,7 @@ from rich.table import Table
 from questionary import Style
 from typing import List, Literal, Union
 
-from BeatPrints import spotify
+from BeatPrints.metadata import AlbumMetadata, TrackMetadata
 
 lavish = Style(
     [
@@ -40,7 +40,7 @@ def clear() -> None:
 
 
 def tablize_items(
-    items: List[spotify.TrackMetadata] | List[spotify.AlbumMetadata],
+    items: List[TrackMetadata] | List[AlbumMetadata],
     item_type: Literal["track", "album"],
 ) -> Table:
     """

@@ -2,12 +2,12 @@
     <img src="https://i.ibb.co/CWY693F/beatprints-logo.png" width="175"/>
 </h3>
 <h3 align="center">
-    BeatPrints: Quick, stylish posters for your favorite tracks! 🎷☕️
+    BeatPrintsYTMusic: Quick, stylish posters for your favorite tracks! 🎷☕️
 </h3>
 
-<p align="center">Create eye-catching, Pinterest-style music posters effortlessly. BeatPrints integrates with <b>Spotify</b> and <b>LRClib API</b> to help you design custom posters for your favorite tracks or albums. 🍀</p>
+<p align="center">Create eye-catching, Pinterest-style music posters effortlessly. BeatPrints integrates with <b>Spotify</b>, <b>YouTube Music</b> and <b>LRClib API</b> to help you design custom posters for your favorite tracks or albums. 🍀</p>
 
-<p align="center">
+<<p align="center">
   <a href="https://gitHub.com/TrueMyst/BeatPrints/graphs/commit-activity">
     <img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-Yes-%23c4b9a6?style=for-the-badge&logo=Undertale&logoColor=%23b5a790&labelColor=%23312123"></a>
 
@@ -68,7 +68,8 @@ Here’s how you can create your first poster:
 
 ```python
 import os, dotenv
-from BeatPrints import lyrics, poster, spotify
+from BeatPrints import lyrics, poster
+from BeatPrints.api import api_client
 
 dotenv.load_dotenv()
 
@@ -79,10 +80,16 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 # Initialize components
 ly = lyrics.Lyrics()
 ps = poster.Poster("./")
-sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+cl = api_client.ApiClient()
+
+# If you want to use the Spotify API
+cl.setSpotifyClient(CLIENT_ID, CLIENT_SECRET)
+
+# If you want to use the YT Music API (default)
+cl.setYtMusicClient()
 
 # Search for the track and fetch metadata
-search = sp.get_track("Saturn - SZA", limit=1)
+search = cl.get_track("Saturn - SZA", limit=1)
 
 # Pick the first result
 metadata = search[0]

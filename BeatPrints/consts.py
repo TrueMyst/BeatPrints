@@ -18,6 +18,8 @@ class Size:
     # Resolution Size
     COVER = (2040, 2040)
     SCANCODE = (660, 170)
+    QRCODE = (200, 200)
+    LOGO = (200, 200)
 
     # Track/Album Metadata
     TRACKS = 70
@@ -50,6 +52,8 @@ class Position:
     PALETTE = (120, 2240)
     ACCENT = (0, 3440, 2280, 3480)
     SCANCODE = (90, 3220)
+    QRCODE = (300, 3220)
+    LOGO = (120, 3220)
 
 
 class Color:
@@ -67,6 +71,9 @@ class Color:
     # Spotify Scancode
     WHITE = (255, 255, 255, 255)
     TRANSPARENT = (0, 0, 0, 0)
+
+    # YT Music logo
+    RED = (255, 0, 51, 255)
 
 
 class ThemesSelector:
@@ -91,6 +98,16 @@ class FilePath:
 
     FONTS = os.path.join(ASSETS, "fonts")
     TEMPLATES = os.path.join(ASSETS, "templates")
+    LOGOS = os.path.join(ASSETS, "logos")
+
+
+class Logos:
+    # Defines logos to render next to the code (doesn't apply to Spotify)
+    f = FilePath()
+    YT_MUSIC = {
+        "path": os.path.join(f.LOGOS, "yt_music.png"),
+        "color": (255, 0, 51, 255),
+    }
 
 
 class Instrumental:

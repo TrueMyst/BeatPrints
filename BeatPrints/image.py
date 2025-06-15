@@ -7,13 +7,14 @@ Provides essential image functions to generate posters.
 import io
 import os
 import random
-import requests
-
 from pathlib import Path
 from typing import List, Literal, Tuple, Optional
+import requests
+
 
 from Pylette import extract_colors
 from PIL import Image, ImageDraw, ImageEnhance
+import qrcode
 from BeatPrints.consts import Size, Position, Color, ThemesSelector, FilePath
 
 # Initialize the components
@@ -124,6 +125,36 @@ def magicify(image: Image.Image) -> Image.Image:
     return contrast.enhance(0.8)
 
 
+def qr_code(
+    url: str,
+    theme: ThemesSelector.Options = "Light",
+) -> Image.Image:
+    """
+    Generates a QR Code as an alternative to Spotify scannable codes for YouTube Music links.
+
+    Args:
+        url (str): The YouTube Music track/album URL.
+        theme (ThemesSelector.Options, optional): The theme for the QR Code. Defaults to "Light".
+    """
+
+    variant = t.THEMES[theme]
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color=c.WHITE, back_color=variant)
+
+    # Convert to RGBA to support transparency
+    img = img.convert("RGBA")
+
+    # Resize the image
+    return replace_color_in_image(img, variant, s.QRCODE)
+
+
 def scannable(
     id: str,
     theme: ThemesSelector.Options = "Light",
@@ -151,20 +182,64 @@ def scannable(
     img_bytes = io.BytesIO(data)
 
     with Image.open(img_bytes) as scan_code:
-        # Convert to RGBA to support transparency
-        scan_code = scan_code.convert("RGBA")
+        return replace_color_in_image(scan_code, variant, s.SCANCODE)
 
-        pixels = scan_code.load()
-        width, height = scan_code.size
 
-        # Iterate over all pixels and replace white pixels with transparency code
-        for x in range(width):
-            for y in range(height):
-                if pixels is not None:
-                    pixels[x, y] = c.TRANSPARENT if pixels[x, y] != c.WHITE else variant
+def replace_color_in_image(
+    image: Image.Image, variant: Tuple, size: Tuple, color_to_replace: Tuple = c.WHITE
+) -> Image.Image:
+    """
+    Converts a color in the given image to another color and resizes it.
 
-        # Resize the image
-        return scan_code.resize(s.SCANCODE, Image.Resampling.BICUBIC)
+    Args:
+        image (Image.Image): The image to convert the color of
+        variant (Tuple): The color to replace to
+        size (Tuple): The size to resize the image to.
+        color_to_replace (Tuple): The color to replace the selected color to
+
+    Returns:
+        Image.Image: The converted and resized image
+    """
+    # Convert to RGBA to support transparency
+    image = image.convert("RGBA")
+
+    pixels = image.load()
+    width, height = image.size
+
+    # Iterate over all pixels and replace white pixels with transparency code
+    for x in range(width):
+        for y in range(height):
+            if pixels is not None:
+                pixels[x, y] = (
+                    c.TRANSPARENT if pixels[x, y] != color_to_replace else variant
+                )
+
+    # Resize the image
+    return image.resize(size, Image.Resampling.BICUBIC)
+
+
+def logo(logo_to_draw: dict, theme: ThemesSelector.Options = "Light") -> Image.Image:
+    """
+    Creates an image for the specified logo.
+
+    Args:
+        logo_to_draw (dict): The logo to draw
+        theme (ThemesSelector.Options): The theme to draw the logo colors with.
+            Defaults to "Light".
+
+    Returns:
+        Image.Image: The created logo image
+    """
+
+    path_ = Path(logo_to_draw.get("path")).expanduser().resolve()
+
+    if not path_.exists():
+        raise FileNotFoundError(f"The specified path '{path_}' does not exist.")
+
+    variant = t.THEMES[theme]
+
+    img = Image.open(path_)
+    return replace_color_in_image(img, variant, s.LOGO)
 
 
 def cover(url: str, path: Optional[str]) -> Image.Image:
@@ -182,7 +257,6 @@ def cover(url: str, path: Optional[str]) -> Image.Image:
     Raises:
         FileNotFoundError: If the provided local image path does not exist.
     """
-
     if path:
         path_ = Path(path).expanduser().resolve()
 

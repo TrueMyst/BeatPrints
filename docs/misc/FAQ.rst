@@ -7,7 +7,7 @@ No, you cannot sell these posters. The project was created to offer an alternati
 
 Is BeatPrints compatible with other music platforms?
 ----------------------------------------------------
-Currently, BeatPrints is designed to work with Spotify via its API. While it doesn't natively support other music platforms like Apple Music or YouTube, anyone can customize the code to integrate additional platforms if they choose to extend the tool's functionality.
+Currently, BeatPrints is designed to work with Spotify and YouTube Music via their APIs. While it doesn't natively support other music platforms like Apple Music or Tidal, anyone can customize the code to integrate additional platforms if they choose to extend the tool's functionality.
 
 Why isn't "x" language supported in BeatPrints?
 -----------------------------------------------

@@ -3,12 +3,15 @@ import questionary
 from rich import print
 
 from cli import conf, exutils, validate
-from BeatPrints import lyrics, spotify, poster, errors
+from BeatPrints import lyrics, poster, errors
+from BeatPrints.api import api_client
 
 # Initialize components
 ly = lyrics.Lyrics()
 ps = poster.Poster(conf.POSTERS_DIR)
-sp = spotify.Spotify(conf.CLIENT_ID, conf.CLIENT_SECRET)
+cl = api_client.Client()
+# sp = spotify.Spotify(conf.CLIENT_ID, conf.CLIENT_SECRET)
+# yt = yt_music.YtMusic()
 
 
 def select_track(limit: int):
@@ -31,7 +34,7 @@ def select_track(limit: int):
             qmark="🎺",
         ).unsafe_ask()
 
-        result = sp.get_track(query, limit=limit)
+        result = cl.get_track(query, limit=limit)
 
         # Clear the screen
         exutils.clear()
@@ -90,7 +93,7 @@ def select_album(limit: int):
             qmark="💿️",
         ).unsafe_ask()
 
-        result = sp.get_album(query, limit, shuffle)
+        result = cl.get_album(query, limit, shuffle)
 
         # Clear the screen
         exutils.clear()
@@ -120,7 +123,7 @@ def select_album(limit: int):
             return result[int(choice) - 1], index
 
 
-def handle_lyrics(track: spotify.TrackMetadata):
+def handle_lyrics(track: api_client.TrackMetadata):
     """
     Get lyrics and let user select lines.
 
@@ -236,6 +239,13 @@ def create_poster():
     # Clear the screen
     exutils.clear()
 
+    if conf.CLIENT_ID and conf.CLIENT_SECRET:
+        cl.set_spotify_client(conf.CLIENT_ID, conf.CLIENT_SECRET)
+
+    code_type = "qr"
+    if cl.use_scannable_code:
+        code_type = "scannable"
+
     # Generate posters
     if poster_type == "Track Poster":
         track = select_track(conf.SEARCH_LIMIT)
@@ -244,12 +254,12 @@ def create_poster():
             lyrics = handle_lyrics(track)
 
             exutils.clear()
-            ps.track(track, lyrics, accent, theme, image)
+            ps.track(track, lyrics, accent, theme, code_type, image, cl.logo)
     else:
         album = select_album(conf.SEARCH_LIMIT)
 
         if album:
-            ps.album(*album, accent, theme, image)
+            ps.album(*album, accent, theme, code_type, image, cl.logo)
 
 
 def main():
