@@ -91,7 +91,8 @@ class Poster:
         accent: bool = False,
         theme: ThemesSelector.Options = "Light",
         pcover: Optional[str] = None,
-    ) -> None:
+        return_image: bool = False,
+    ) -> Optional[Image.Image]:
         """
         Generates a poster for a track, which includes lyrics.
 
@@ -101,6 +102,10 @@ class Poster:
             accent (bool, optional): Adds an accent at the bottom of the poster. Defaults to False.
             theme (ThemesSelector.Options, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest".  Defaults to "Light".
             pcover (Optional[str]): Path to a custom cover image. Defaults to None.
+            return_image (bool, optional): If True, returns the PIL Image object instead of saving. Defaults to False.
+
+        Returns:
+            Optional[Image.Image]: The PIL Image object of the poster if return_image is True, otherwise None.
         """
 
         # Check if the theme is valid or not
@@ -148,13 +153,16 @@ class Poster:
                 anchor="lt",
             )
 
-            # Save the generated poster with a unique filename
-            name = filename(metadata.name, metadata.artist)
-            poster.save(os.path.join(self.save_to, name))
-
-            print(
-                f"✨ Poster for {metadata.name} by {metadata.artist} saved to {self.save_to}"
-            )
+            if return_image:
+                return poster
+            else:
+                # Save the generated poster with a unique filename
+                name = filename(metadata.name, metadata.artist)
+                poster.save(os.path.join(self.save_to, name))
+                print(
+                    f"✨ Poster for {metadata.name} by {metadata.artist} saved to {self.save_to}"
+                )
+                return None
 
     def album(
         self,
@@ -163,7 +171,8 @@ class Poster:
         accent: bool = False,
         theme: ThemesSelector.Options = "Light",
         pcover: Optional[str] = None,
-    ) -> None:
+        return_image: bool = False,
+    ) -> Optional[Image.Image]:
         """
         Generates a poster for an album, which includes track listing.
 
@@ -173,6 +182,10 @@ class Poster:
             accent (bool, optional): Add an accent at the bottom of the poster. Defaults to False.
             theme (ThemesSelector.Options, optional): Specifies the theme to use. Must be one of "Light", "Dark", "Catppuccin", "Gruvbox", "Nord", "RosePine", or "Everforest". Defaults to "Light".
             pcover (Optional[str]): Path to a custom cover image. Defaults to None.
+            return_image (bool, optional): If True, returns the PIL Image object instead of saving. Defaults to False.
+
+        Returns:
+            Optional[Image.Image]: The PIL Image object of the poster if return_image is True, otherwise None.
         """
 
         # Check if the theme mentioned is valid or not
@@ -223,9 +236,13 @@ class Poster:
                 )
                 x += column_width + s.SPACING  # Adjust x for next column
 
-            # Save the generated album poster with a unique filename
-            name = filename(metadata.name, metadata.artist)
-            poster.save(os.path.join(self.save_to, name))
-            print(
-                f"✨ Album poster for {metadata.name} by {metadata.artist} saved to {self.save_to}"
-            )
+            if return_image:
+                return poster
+            else:
+                # Save the generated album poster with a unique filename
+                name = filename(metadata.name, metadata.artist)
+                poster.save(os.path.join(self.save_to, name))
+                print(
+                    f"✨ Album poster for {metadata.name} by {metadata.artist} saved to {self.save_to}"
+                )
+                return None

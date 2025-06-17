@@ -3,7 +3,8 @@ import questionary
 from rich import print
 
 from cli import conf, exutils, validate
-from BeatPrints import lyrics, spotify, poster, errors
+from BeatPrints import lyrics, spotify, poster, errors, wallpaper  
+import os 
 
 # Initialize components
 ly = lyrics.Lyrics()
@@ -220,7 +221,7 @@ def poster_features():
     return theme, accent, image_path
 
 
-def create_poster():
+def create_poster(return_image=False):
     """
     Create a poster based on user input.
     """
@@ -236,6 +237,8 @@ def create_poster():
     # Clear the screen
     exutils.clear()
 
+    generated_image = None
+
     # Generate posters
     if poster_type == "Track Poster":
         track = select_track(conf.SEARCH_LIMIT)
@@ -244,19 +247,106 @@ def create_poster():
             lyrics = handle_lyrics(track)
 
             exutils.clear()
-            ps.track(track, lyrics, accent, theme, image)
+            generated_image = ps.track(track, lyrics, accent, theme, image, return_image=return_image)
     else:
         album = select_album(conf.SEARCH_LIMIT)
 
         if album:
-            ps.album(*album, accent, theme, image)
+            generated_image = ps.album(*album, accent, theme, image, return_image=return_image)
+
+    return generated_image
 
 
 def main():
     exutils.clear()
 
     try:
-        create_poster()
+        creation_type = questionary.select(
+            "• What would you like to create?",
+            choices=["Poster", "Wallpaper"],
+            style=exutils.lavish,
+            qmark="✨",
+        ).unsafe_ask()
+
+        if creation_type == "Poster":
+            create_poster()
+        elif creation_type == "Wallpaper":
+            num_posters = questionary.text(
+                "• How many posters (1-10) would you like in your wallpaper?",
+                validate=validate.NumericValidator(limit=10),
+                style=exutils.lavish,
+                qmark="🖼️",
+            ).unsafe_ask()
+            num_posters = int(num_posters)
+
+            if 1 <= num_posters <= 10:
+                poster_images = []
+                temp_poster_paths = []
+                for i in range(num_posters):
+                    print(f"\nCreating poster {i+1} for the wallpaper:")
+                    poster_image = create_poster(return_image=True)
+                    if poster_image:
+                        poster_images.append(poster_image)
+                        # Optionally save to temporary files if memory becomes an issue
+                        temp_path = f"temp_poster_{i+1}.png"
+                        poster_image.save(temp_path)
+                        temp_poster_paths.append(temp_path)
+                    else:
+                        print("Error creating a poster. Wallpaper creation aborted.")
+                        # Clean up any created temporary files
+                        for path in temp_poster_paths:
+                            try:
+                                os.remove(path)
+                            except FileNotFoundError:
+                                pass
+                        return
+
+                wallpaper_width = questionary.text(
+                    "• Enter the desired wallpaper width:",
+                    validate=validate.NumericValidator(limit=9999),
+                    style=exutils.lavish,
+                    qmark="📏",
+                ).unsafe_ask()
+                wallpaper_height = questionary.text(
+                    "• Enter the desired wallpaper height:",
+                    validate=validate.NumericValidator(limit=9999),
+                    style=exutils.lavish,
+                    qmark="📐",
+                ).unsafe_ask()
+                wallpaper_resolution = (int(wallpaper_width), int(wallpaper_height))
+                wallpaper_bg_color = questionary.text(
+                    "• Enter the background color for the wallpaper (e.g., slategrey, #RRGGBB):",
+                    style=exutils.lavish,
+                    qmark="🎨",
+                ).unsafe_ask()
+
+                try:
+                    wallpaper_image = wallpaper.generate_wallpaper(
+                        wallpaper_resolution,
+                        temp_poster_paths,  # Pass the list of temporary file paths
+                        wallpaper_bg_color
+                    )
+                    # Need to come up with a scheme for naming generated files
+                    wallpaper_save_path = os.path.join(conf.POSTERS_DIR, "generated_wallpaper.png")
+                    wallpaper_image.save(wallpaper_save_path)
+                    print(f"\nWallpaper created successfully and saved as {wallpaper_save_path}")
+
+                    # Clean up temporary poster files
+                    for path in temp_poster_paths:
+                        try:
+                            os.remove(path)
+                        except FileNotFoundError:
+                            pass
+
+                except ValueError as e:
+                    print(f"Error during wallpaper generation: {e}")
+                except Exception as e:
+                    print(f"An unexpected error occurred: {e}")
+            else:
+                print("Invalid number of posters.")
+        else:
+            print("Invalid choice.")
+
     except KeyboardInterrupt:
         exutils.clear()
         print("👋 Alright, no problem! See you next time.")
