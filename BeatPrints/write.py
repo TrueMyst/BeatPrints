@@ -48,6 +48,7 @@ def font(weight: Literal["Regular", "Bold", "Light"]) -> Dict[str, TTFont]:
         "NotoSansTC",
         "NotoSansSC",
         "NotoSans",
+        "NotoSansBengali",
     ]
     font_paths = [
         os.path.join(fonts_path, family, f"{family}-{weight}.ttf")
