@@ -56,7 +56,6 @@ class Poster:
             color (Tuple[int, int, int]): Text color.
         """
         if A4:
-            print("init the draw temp")
             s = SizeA4()
             p = PositionA4()
         elif not A4:

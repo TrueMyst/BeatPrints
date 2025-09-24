@@ -171,7 +171,7 @@ def poster_features():
     Ask for poster customization options.
 
     Returns:
-        tuple: theme, accent color, and image path.
+        tuple: theme, accent color, image path, and a4 format.
     """
     features = questionary.form(
         theme=questionary.select(
@@ -201,9 +201,15 @@ def poster_features():
             style=exutils.lavish,
             qmark="🥐",
         ),
+        a4=questionary.confirm(
+            "• Generate in A4 format (2480×3508)?",
+            default=False,
+            style=exutils.lavish,
+            qmark="📄",
+        ),
     ).unsafe_ask()
 
-    theme, accent, image = features.values()
+    theme, accent, image, a4 = features.values()
 
     # Get the image path if custom image is selected
     image_path = (
@@ -217,7 +223,7 @@ def poster_features():
         .unsafe_ask()
     )
 
-    return theme, accent, image_path
+    return theme, accent, image_path, a4
 
 
 def create_poster():
@@ -231,7 +237,7 @@ def create_poster():
         qmark="🎨",
     ).unsafe_ask()
 
-    theme, accent, image = poster_features()
+    theme, accent, image, a4 = poster_features()
 
     # Clear the screen
     exutils.clear()
@@ -244,12 +250,12 @@ def create_poster():
             lyrics = handle_lyrics(track)
 
             exutils.clear()
-            ps.track(track, lyrics, accent, theme, image)
+            ps.track(track, lyrics, accent, theme, image, a4)
     else:
         album = select_album(conf.SEARCH_LIMIT)
 
         if album:
-            ps.album(*album, accent, theme, image)
+            ps.album(*album, accent, theme, image, a4)
 
 
 def main():
@@ -261,3 +267,7 @@ def main():
         exutils.clear()
         print("👋 Alright, no problem! See you next time.")
         exit(1)
+
+
+if __name__ == "__main__":
+    main()
