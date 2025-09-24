@@ -164,3 +164,8 @@ cython_debug/
 # Added by TrueMyst
 !{example}.env
 posters/*
+
+#Added by DamnUI
+.github/instructions/ins.instructions.md
+w.py
+w2.py

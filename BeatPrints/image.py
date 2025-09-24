@@ -14,7 +14,7 @@ from typing import List, Literal, Tuple, Optional
 
 from Pylette import extract_colors
 from PIL import Image, ImageDraw, ImageEnhance
-from BeatPrints.consts import Size, Position, Color, ThemesSelector, FilePath
+from BeatPrints.consts import Size, Position, Color, ThemesSelector, FilePath, SizeA4, PositionA4
 
 # Initialize the components
 s = Size()
@@ -47,7 +47,7 @@ def get_palette(image: Image.Image) -> List[Tuple]:
 
 
 def draw_palette(
-    draw: ImageDraw.ImageDraw, image: Image.Image, accent: bool = False
+    draw: ImageDraw.ImageDraw, image: Image.Image, accent: bool = False, A4: bool = False
 ) -> None:
     """
     Draws a color palette on the given image.
@@ -58,6 +58,13 @@ def draw_palette(
         accent (bool, optional): If True, an accent color is added at the bottom. Defaults to False.
     """
     palette = get_palette(image)
+
+    if A4:
+        s = SizeA4()
+        p = PositionA4()
+    else:
+        s = Size()
+        p = Position()
 
     # Render each color from the palette as a rectangle
     for index in range(6):
@@ -128,6 +135,7 @@ def scannable(
     id: str,
     theme: ThemesSelector.Options = "Light",
     item: Literal["track", "album"] = "track",
+    A4: bool = False,
 ) -> Image.Image:
     """
     Generates a Spotify scannable code for a track or album.
@@ -140,6 +148,13 @@ def scannable(
     Returns:
         Image.Image: The resized scannable code image.
     """
+
+    if A4:
+        s = SizeA4()
+        p = PositionA4()
+    else:
+        s = Size()
+        p = Position()
 
     variant = t.THEMES[theme]
 
@@ -167,7 +182,7 @@ def scannable(
         return scan_code.resize(s.SCANCODE, Image.Resampling.BICUBIC)
 
 
-def cover(url: str, path: Optional[str]) -> Image.Image:
+def cover(url: str, path: Optional[str], A4: bool = False) -> Image.Image:
     """
     Fetches and processes an image from a URL or local path.
 
@@ -182,6 +197,13 @@ def cover(url: str, path: Optional[str]) -> Image.Image:
     Raises:
         FileNotFoundError: If the provided local image path does not exist.
     """
+    if A4:  
+        s = SizeA4()
+        p = PositionA4()
+    else:
+        s = Size()
+        p = Position()
+
 
     if path:
         path_ = Path(path).expanduser().resolve()
@@ -198,7 +220,7 @@ def cover(url: str, path: Optional[str]) -> Image.Image:
     return magicify(img.resize(s.COVER))
 
 
-def get_theme(theme: ThemesSelector.Options = "Light") -> Tuple[tuple, str]:
+def get_theme(theme: ThemesSelector.Options = "Light", A4: bool = False) -> Tuple[tuple, str]:
     """
     Returns theme-related properties based on the selected theme.
 
@@ -206,10 +228,17 @@ def get_theme(theme: ThemesSelector.Options = "Light") -> Tuple[tuple, str]:
         theme (ThemesSelector.Options, optional): The selected theme. Defaults to "Light".
 
     Returns:
-        Tuple[tuple, str]: A tuple containing the theme color and the template path.
+        Tuple[tuple, str]: A tuple containing the theme color and A4 template path.
     """
-
     variant = t.THEMES[theme]
-    template = os.path.join(f.TEMPLATES, f"{theme.lower()}.png")
+    
+    # Use the new A4-sized template files that preserve original visual elements
+    if A4:
+        a4_template_path = os.path.join(f.TEMPLATES, f"a4_{theme.lower()}.png")
+    else:
+        a4_template_path = os.path.join(f.TEMPLATES, f"{theme.lower()}.png")
+    
+    return variant, a4_template_path
 
-    return variant, template
+
+
