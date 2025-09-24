@@ -157,7 +157,7 @@ def handle_lyrics(track: spotify.TrackMetadata):
         # Ask user to paste custom lyrics
         lyrics = questionary.text(
             "• Paste your lyrics here:",
-            validate=validate.LineCountValidator,
+            validate=validate.LineValidator,
             multiline=True,
             style=exutils.lavish,
             qmark="🎀",

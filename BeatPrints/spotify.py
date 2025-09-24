@@ -1,16 +1,18 @@
 """
 Module: spotify.py
 
-Provides functionality related to interacting with the Spotify API.
+Provides methods to retrieve track and album metadata from search queries, IDs, URIs, or URLs.
 """
 
-import spotipy
+import re
 import random
+import spotipy
 import datetime
 
 from typing import List
 from dataclasses import dataclass
 
+from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.cache_handler import MemoryCacheHandler
 
@@ -54,7 +56,7 @@ class AlbumMetadata:
 
 class Spotify:
     """
-    A class for interacting with the Spotify API to search and retrieve track/album information.
+    A class for interacting with the Spotify API to search and retrieve track and album metadata.
     """
 
     def __init__(self, CLIENT_ID: str, CLIENT_SECRET: str) -> None:
@@ -72,6 +74,107 @@ class Spotify:
         )
 
         self.spotify = spotipy.Spotify(client_credentials_manager=authorization)
+
+    def _is_spotify_id(self, id: str) -> bool:
+        """
+        Checks if the provided string is a valid Spotify ID, URI, or URL.
+
+        A valid Spotify identifier can be one of the following formats:
+        - Spotify URI: "spotify:{type}:{id}"
+        - Spotify URL: "https://open.spotify.com/{type}/{id}"
+        - Spotify ID: A 22-character Base62 string
+
+        Args:
+            id (str): The string to be checked.
+
+        Returns:
+            bool: True if the input matches any of the valid Spotify ID formats.
+        """
+        # Remove query parameters (e.g., ?si=...)
+        id = id.split("?")[0]
+
+        # Spotify URI: spotify:album:id or spotify:track:id
+        if re.fullmatch(r"spotify:(track|album):[0-9A-Za-z]{22}", id):
+            return True
+
+        # Spotify URL: http(s)://open.spotify.com/album/id or /track/id
+        if re.fullmatch(
+            r"https?://open\.spotify\.com/(track|album)/[0-9A-Za-z]{22}", id
+        ):
+            return True
+
+        # Spotify ID: 22-character Base62 string
+        if re.fullmatch(r"[0-9A-Za-z]{22}", id):
+            return True
+
+        return False
+
+    def _get_track_metadata(self, track: dict) -> TrackMetadata:
+        """
+        Returns TrackMetadata from a Spotify track object.
+
+        Args:
+            track (dict): Spotify track object
+
+        Returns:
+            List[TrackMetadata]: A list of track metadata.
+        """
+
+        album = self.spotify.album(track["album"]["id"])
+
+        metadata = {
+            "name": track["name"],
+            "artist": track["artists"][0]["name"],
+            "album": album["name"],
+            "released": self._format_released(
+                track["album"]["release_date"], track["album"]["release_date_precision"]
+            ),
+            "duration": self._format_duration(track["duration_ms"]),
+            "image": track["album"]["images"][0]["url"],
+            "label": (
+                album["label"]
+                if len(album["label"]) < 35
+                else track["artists"][0]["name"]
+            ),
+            "id": track["id"],
+        }
+
+        return TrackMetadata(**metadata)
+
+    def _get_album_metadata(self, album: dict, shuffle: bool) -> AlbumMetadata:
+        """
+        Returns AlbumMetadata from a Spotify album object.
+
+        Args:
+            album (dict): Spotify album object
+
+        Returns:
+            List[AlbumMetadata]: A list of album metadata with track listings.
+        """
+
+        # Extract track names
+        tracks = [track["name"] for track in album["tracks"]["items"]]
+
+        if shuffle:
+            random.shuffle(tracks)
+
+        metadata = {
+            "name": album["name"],
+            "artist": album["artists"][0]["name"],
+            "released": self._format_released(
+                album["release_date"], album["release_date_precision"]
+            ),
+            "image": album["images"][0]["url"],
+            "label": (
+                album["label"]
+                if len(album["label"]) < 35
+                else album["artists"][0]["name"]
+            ),
+            "id": album["id"],
+            "tracks": tracks,
+        }
+
+        return AlbumMetadata(**metadata)
 
     def _format_released(self, release_date: str, precision: str) -> str:
         """
@@ -109,11 +212,11 @@ class Spotify:
 
     def get_track(self, query: str, limit: int = 6) -> List[TrackMetadata]:
         """
-        Searches for tracks based on a query and retrieves their metadata.
+        Searches for tracks based on a query or Spotify ID/URI/URL and retrieves their metadata.
 
         Args:
-            query (str): The search query for the track (e.g. track name - artist).
-            limit (int, optional): Maximum number of tracks to retrieve. Defaults to 6.
+            query (str): The search query or Spotify ID/URI/URL for the track.
+            limit (int, optional): Max number of tracks to retrieve (only applies to search by text). Defaults to 6.
 
         Returns:
             List[TrackMetadata]: A list of track metadata.
@@ -122,68 +225,36 @@ class Spotify:
             InvalidSearchLimit: If the limit is less than 1.
             NoMatchingTrackFound: If no matching tracks are found.
         """
-        if limit < 1:
-            raise InvalidSearchLimit
 
-        tracklist = []
-        result = self.spotify.search(q=query, type="track", limit=limit)
+        try:
+            # If query is a Spotify ID/URI/URL, fetch a single track directly
+            if self._is_spotify_id(query):
+                track = self.spotify.track(query)
+                return [self._get_track_metadata(track)]
 
-        if not result:
+            else:
+                if limit < 1:
+                    raise InvalidSearchLimit
+
+                search = self.spotify.search(q=query, type="track", limit=limit)
+                return [
+                    self._get_track_metadata(track)
+                    for track in search["tracks"]["items"]
+                ]
+
+        except SpotifyException:
             raise NoMatchingTrackFound
-
-        tracks = result["tracks"]["items"]
-
-        for track in tracks:
-            album_id = track["album"]["id"]
-
-            # If a track doesn't have an album id, skip it
-            if album_id is None:
-                continue
-
-            album = self.spotify.album(album_id)
-
-            if album is not None:
-                id = track["id"]
-                name = track["name"]
-                album_name = album["name"]
-                artist = track["artists"][0]["name"]
-                image = track["album"]["images"][0]["url"]
-
-                # If the label name is too long, use the artist's name
-                label = album["label"] if len(album["label"]) < 35 else artist
-
-                duration = self._format_duration(track["duration_ms"])
-                released = self._format_released(
-                    track["album"]["release_date"],
-                    track["album"]["release_date_precision"],
-                )
-
-                # Create TrackMetadata object with formatted data
-                metadata = {
-                    "name": name,
-                    "artist": artist,
-                    "album": album_name,
-                    "released": released,
-                    "duration": duration,
-                    "image": image,
-                    "label": label,
-                    "id": id,
-                }
-
-                tracklist.append(TrackMetadata(**metadata))
-
-        return tracklist
 
     def get_album(
         self, query: str, limit: int = 6, shuffle: bool = False
     ) -> List[AlbumMetadata]:
         """
-        Searches for albums based on a query and retrieves their metadata, including track listing.
+        Searches for album based on a query or Spotify ID/URI/URL and retrieves their metadata.
 
         Args:
-            query (str): The search query for the album (e.g. album name - artist).
-            limit (int, optional): Maximum number of albums to retrieve. Defaults to 6.
-            shuffle (bool, optional): Shuffle the tracks in the tracklist. Defaults to False.
+            query (str): The search query or Spotify ID/URI/URL for the album.
+            limit (int, optional): Max number of albums to retrieve (only applies to search by text). Defaults to 6.
+            shuffle (bool, optional): Whether to shuffle the track list. Defaults to False.
 
         Returns:
             List[AlbumMetadata]: A list of album metadata with track listings.
@@ -193,54 +264,21 @@ class Spotify:
             NoMatchingAlbumFound: If no matching albums are found.
         """
 
-        if limit < 1:
-            raise InvalidSearchLimit
+        try:
+            # If query is a Spotify ID/URI/URL, fetch a single album directly
+            if self._is_spotify_id(query):
+                album = self.spotify.album(query)
+                return [self._get_album_metadata(album, shuffle)]
 
-        albumlist = []
-        result = self.spotify.search(q=query, type="album", limit=limit)
+            else:
+                if limit < 1:
+                    raise InvalidSearchLimit
 
-        if not result:
+                result = self.spotify.search(q=query, type="album", limit=limit)
+                return [
+                    self._get_album_metadata(self.spotify.album(album["id"]), shuffle)
+                    for album in result["albums"]["items"]
+                ]
+
+        except SpotifyException:
             raise NoMatchingAlbumFound
-
-        albums = result["albums"]["items"]
-
-        for album in albums:
-            id = album["id"]
-            album = self.spotify.album(id)
-
-            if album is not None:
-                # Extract track names from album details
-                items = album["tracks"]["items"]
-                tracks = [track["name"] for track in items]
-
-                # Shuffle tracks if true
-                if shuffle:
-                    random.shuffle(tracks)
-
-                id = album["id"]
-                name = album["name"]
-                artist = album["artists"][0]["name"]
-                image = album["images"][0]["url"]
-
-                # If the label name is too long, use the artist's name
-                label = album["label"] if len(album["label"]) < 35 else artist
-
-                released = self._format_released(
-                    album["release_date"],
-                    album["release_date_precision"],
-                )
-
-                # Create AlbumMetadata object with formatted data
-                metadata = {
-                    "name": name,
-                    "artist": artist,
-                    "released": released,
-                    "image": image,
-                    "label": label,
-                    "id": id,
-                    "tracks": tracks,
-                }
-
-                albumlist.append(AlbumMetadata(**metadata))
-
-        return albumlist
