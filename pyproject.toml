@@ -12,22 +12,22 @@ repository = "https://github.com/TrueMyst/BeatPrints"
 packages = [{ include = "BeatPrints" }, { include = "cli" }]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-requests = "^2.32.3"
-pylette = "^4.0.0"
-pillow = ">=9.3,<11.0"
-lrclibapi = "^0.3.1"
-fonttools = "^4.54.1"
-questionary = "^2.0.1"
-rich = "^13.9.4"
-toml = "^0.10.2"
-spotipy = "^2.25.1"
+python = "^3.12"
+requests = "*"
+pylette = "*"
+pillow = "*"
+lrclibapi = "*"
+fonttools = "*"
+questionary = "*"
+rich = "*"
+toml = "*"
+spotipy = "*"
 
 [tool.poetry.scripts]
 beatprints = 'cli.prompt:main'
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.10.0"
+black = "*"
 
 [build-system]
 requires = ["poetry-core"]
