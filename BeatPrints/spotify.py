@@ -132,8 +132,8 @@ class Spotify:
             "duration": self._format_duration(track["duration_ms"]),
             "image": track["album"]["images"][0]["url"],
             "label": (
-                album["label"]
-                if len(album["label"]) < 35
+                album.get("label", "")
+                if len(album.get("label", "")) < 35
                 else track["artists"][0]["name"]
             ),
             "id": track["id"],
@@ -166,8 +166,8 @@ class Spotify:
             ),
             "image": album["images"][0]["url"],
             "label": (
-                album["label"]
-                if len(album["label"]) < 35
+                album.get("label", "")
+                if len(album.get("label", "")) < 35
                 else album["artists"][0]["name"]
             ),
             "id": album["id"],
