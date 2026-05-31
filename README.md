@@ -61,7 +61,7 @@ dz = deez.Deezer()
 ps = poster.Poster("./")  # Save the poster in the current directory
 
 # Search for the track and fetch metadata
-search = dz.search(query="Apples - Rocco", type="track", limit=1)
+search = dz.search(query="Apples - Rocco", stype="track", limit=1)
 
 # Grab the Track ID from the first result
 id = search[0]["id"]
@@ -76,7 +76,7 @@ lrc = lyrics.Lyrics(metadata).get_lyrics()
 lyrics = (
     "It's an instrumental track :>"
     if lrc.check_instrumental(metadata)
-    else lrc.select_lines("5-9")
+    else lrc.select_lines("11-14")
 )
 
 # Generate and save the poster
@@ -93,7 +93,7 @@ dz = deez.Deezer()
 ps = poster.Poster("./")  # Save the poster in the current directory
 
 # Search for the album and fetch metadata
-search = dz.search(query="Charm - Clairo", type="album", limit=1)
+search = dz.search(query="Charm - Clairo", stype="album", limit=1)
 
 # Grab the Album ID from the first result
 id = search[0]["id"]
