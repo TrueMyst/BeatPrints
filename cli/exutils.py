@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from rich import box
 from rich.table import Table
@@ -6,7 +7,7 @@ from rich.table import Table
 from questionary import Style
 from typing import List, Literal, Union
 
-from BeatPrints import spotify
+from BeatPrints import deez
 
 lavish = Style(
     [
@@ -35,12 +36,13 @@ def clear() -> None:
     """
     Clears the terminal screen.
     """
-    os.system("cls" if os.name == "nt" else "clear")
+
+    subprocess.call("cls" if os.name == "nt" else "clear")
     print(BEATPRINTS_ASCII)
 
 
 def tablize_items(
-    items: List[spotify.TrackMetadata] | List[spotify.AlbumMetadata],
+    items: List[deez.TrackMetadata] | List[deez.AlbumMetadata],
     item_type: Literal["track", "album"],
 ) -> Table:
     """
@@ -57,14 +59,14 @@ def tablize_items(
         table.add_column("Album", justify="left", style="cyan")
 
         for pos, item in enumerate(items, start=1):
-            table.add_row(f"{pos}", item.name, item.artist, item.album)
+            table.add_row(f"{pos}", item.title, ", ".join(item.artists), item.album)
 
     elif item_type == "album":
         table.add_column("Artist", justify="right", style="blue")
         table.add_column("Year", justify="left", style="cyan")
 
         for pos, item in enumerate(items, start=1):
-            table.add_row(f"{pos}", item.name, item.artist, item.released)
+            table.add_row(f"{pos}", item.title, ", ".join(item.artists), item.released)
 
     return table
 

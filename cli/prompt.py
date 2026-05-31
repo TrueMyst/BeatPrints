@@ -1,14 +1,12 @@
 import questionary
-
 from rich import print
 
 from cli import conf, exutils, validate
-from BeatPrints import lyrics, spotify, poster, errors
+from BeatPrints import lyrics, deez, poster, errors
 
 # Initialize components
-ly = lyrics.Lyrics()
+dz = deez.Deezer()
 ps = poster.Poster(conf.POSTERS_DIR)
-sp = spotify.Spotify(conf.CLIENT_ID, conf.CLIENT_SECRET)
 
 
 def select_track(limit: int):
@@ -31,7 +29,9 @@ def select_track(limit: int):
             qmark="🎺",
         ).unsafe_ask()
 
-        result = sp.get_track(query, limit=limit)
+        result = [
+            dz.get_track(track["id"]) for track in dz.search(query, "track", limit)
+        ]
 
         # Clear the screen
         exutils.clear()
@@ -90,7 +90,10 @@ def select_album(limit: int):
             qmark="💿️",
         ).unsafe_ask()
 
-        result = sp.get_album(query, limit, shuffle)
+        result = [
+            dz.get_album(album["id"], shuffle)
+            for album in dz.search(query, "album", limit)
+        ]
 
         # Clear the screen
         exutils.clear()
@@ -120,7 +123,7 @@ def select_album(limit: int):
             return result[int(choice) - 1], index
 
 
-def handle_lyrics(track: spotify.TrackMetadata):
+def handle_lyrics(track: deez.TrackMetadata):
     """
     Get lyrics and let user select lines.
 
@@ -130,32 +133,32 @@ def handle_lyrics(track: spotify.TrackMetadata):
     Returns:
         str: Selected lyrics portion.
     """
+
     try:
-        # Fetch lyrics and print it in a pretty table
-        lyrics = ly.get_lyrics(track)
+        ly = lyrics.Lyrics(track).get_lyrics()
 
         if ly.check_instrumental(track):
             print("🎸 • The track is detected to be an instrumental track")
-            return lyrics
+            return ly.lyrics
 
-        print(exutils.format_lyrics(track.name, track.artist, lyrics))
+        print(exutils.format_lyrics(track.title, track.artists[0], ly.lyrics))
 
         # Let user pick lyrics lines
         selection_range = questionary.text(
             "• Select 4 of your favorite lines (e.g., 2-5, 7-10):",
-            validate=validate.SelectionValidator(lyrics),
+            validate=validate.SelectionValidator(ly.lyrics),
             style=exutils.lavish,
             qmark="🎀",
         ).unsafe_ask()
 
-        return ly.select_lines(lyrics, selection_range)
+        return ly.select_lines(selection_range)
 
     except errors.NoLyricsAvailable:
         print("😦 • Couldn't find the lyrics with LRClib.")
         print("╰─ You can try getting them from other sources!")
 
         # Ask user to paste custom lyrics
-        lyrics = questionary.text(
+        custom_lyrics = questionary.text(
             "• Paste your lyrics here:",
             validate=validate.LineValidator,
             multiline=True,
@@ -163,7 +166,7 @@ def handle_lyrics(track: spotify.TrackMetadata):
             qmark="🎀",
         ).unsafe_ask()
 
-        return lyrics
+        return custom_lyrics
 
 
 def poster_features():

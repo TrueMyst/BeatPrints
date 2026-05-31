@@ -10,7 +10,7 @@ import random
 import requests
 
 from pathlib import Path
-from typing import List, Literal, Tuple, Optional
+from typing import List, Tuple, Optional
 
 from Pylette import extract_colors
 from PIL import Image, ImageDraw, ImageEnhance
@@ -125,46 +125,31 @@ def magicify(image: Image.Image) -> Image.Image:
 
 
 def scannable(
-    id: str,
     theme: ThemesSelector.Options = "Light",
-    item: Literal["track", "album"] = "track",
 ) -> Image.Image:
     """
-    Generates a Spotify scannable code for a track or album.
+    Prepares the deezer's logo based on the theme selected.
 
     Args:
-        id (str): The Spotify track or album ID.
         theme (ThemesSelector.Options, optional): The theme for the scannable code. Defaults to "Light".
-        item (Literal["track", "album"], optional): Specifies the type of the scannable code. Defaults to "track".
 
     Returns:
         Image.Image: The resized scannable code image.
     """
 
-    variant = t.THEMES[theme]
+    color = t.THEMES[theme]
 
-    # URL to fetch the scannable code
-    scan_url = f"https://scannables.scdn.co/uri/plain/png/101010/white/1280/spotify:{item}:{id}"
+    # Recolor the image
+    image = Image.open(f.IMAGES + "/deezer.png")
+    image = image.convert("RGBA")
 
-    # Fetch the scannable image data from Spotify
-    data = requests.get(scan_url).content
-    img_bytes = io.BytesIO(data)
+    alpha = image.getchannel("A")
 
-    with Image.open(img_bytes) as scan_code:
-        # Convert to RGBA to support transparency
-        scan_code = scan_code.convert("RGBA")
+    colored = Image.new("RGBA", image.size, color + (255,))
+    colored.putalpha(alpha)
 
-        pixels = scan_code.load()
-        width, height = scan_code.size
-
-        # Iterate over all pixels and replace white pixels with transparency code
-        for x in range(width):
-            for y in range(height):
-                if pixels is not None:
-                    pixels[x, y] = c.TRANSPARENT if pixels[x, y] != c.WHITE else variant
-
-        # Resize the image
-        return scan_code.resize(s.SCANCODE, Image.Resampling.BICUBIC)
+    # Resize the image
+    return colored.resize(s.SCANCODE, Image.Resampling.BICUBIC)
 
 
 def cover(url: str, path: Optional[str]) -> Image.Image:

@@ -7,23 +7,52 @@ Provides functionality for retrieving song lyrics using the LRClib API.
 import re
 from lrclib import LrcLibAPI
 
-from BeatPrints.spotify import TrackMetadata
+from BeatPrints.deez import TrackMetadata
 from BeatPrints.errors import (
     NoLyricsAvailable,
     InvalidFormatError,
     InvalidSelectionError,
     LineLimitExceededError,
 )
-from BeatPrints.consts import Instrumental
-
-# Initialize the components
-i = Instrumental()
 
 
 class Lyrics:
     """
     A class for interacting with the LRClib API to fetch and manage song lyrics.
     """
+
+    def __init__(self, track: TrackMetadata):
+        self.__lrc = LrcLibAPI(
+            user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:148.0) Gecko/20100101 Firefox/148.0"
+        )
+        self.lyrics = None
+        self.track = track
+
+    def get_lyrics(self):
+        """
+        Retrieves lyrics from LRClib.net for a specified track and artist.
+
+        Args:
+            metadata (TrackMetadata): The metadata of the track.
+
+        Returns:
+            str: The lyrics of the track in plain text if available; otherwise, a placeholder message for instrumental tracks.
+
+        Raises:
+            NoLyricsAvailable: If no lyrics are found for the specified track and artist.
+        """
+        try:
+            artist = ", ".join(self.track.artists)
+
+            results = self.__lrc.search_lyrics(
+                track_name=self.track.title, artist_name=artist
+            )
+
+            self.lyrics = results[0].plain_lyrics
+            return self
+
+        except IndexError:
+            raise NoLyricsAvailable
 
     def check_instrumental(self, metadata: TrackMetadata) -> bool:
         """
@@ -39,45 +68,12 @@ class Lyrics:
             user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"
         )
         results = api.search_lyrics(
-            track_name=metadata.name, artist_name=metadata.artist
+            track_name=metadata.title, artist_name=metadata.artists[0]
         )
 
         return results[0].instrumental
 
-    def get_lyrics(self, metadata: TrackMetadata) -> str:
-        """
-        Retrieves lyrics from LRClib.net for a specified track and artist.
-
-        Args:
-            metadata (TrackMetadata): The metadata of the track.
-
-        Returns:
-            str: The lyrics of the track in plain text if available; otherwise, a placeholder message for instrumental tracks.
-
-        Raises:
-            NoLyricsAvailable: If no lyrics are found for the specified track and artist.
-        """
-        api = LrcLibAPI(
-            user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0"
-        )
-        results = api.search_lyrics(
-            track_name=metadata.name, artist_name=metadata.artist
-        )
-
-        if not results:
-            raise NoLyricsAvailable
-
-        if self.check_instrumental(metadata):
-            return i.DESC
-
-        lyrics = api.get_lyrics_by_id(results[0].id).plain_lyrics
-
-        if not lyrics:
-            raise NoLyricsAvailable
-
-        return lyrics
-
-    def select_lines(self, lyrics: str, selection: str) -> str:
+    def select_lines(self, selection: str) -> str:
         """
         Extracts a specific range of lines from the given song lyrics.
 
@@ -95,7 +91,7 @@ class Lyrics:
         """
 
         # Split lyrics into lines
-        lines = [line for line in lyrics.split("\n")]
+        lines = [line for line in self.lyrics.splitlines()]
         line_count = len(lines)
 
         try:

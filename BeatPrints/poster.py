@@ -15,7 +15,7 @@ from BeatPrints import image, write
 from BeatPrints.utils import filename, organize_tracks
 
 from BeatPrints.errors import ThemeNotFoundError
-from BeatPrints.spotify import TrackMetadata, AlbumMetadata
+from BeatPrints.deez import TrackMetadata, AlbumMetadata
 from BeatPrints.consts import Size, Position, ThemesSelector
 
 # Initialize the components
@@ -57,7 +57,7 @@ class Poster:
             draw,
             p.HEADING,
             s.HEADING_WIDTH,
-            metadata.name.upper(),
+            metadata.title.upper(),
             color,
             write.font("Bold"),
             s.HEADING,
@@ -67,7 +67,7 @@ class Poster:
         write.text(
             draw,
             p.ARTIST,
-            metadata.artist,
+            ", ".join(metadata.artists),
             color,
             write.font("Regular"),
             s.ARTIST,
@@ -111,8 +111,8 @@ class Poster:
         color, template = image.get_theme(theme)
 
         # Get cover art and scancode
-        cover = image.cover(metadata.image, pcover)
-        scannable = image.scannable(metadata.id, theme, "track")
+        cover = image.cover(metadata.cover, pcover)
+        scannable = image.scannable(theme)
 
         with Image.open(template) as poster:
             poster = poster.convert("RGB")
@@ -149,11 +149,11 @@ class Poster:
             )
 
             # Save the generated poster with a unique filename
-            name = filename(metadata.name, metadata.artist)
+            name = filename(metadata.title, metadata.artists[0])
             poster.save(os.path.join(self.save_to, name))
 
             print(
-                f"✨ Poster for {metadata.name} by {metadata.artist} saved to {self.save_to}"
+                f"✨ Poster for {metadata.title} by {metadata.artists[0]} saved to {self.save_to}"
             )
 
     def album(
@@ -182,15 +182,15 @@ class Poster:
         # Get theme colors and template for the poster
         color, template = image.get_theme(theme)
 
-        # Get cover art and spotify scannable code
-        cover = image.cover(metadata.image, pcover)
-        scannable = image.scannable(metadata.id, theme, "album")
+        # Get cover art and deezer
+        cover = image.cover(metadata.cover, pcover)
+        scannable = image.scannable(theme)
 
         with Image.open(template) as poster:
             poster = poster.convert("RGB")
             draw = ImageDraw.Draw(poster)
 
-            # Paste the album cover and scannable Spotify code
+            # Paste the album cover and deezer's logo
             poster.paste(cover, p.COVER)
             poster.paste(scannable, p.SCANCODE, scannable)
 
@@ -223,9 +223,10 @@ class Poster:
                 )
                 x += column_width + s.SPACING  # Adjust x for next column
 
-            # Save the generated album poster with a unique filename
-            name = filename(metadata.name, metadata.artist)
+            # Save the generated poster with a unique filename
+            name = filename(metadata.title, metadata.artists[0])
             poster.save(os.path.join(self.save_to, name))
+
             print(
-                f"✨ Album poster for {metadata.name} by {metadata.artist} saved to {self.save_to}"
+                f"✨ Poster for {metadata.title} by {metadata.artists[0]} saved to {self.save_to}"
             )

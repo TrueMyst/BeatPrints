@@ -6,8 +6,6 @@ needed for positioning text and images on the poster.
 """
 
 import os
-import random
-
 from typing import Literal, TypeAlias
 
 
@@ -17,7 +15,7 @@ class Size:
 
     # Resolution Size
     COVER = (2040, 2040)
-    SCANCODE = (660, 170)
+    SCANCODE = (425, 120)
 
     # Track/Album Metadata
     TRACKS = 70
@@ -49,7 +47,7 @@ class Position:
     DURATION = (2160, 2550)
     PALETTE = (120, 2240)
     ACCENT = (0, 3440, 2280, 3480)
-    SCANCODE = (90, 3220)
+    SCANCODE = (120, 3225)
 
 
 class Color:
@@ -63,10 +61,6 @@ class Color:
     NORD = (216, 222, 233)
     ROSEPINE = (224, 222, 244)
     EVERFOREST = (211, 198, 170)
-
-    # Spotify Scancode
-    WHITE = (255, 255, 255, 255)
-    TRANSPARENT = (0, 0, 0, 0)
 
 
 class ThemesSelector:
@@ -90,20 +84,5 @@ class FilePath:
     ASSETS = os.path.join(FULLPATH, "assets")
 
     FONTS = os.path.join(ASSETS, "fonts")
+    IMAGES = os.path.join(ASSETS, "images")
     TEMPLATES = os.path.join(ASSETS, "templates")
-
-
-class Instrumental:
-    PLACEHOLDER = random.choice(
-        [
-            "woosh- instrumental vibes ahead!",
-            "here's a track with some serious feels!",
-            "the melody speaks for itself!",
-            "all melody, no lyrics!",
-            "it's a wordless masterpiece!",
-        ]
-    )
-
-    DESC = (
-        f"""(\\_/)\n( •.•) mmm, this is an instrumental track !!!\n/> {PLACEHOLDER}"""
-    )

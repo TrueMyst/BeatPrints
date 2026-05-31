@@ -10,9 +10,7 @@ class NoMatchingTrackFound(Exception):
     Raised when no song matching the specified query is found.
     """
 
-    def __init__(
-        self, message="No track was found matching the query or Spotify ID/URI/URL."
-    ):
+    def __init__(self, message="No track was found matching the query"):
         self.message = message
         super().__init__(self.message)
 
@@ -22,9 +20,7 @@ class NoMatchingAlbumFound(Exception):
     Raised when no album matching the specified query is found.
     """
 
-    def __init__(
-        self, message="No album was found matching the query or Spotify ID/URI/URL."
-    ):
+    def __init__(self, message="No album was found matching the query"):
         self.message = message
         super().__init__(self.message)
 
