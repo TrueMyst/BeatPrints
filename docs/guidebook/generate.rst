@@ -1,49 +1,40 @@
 🎨 Code Examples
 ===================
 
-This is a quick guide on how to generate posters using **BeatPrints** through code.
-
-.. note::
-
-   It is important for you to have the ``.env`` file in the same directory.
+This is a quick guide on how to create track / album posters using **BeatPrints**.
 
 🎷 Track Posters
 ^^^^^^^^^^^^^^^^^
 
-To generate a track poster, follow the steps below.
-
 .. code-block:: python
 
-  import os, dotenv
-  from BeatPrints import lyrics, poster, spotify
-
-  dotenv.load_dotenv()
-
-  # Spotify credentials
-  CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-  CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+  from BeatPrints import deez, lyrics, poster
 
   # Initialize components
-  ly = lyrics.Lyrics()
-  ps = poster.Poster("./")
-  sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+  dz = deez.Deezer()
+  ps = poster.Poster("./")  # Save the poster in the current directory
 
   # Search for the track and fetch metadata
-  search = sp.get_track("Saturn - SZA", limit=1)
+  search = dz.search(query="Apples - Rocco", stype="track", limit=1)
 
-  # Pick the first result
-  metadata = search[0]
+  # Grab the Track ID from the first result
+  id = search[0]["id"]
 
-  # Get lyrics for the track
-  lyrics = ly.get_lyrics(metadata)
+  # Fetch full track metadata
+  metadata = dz.get_track(id)
 
-  # Use the placeholder for instrumental tracks; otherwise, select specific lines
-  highlighted_lyrics = (
-      lyrics if ly.check_instrumental(metadata) else ly.select_lines(lyrics, "5-9")
+  # Get lyrics and check if the track is instrumental
+  lrc = lyrics.Lyrics(metadata).get_lyrics()
+
+  # Use a placeholder for instrumentals; otherwise pick specific lines
+  lyrics = (
+      "It's an instrumental track :>"
+      if lrc.check_instrumental(metadata)
+      else lrc.select_lines("11-14")
   )
 
-  # Generate the track poster
-  ps.track(metadata, highlighted_lyrics)
+  # Generate and save the poster
+  ps.track(metadata=metadata, lyrics=lyrics, accent=False, theme="Light")
 
 .. tip::
 
@@ -53,33 +44,27 @@ To generate a track poster, follow the steps below.
 💿️ Album Posters 
 ^^^^^^^^^^^^^^^^^
 
-Like tracks, you can also create an album poster, follow these steps below.
-
 .. code-block:: python
 
-   import os, dotenv
-   from BeatPrints import poster, spotify
+  from BeatPrints import poster, deez
 
-   dotenv.load_dotenv()
+  # Initialize components
+  dz = deez.Deezer()
+  ps = poster.Poster("./")  # Save the poster in the current directory
 
-   # Spotify credentials
-   CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-   CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+  # Search for the album and fetch metadata
+  search = dz.search(query="Charm - Clairo", stype="album", limit=1)
 
-   # Initialize components
-   ps = poster.Poster("./")
-   sp = spotify.Spotify(CLIENT_ID, CLIENT_SECRET)
+  # Grab the Album ID from the first result
+  id = search[0]["id"]
 
-   # Search for an album
-   search = sp.get_album("Charm - Clairo", limit=1)
+  # Fetch full album metadata
+  metadata = dz.get_album(id)
 
-   # Get the album's metadata
-   metadata = search[0]
+  # Generate and save the poster
+  ps.album(metadata=metadata, indexing=False, accent=True, theme="Light")
 
-   # Generate the album poster
-   ps.album(metadata)
-
-This is a basic guide on generating your posters. You can extend it by creating your own functions to make them more useful.
+This is a basic guide on generating your posters. You can always extend the functionality of the program to suit your needs. 
 
 .. tip::
 

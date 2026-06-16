@@ -3,11 +3,17 @@ Frequently Asked Questions
 
 Can I sell these posters?
 -------------------------
-No, you cannot sell these posters. The project was created to offer an alternative to overpriced music posters being sold online, especially on platforms like `Etsy <https://www.etsy.com/market/spotify_poster>`_, where digital downloads were sold at high prices. Since the posters use copyrighted song lyrics and album art from Spotify, selling them could lead to legal issues. The tool is intended for personal use and non-commercial sharing only.
+No, you cannot sell these posters. The project was created to offer an alternative to overpriced music posters being sold online, especially on platforms like `Etsy <https://www.etsy.com/market/spotify_poster>`_, where digital downloads were sold at high prices. Since the posters use copyrighted song lyrics and album art from Deezer, selling them could lead to legal issues. The tool is intended for personal use and non-commercial sharing only.
+
+Why did BeatPrints switch to Deezer all of a sudden?
+-------------------------------------------------------------
+Spotify introduced harsh restrictions that completely kill independent projects since it now requires a paid premium account just to test code, limits apps to five test users, and blocks public launches unless you are a registered business with 250,000 active users.
+
+By switching to Deezer, it allows us to bypass these restrictions, giving us an open access to a massive music catalog so we can keep BeatPrints free for everyone.
 
 Is BeatPrints compatible with other music platforms?
 ----------------------------------------------------
-Currently, BeatPrints is designed to work with Spotify via its API. While it doesn't natively support other music platforms like Apple Music or YouTube, anyone can customize the code to integrate additional platforms if they choose to extend the tool's functionality.
+Currently, BeatPrints is designed to work with Deezer via its API. While it doesn't natively support other music platforms like Apple Music or YouTube, anyone can customize the code to integrate additional platforms if they choose to extend the tool's functionality.
 
 Why isn't "x" language supported in BeatPrints?
 -----------------------------------------------

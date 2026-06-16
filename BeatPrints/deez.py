@@ -58,10 +58,9 @@ class Deezer:
             limit: The maximum number of results to return. Must be at least 1. Defaults to 5.
 
         Returns:
-            A list of dicts, each containing:
-                - "id" (int): The Deezer ID of the item.
-                - "title" (str): The title of the track or album.
-                - "artists" (list[str]): A list of contributing artist names.
+            A ``dict`` containing ``id``, ``title``,
+            and ``artists`` which represents the Deezer ID, title,
+            and contributing artist names respectively.
 
         Raises:
             ValueError: If `stype` is not "track" or "album".

@@ -6,7 +6,7 @@ Reference
 .. toctree::
    :maxdepth: 1
 
-   spotify
+   deez
    lyrics
    poster
    errors

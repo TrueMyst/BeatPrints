@@ -21,12 +21,7 @@ Windows
    search_limit = 7
    output_directory = "<path-to-save-your-posters>"
 
-   [credentials]
-   client_id = "<your-client-id>"
-   client_secret = "<your-client-secret>"
-
-Replace ``<path-to-save-your-posters>`` with the path where you'd like to save the generated posters, and fill in the ``client_id`` and ``client_secret`` with your Spotify credentials.
-
+Replace ``<path-to-save-your-posters>`` with the path where you'd like to save the generated posters.
 
 .. important::
 

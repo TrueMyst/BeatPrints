@@ -8,13 +8,12 @@ import io
 import os
 import random
 import requests
-
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 from Pylette import extract_colors
 from PIL import Image, ImageDraw, ImageEnhance
-from BeatPrints.consts import Size, Position, Color, ThemesSelector, FilePath
+from BeatPrints.consts import Color, FilePath, Position, Size, ThemesSelector
 
 # Initialize the components
 s = Size()
