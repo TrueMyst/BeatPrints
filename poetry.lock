@@ -853,24 +853,6 @@ files = [
 prompt_toolkit = ">=2.0,<4.0"
 
 [[package]]
-name = "redis"
-version = "7.1.0"
-description = "Python client for Redis database and key-value store"
-optional = false
-python-versions = ">=3.10"
-groups = ["main"]
-files = [
-    {file = "redis-7.1.0-py3-none-any.whl", hash = "sha256:23c52b208f92b56103e17c5d06bdc1a6c2c0b3106583985a76a18f83b265de2b"},
-    {file = "redis-7.1.0.tar.gz", hash = "sha256:b1cc3cfa5a2cb9c2ab3ba700864fb0ad75617b41f01352ce5779dabf6d5f9c3c"},
-]
-
-[package.extras]
-circuit-breaker = ["pybreaker (>=1.4.0)"]
-hiredis = ["hiredis (>=3.2.0)"]
-jwt = ["pyjwt (>=2.9.0)"]
-ocsp = ["cryptography (>=36.0.1)", "pyopenssl (>=20.0.1)", "requests (>=2.31.0)"]
-
-[[package]]
 name = "requests"
 version = "2.32.5"
 description = "Python HTTP for Humans."
@@ -1065,27 +1047,6 @@ files = [
 ]
 
 [[package]]
-name = "spotipy"
-version = "2.25.2"
-description = "A light weight Python library for the Spotify Web API"
-optional = false
-python-versions = ">3.8"
-groups = ["main"]
-files = [
-    {file = "spotipy-2.25.2-py3-none-any.whl", hash = "sha256:694bc9734d94171716257bf18eea9f1cb2ff8c581e59c74464137433830cf890"},
-    {file = "spotipy-2.25.2.tar.gz", hash = "sha256:5ed45c044156ca5518997e2502b1f2c1e7336407cb1fb8fe112d144b4d5282c8"},
-]
-
-[package.dependencies]
-redis = ">=3.5.3"
-requests = ">=2.25.0"
-urllib3 = ">=1.26.0"
-
-[package.extras]
-memcache = ["pymemcache (>=3.5.2)"]
-test = ["autopep8 (>=2.3.2)", "flake8 (>=7.1.1)", "flake8-string-format (>=0.3.0)", "isort (>=5.13.2)"]
-
-[[package]]
 name = "threadpoolctl"
 version = "3.6.0"
 description = "threadpoolctl"
@@ -1172,4 +1133,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "898830b838e4e83b2db25588b6b49c8b81d6606e6e7c90cac81cd20d18a84ae3"
+content-hash = "7db6a94c8af5f2836405e6e8d60f9e8f773a57a9fd6236fa9db821eb9cf36d37"
