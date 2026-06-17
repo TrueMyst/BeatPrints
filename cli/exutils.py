@@ -1,5 +1,4 @@
 import os
-import subprocess
 
 from rich import box
 from rich.table import Table
@@ -37,7 +36,7 @@ def clear() -> None:
     Clears the terminal screen.
     """
 
-    subprocess.call("cls" if os.name == "nt" else "clear")
+    os.system("cls" if os.name == "nt" else "clear")
     print(BEATPRINTS_ASCII)
 
 

@@ -29,9 +29,15 @@ def select_track(limit: int):
             qmark="🎺",
         ).unsafe_ask()
 
-        result = [
-            dz.get_track(track["id"]) for track in dz.search(query, "track", limit)
-        ]
+        try:
+            result = [
+                dz.get_track(track["id"]) for track in dz.search(query, "track", limit)
+            ]
+        except errors.NoMatchingTrackFound:
+            exutils.clear()
+            print(f"😦 • No track was found matching [bold cyan]'{query}'[/bold cyan]")
+            print("╰─ Please try searching with a different term!\n")
+            continue
 
         # Clear the screen
         exutils.clear()
@@ -90,10 +96,16 @@ def select_album(limit: int):
             qmark="💿️",
         ).unsafe_ask()
 
-        result = [
-            dz.get_album(album["id"], shuffle)
-            for album in dz.search(query, "album", limit)
-        ]
+        try:
+            result = [
+                dz.get_album(album["id"], shuffle)
+                for album in dz.search(query, "album", limit)
+            ]
+        except errors.NoMatchingAlbumFound:
+            exutils.clear()
+            print(f"😦 • No album was found matching [bold cyan]'{query}'[/bold cyan]")
+            print("╰─ Please try searching with a different term!\n")
+            continue
 
         # Clear the screen
         exutils.clear()
