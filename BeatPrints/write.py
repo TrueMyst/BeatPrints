@@ -5,6 +5,8 @@ A custom module written to improve Pillow’s draw.text functionality.
 """
 
 import os
+import sys
+import unicodedata
 
 from typing import Optional, Dict, Literal, Tuple, List
 
@@ -25,9 +27,86 @@ def _load_fonts(*font_paths: str) -> Dict[str, TTFont]:
     """
     fonts = {}
     for path in font_paths:
-        font = TTFont(path)
-        fonts[path] = font
+        if os.path.exists(path):
+            try:
+                font = TTFont(path)
+                fonts[path] = font
+            except Exception:
+                # Skip fonts that can't be loaded
+                pass
     return fonts
+
+
+def is_emoji(character: str) -> bool:
+    """
+    Determines if a character is an emoji.
+
+    Args:
+        character (str): The character to check.
+
+    Returns:
+        bool: True if the character is an emoji, False otherwise.
+    """
+    if not character:
+        return False
+    
+    # Check for emoji using unicode properties
+    if unicodedata.category(character) == 'So':
+        return True
+    
+    # Specific emoji ranges
+    cp = ord(character)
+    
+    # Basic emoji ranges
+    if cp in range(0x1F600, 0x1F64F + 1):  # Emoticons
+        return True
+    elif cp in range(0x1F300, 0x1F5FF + 1):  # Misc Symbols and Pictographs
+        return True
+    elif cp in range(0x1F680, 0x1F6FF + 1):  # Transport and Map
+        return True
+    elif cp in range(0x1F700, 0x1F77F + 1):  # Alchemical Symbols
+        return True
+    elif cp in range(0x1F780, 0x1F7FF + 1):  # Geometric Shapes
+        return True
+    elif cp in range(0x1F800, 0x1F8FF + 1):  # Supplemental Arrows-C
+        return True
+    elif cp in range(0x1F900, 0x1F9FF + 1):  # Supplemental Symbols and Pictographs
+        return True
+    elif cp in range(0x1FA00, 0x1FA6F + 1):  # Chess Symbols
+        return True
+    elif cp in range(0x1FA70, 0x1FAFF + 1):  # Symbols and Pictographs Extended-A
+        return True
+    
+    return False
+
+
+def get_system_emoji_font() -> str:
+    """
+    Returns the path to an emoji font based on the operating system.
+
+    Returns:
+        str: Path to an emoji font file.
+    """
+    if sys.platform == "win32":
+        # Windows emoji font
+        return "C:/Windows/Fonts/seguiemj.ttf"
+    elif sys.platform == "darwin":
+        # macOS emoji font
+        return "/System/Library/Fonts/Apple Color Emoji.ttc"
+    else:
+        # Linux/other systems
+        possible_paths = [
+            "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+            "/usr/share/fonts/google-noto-emoji/NotoColorEmoji.ttf",
+            "/usr/share/fonts/noto-emoji/NotoColorEmoji.ttf",
+            "/usr/share/fonts/noto/NotoColorEmoji.ttf",
+        ]
+        for path in possible_paths:
+            if os.path.exists(path):
+                return path
+    
+    # If no system emoji font is found, return None
+    return None
 
 
 def font(weight: Literal["Regular", "Bold", "Light"]) -> Dict[str, TTFont]:
@@ -54,6 +133,12 @@ def font(weight: Literal["Regular", "Bold", "Light"]) -> Dict[str, TTFont]:
         os.path.join(fonts_path, family, f"{family}-{weight}.ttf")
         for family in font_families
     ]
+    
+    # Try to add emoji font
+    emoji_font = get_system_emoji_font()
+    if emoji_font:
+        font_paths.append(emoji_font)
+    
     return _load_fonts(*font_paths)
 
 
@@ -96,6 +181,13 @@ def group_by_font(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
     # Use the first font in the dictionary as the default font.
     default_font = next(iter(fonts))
     last_font_path = default_font
+    
+    # Find emoji font if available
+    emoji_font_path = None
+    for path in fonts.keys():
+        if "emoji" in path.lower() or "seguiemj" in path.lower():
+            emoji_font_path = path
+            break
 
     # Assign each character to the correct font.
     for char in text:
@@ -104,6 +196,13 @@ def group_by_font(text: str, fonts: Dict[str, TTFont]) -> List[List[str]]:
         # Use the default font for common characters.
         if char in common_chars:
             groups.append([char, last_font_path])
+            continue
+            
+        # Check if character is an emoji and use emoji font if available
+        if is_emoji(char) and emoji_font_path:
+            groups.append([char, emoji_font_path])
+            last_font_path = emoji_font_path
+            char_matched = True
             continue
 
         # Check which font supports the character.
@@ -201,11 +300,15 @@ def text_width(text: str, fonts: Dict[str, TTFont], size: int) -> int:
 
     # Sum widths of all words
     for word, path in formatted_text:
-        font = ImageFont.truetype(path, size)
-        bound = font.getbbox(word)
+        try:
+            font = ImageFont.truetype(path, size)
+            bound = font.getbbox(word)
 
-        # Add word width
-        total_width += bound[2] - bound[0]
+            # Add word width
+            total_width += bound[2] - bound[0]
+        except Exception:
+            # Handle any font loading errors
+            continue
 
     return int(total_width)
 
@@ -282,11 +385,16 @@ def heading(
 
     # Adjust font size to fit within max_width.
     while True:
+        total_width = 0
         for word, font_path in words_fonts:
-            font = ImageFont.truetype(font_path, size)
-            total_width += font.getlength(word)
+            try:
+                font = ImageFont.truetype(font_path, size)
+                total_width += font.getlength(word)
+            except Exception:
+                # Handle any font loading errors
+                continue
 
-        if total_width > max_width:
+        if total_width > max_width and size > 10:  # Minimum font size of 10
             size -= 1  # Reduce font size.
             total_width = 0
         else:
@@ -298,16 +406,20 @@ def heading(
     for word, font_path in words_fonts:
         word_pos = (pos[0] + offset, pos[1])
 
-        font = ImageFont.truetype(font_path, size)
-        draw.text(
-            xy=word_pos,
-            text=word,
-            fill=color,
-            font=font,
-            anchor="ls",
-            embedded_color=True,
-        )
+        try:
+            font = ImageFont.truetype(font_path, size)
+            draw.text(
+                xy=word_pos,
+                text=word,
+                fill=color,
+                font=font,
+                anchor="ls",
+                embedded_color=True,
+            )
 
-        # Update offset based on word width.
-        word_width = font.getbbox(word)[2]
-        offset += word_width
+            # Update offset based on word width.
+            word_width = font.getbbox(word)[2]
+            offset += word_width
+        except Exception:
+            # Skip words that can't be rendered
+            continue
