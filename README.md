@@ -7,6 +7,9 @@
 
 <p align="center">Create eye-catching, <b>pinterest-style</b> music posters effortlessly.<br>BeatPrints integrates with <b>Deezer</b> and <b>LRClib API</b> to help you design custom posters for your favorite tracks or albums. 🍀</p>
 
+### **More Languages**  
+[English](README.md)  |  [简体中文](README.zh-CN.md)
+
 <p align="center">
   <a href="https://gitHub.com/TrueMyst/BeatPrints/graphs/commit-activity">
     <img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-Yes-%23c4b9a6?style=for-the-badge&logo=Undertale&logoColor=%23b5a790&labelColor=%23312123"></a>
