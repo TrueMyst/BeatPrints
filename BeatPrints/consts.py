@@ -13,6 +13,10 @@ class Size:
     # Heading's Width (Max)
     HEADING_WIDTH = 1760
 
+    # Artist name's Width (Max) - keeps long artist names from
+    # running into the play/shuffle/queue/heart icons on the template
+    ARTIST_WIDTH = 1440
+
     # Resolution Size
     COVER = (2040, 2040)
     SCANCODE = (425, 120)

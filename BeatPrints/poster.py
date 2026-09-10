@@ -63,15 +63,16 @@ class Poster:
             s.HEADING,
         )
 
-        # Add artist name
-        write.text(
+        # Add artist name, shrinking it to fit ARTIST_WIDTH so it
+        # never runs into the icons drawn on the template (see #36)
+        write.heading(
             draw,
             p.ARTIST,
+            s.ARTIST_WIDTH,
             ", ".join(metadata.artists),
             color,
             write.font("Regular"),
             s.ARTIST,
-            anchor="ls",
         )
         # Add release year and label info
         write.text(
